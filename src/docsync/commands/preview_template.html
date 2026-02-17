@@ -381,7 +381,7 @@
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                 History
                             </button>
-                            <button class="doc-btn doc-btn-edit" onclick="enterEditMode()">
+                            <button class="doc-btn doc-btn-edit" onclick="toggleEditMode()">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                 Edit
                             </button>
@@ -547,35 +547,43 @@
             return div.innerHTML;
         }
 
-        function enterEditMode() {
-            isEditing = true;
-            document.querySelector('.doc-view').classList.add('hidden');
-            document.querySelector('.doc-edit').classList.add('visible');
-            document.querySelector('.doc-history').style.display = 'none';
-            document.querySelector('.doc-actions').innerHTML = `
-                <button class="doc-btn doc-btn-cancel" onclick="cancelEdit()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    Cancel
-                </button>
-                <button class="doc-btn doc-btn-save" onclick="saveDoc()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                    Save
-                </button>
-            `;
+        async function toggleEditMode() {
+            if (isEditing) {
+                const editor = document.getElementById('doc-editor');
+                const newContent = editor.value;
+                if (newContent !== originalContent) {
+                    await saveDoc();
+                } else {
+                    exitEditMode();
+                }
+            } else {
+                enterEditMode();
+            }
         }
 
-        function cancelEdit() {
+        function enterEditMode() {
+            isEditing = true;
+            closeHistoryPanel();
+            document.querySelector('.doc-view').classList.add('hidden');
+            document.querySelector('.doc-edit').classList.add('visible');
+            updateEditButton();
+        }
+
+        function exitEditMode() {
             isEditing = false;
             document.getElementById('doc-editor').value = originalContent;
-            document.querySelector('.doc-history').style.display = '';
             document.querySelector('.doc-view').classList.remove('hidden');
             document.querySelector('.doc-edit').classList.remove('visible');
-            document.querySelector('.doc-actions').innerHTML = `
-                <button class="doc-btn doc-btn-edit" onclick="enterEditMode()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    Edit
-                </button>
-            `;
+            updateEditButton();
+        }
+
+        function updateEditButton() {
+            const btn = document.querySelector('.doc-btn-edit');
+            if (btn) {
+                btn.innerHTML = isEditing
+                    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Done'
+                    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Edit';
+            }
         }
 
         async function saveDoc() {
@@ -591,7 +599,7 @@
                 originalContent = newContent;
                 const html = marked.parse(newContent);
                 document.querySelector('.doc-content').innerHTML = html;
-                cancelEdit();
+                exitEditMode();
             } catch (e) {
                 alert('Failed to save document');
             }
