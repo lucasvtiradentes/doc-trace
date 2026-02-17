@@ -3,7 +3,7 @@ import sys
 from importlib.metadata import version
 from pathlib import Path
 
-from docsync.commands import cascade, check, init, sync, tree
+from docsync.commands import cascade, check, init, prompt, tree
 
 VERSION = version("docsync")
 
@@ -20,12 +20,11 @@ def main():
     cascade_parser.add_argument("commit", help="commit ref (e.g., HEAD~1, abc123)")
     cascade_parser.add_argument("--docs", type=Path, default=Path("docs"), help="docs directory")
 
-    sync_parser = subparsers.add_parser("sync", help="generate prompt for AI to fix docs")
-    sync_parser.add_argument("path", type=Path, help="docs directory")
-    sync_parser.add_argument("--incremental", action="store_true", help="only include changed docs")
-    sync_parser.add_argument("--json", action="store_true", help="output as JSON instead of text")
-    sync_parser.add_argument("--parallel", action="store_true", help="ignore dependencies, sync all at once")
-    sync_parser.add_argument("--update-lock", action="store_true", help="update lock.json with current commit")
+    prompt_parser = subparsers.add_parser("prompt", help="generate prompt for AI to review docs")
+    prompt_parser.add_argument("path", type=Path, help="docs directory")
+    prompt_parser.add_argument("--incremental", action="store_true", help="only include changed docs")
+    prompt_parser.add_argument("--parallel", action="store_true", help="ignore dependencies, all at once")
+    prompt_parser.add_argument("--update-lock", action="store_true", help="update lock.json with current commit")
 
     tree_parser = subparsers.add_parser("tree", help="show doc dependency tree")
     tree_parser.add_argument("path", type=Path, help="docs directory")
@@ -38,8 +37,8 @@ def main():
         sys.exit(check.run(args.path))
     elif args.command == "cascade":
         sys.exit(cascade.run(args.commit, args.docs))
-    elif args.command == "sync":
-        sys.exit(sync.run(args.path, args.incremental, args.json, args.parallel, args.update_lock))
+    elif args.command == "prompt":
+        sys.exit(prompt.run(args.path, args.incremental, args.parallel, args.update_lock))
     elif args.command == "tree":
         sys.exit(tree.run(args.path))
     elif args.command == "init":

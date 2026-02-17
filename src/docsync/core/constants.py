@@ -8,7 +8,7 @@ LIST_ITEM_PATTERN = re.compile(r"^-\s+(\S+)\s+-\s+(.+)$")
 DOCSYNC_DIR = ".docsync"
 CONFIG_FILENAME = "config.json"
 LOCK_FILENAME = "lock.json"
-SYNC_FILENAME = "sync.md"
+PROMPT_FILENAME = "prompt.md"
 SYNCS_DIR = "syncs"
 
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
@@ -21,6 +21,5 @@ DEFAULT_CONFIG = {
 DEFAULT_LOCK = {"last_analyzed_commit": None, "last_run": None, "docs_validated": []}
 
 
-def load_default_prompt(parallel: bool = False) -> str:
-    filename = "sync-parallel.md" if parallel else "sync.md"
-    return (PROMPTS_DIR / filename).read_text()
+def load_default_prompt() -> str:
+    return (PROMPTS_DIR / "prompt.md").read_text()

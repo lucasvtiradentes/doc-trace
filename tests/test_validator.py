@@ -2,7 +2,7 @@ import tempfile
 from pathlib import Path
 
 from docsync.commands.check import check_refs
-from docsync.commands.sync import generate_sync_prompt
+from docsync.commands.prompt import generate_prompt
 from docsync.core.config import Config, validate_config
 
 
@@ -76,7 +76,7 @@ def test_check_refs_ignores_patterns():
         assert results[0].doc_path.name == "test.md"
 
 
-def test_sync_prompt_ordered():
+def test_prompt_ordered():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
         (tmppath / ".git").mkdir()
@@ -85,14 +85,14 @@ def test_sync_prompt_ordered():
         (docs_dir / "base.md").write_text("# Base\n\nrelated sources:\n- src/base.py - base")
         (docs_dir / "child.md").write_text("# Child\n\nrelated docs:\n- docs/base.md - base")
         config = Config({})
-        prompt = generate_sync_prompt(docs_dir, config, incremental=False, parallel=False)
+        prompt = generate_prompt(docs_dir, config, incremental=False, parallel=False)
         assert "Phase 1" in prompt
         assert "Phase 2" in prompt
         assert "base.md" in prompt
         assert "child.md" in prompt
 
 
-def test_sync_prompt_parallel():
+def test_prompt_parallel():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
         (tmppath / ".git").mkdir()
@@ -101,20 +101,21 @@ def test_sync_prompt_parallel():
         (docs_dir / "a.md").write_text("# A\n\nrelated sources:\n- src/a.py - a")
         (docs_dir / "b.md").write_text("# B\n\nrelated sources:\n- src/b.py - b")
         config = Config({})
-        prompt = generate_sync_prompt(docs_dir, config, incremental=False, parallel=True)
-        assert "PARALLEL" in prompt
+        prompt = generate_prompt(docs_dir, config, incremental=False, parallel=True)
+        assert "a.md" in prompt
+        assert "b.md" in prompt
         assert "Phase" not in prompt
 
 
-def test_sync_prompt_no_docs():
+def test_prompt_no_docs():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
         (tmppath / ".git").mkdir()
         docs_dir = tmppath / "docs"
         docs_dir.mkdir()
         config = Config({})
-        prompt = generate_sync_prompt(docs_dir, config)
-        assert "No docs to sync" in prompt
+        prompt = generate_prompt(docs_dir, config)
+        assert "No docs found" in prompt
 
 
 def test_validate_config_valid():

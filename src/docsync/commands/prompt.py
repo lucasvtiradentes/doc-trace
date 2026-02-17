@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import fnmatch
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from docsync.core.config import Config, find_repo_root
-from docsync.core.constants import DOCSYNC_DIR, SYNC_FILENAME, SYNCS_DIR, load_default_prompt
+from docsync.core.constants import DOCSYNC_DIR, PROMPT_FILENAME, SYNCS_DIR, load_default_prompt
 from docsync.core.parser import parse_doc
 
 
@@ -54,16 +55,11 @@ def _is_ignored(path: Path, ignored_patterns: list[str], repo_root: Path) -> boo
     return False
 
 
-def print_validation_report(docs_path: Path, config: Config, incremental: bool = False) -> str:
-    report = generate_validation_report(docs_path, config, incremental)
-    return json.dumps(report, indent=2)
-
-
-def _load_prompt_template(repo_root: Path, parallel: bool) -> str:
-    prompt_path = repo_root / DOCSYNC_DIR / SYNC_FILENAME
+def _load_prompt_template(repo_root: Path) -> str:
+    prompt_path = repo_root / DOCSYNC_DIR / PROMPT_FILENAME
     if prompt_path.exists():
         return prompt_path.read_text()
-    return load_default_prompt(parallel)
+    return load_default_prompt()
 
 
 def _format_docs_list(docs: list[dict[str, Any]]) -> str:
@@ -136,33 +132,29 @@ def _build_sync_levels(docs: list[dict[str, Any]], repo_root: Path) -> list[list
     return [level for level in levels if level]
 
 
-def generate_sync_prompt(docs_path: Path, config: Config, incremental: bool = False, parallel: bool = False) -> str:
+def generate_prompt(docs_path: Path, config: Config, incremental: bool = False, parallel: bool = False) -> str:
     report = generate_validation_report(docs_path, config, incremental)
     docs = report["docs"]
     if not docs:
-        return "No docs to sync."
+        return "No docs found."
     repo_root = Path(report["repo_root"])
     syncs_dir = _get_syncs_dir()
-    template = _load_prompt_template(repo_root, parallel)
+    template = _load_prompt_template(repo_root)
 
     if parallel:
-        docs_list = _format_docs_list(docs)
-        return template.format(count=len(docs), docs_list=docs_list, syncs_dir=syncs_dir)
+        docs_formatted = _format_docs_list(docs)
     else:
         levels = _build_sync_levels(docs, repo_root)
-        phases = _format_phases(levels)
-        return template.format(count=len(docs), phases=phases, syncs_dir=syncs_dir)
+        docs_formatted = _format_phases(levels)
+    return template.format(count=len(docs), docs=docs_formatted, syncs_dir=syncs_dir)
 
 
-def run(docs_path: Path, incremental: bool, as_json: bool, parallel: bool, update_lock: bool = False) -> int:
+def run(docs_path: Path, incremental: bool, parallel: bool, update_lock: bool = False) -> int:
     from docsync.core.config import find_repo_root, load_config
     from docsync.core.lock import Lock, get_current_commit, save_lock
 
     config = load_config()
-    if as_json:
-        print(print_validation_report(docs_path, config, incremental))
-    else:
-        print(generate_sync_prompt(docs_path, config, incremental, parallel))
+    print(generate_prompt(docs_path, config, incremental, parallel))
     if update_lock:
         repo_root = find_repo_root(docs_path)
         commit = get_current_commit()

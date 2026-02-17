@@ -1,4 +1,4 @@
-Sync {count} docs by launching agents in phases (respecting dependencies).
+Review {count} docs.
 
 Each agent will:
 1. Read the doc + all related sources
@@ -14,4 +14,4 @@ Report format ({syncs_dir}/{{doc-name}}.md):
 - explanation referencing the source code
 ```
 
-{phases}
+{docs}

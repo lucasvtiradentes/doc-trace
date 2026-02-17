@@ -71,7 +71,7 @@ docsync solves this by adding "hints" to each doc - `related sources:` tells any
 
 - check   - validates all referenced paths exist
 - cascade - finds docs affected by code changes (with directory matching)
-- sync    - generates prompt for AI to fix docs (ordered by deps)
+- prompt  - generates prompt for AI to review docs (ordered by deps)
 - tree    - shows doc dependency tree
 
 ## Quickstart
@@ -113,7 +113,7 @@ docsync init    # creates .docsync/ folder
 ```
 .docsync/
 ├── config.json   # required
-├── sync.md       # optional - custom prompt template
+├── prompt.md     # optional - custom prompt template
 ├── lock.json     # optional - tracks last synced commit
 └── syncs/        # ignored - AI writes sync reports here
 ```
@@ -126,14 +126,14 @@ config.json:
 }
 ```
 
-sync.md (custom template):
+prompt.md (custom template):
 ```markdown
-Sync {count} docs. Write reports to {syncs_dir}/
+Review {count} docs. Write reports to {syncs_dir}/
 
-{phases}
+{docs}
 ```
 
-Placeholders: `{count}`, `{phases}`, `{docs_list}`, `{syncs_dir}`
+Placeholders: `{count}`, `{docs}`, `{syncs_dir}`
 
 </details>
 
@@ -147,8 +147,8 @@ docsync check docs/    # ensures all paths exist
 
 ```bash
 docsync cascade HEAD~5 --docs docs/    # docs affected by last 5 commits
-docsync sync docs/ | pbcopy            # generate AI prompt
-claude "$(docsync sync docs/)"         # or pipe directly to AI
+docsync prompt docs/ | pbcopy          # generate AI prompt
+claude "$(docsync prompt docs/)"       # or pipe directly to AI
 ```
 
 ## Commands
@@ -156,19 +156,18 @@ claude "$(docsync sync docs/)"         # or pipe directly to AI
 ```bash
 docsync check <path>                   # validate refs exist
 docsync cascade <commit> --docs <dir>  # list affected docs
-docsync sync <path>                    # generate prompt (ordered by deps)
-docsync sync <path> --parallel         # ignore deps, all at once
-docsync sync <path> --incremental      # only include changed docs
-docsync sync <path> --update-lock      # update lock.json after sync
-docsync sync <path> --json             # output as JSON for scripts
+docsync prompt <path>                  # generate prompt (ordered by deps)
+docsync prompt <path> --parallel       # ignore deps, all at once
+docsync prompt <path> --incremental    # only include changed docs
+docsync prompt <path> --update-lock    # update lock.json after prompt
 docsync tree <path>                    # show doc dependency tree
 docsync init                           # create .docsync/ folder
 docsync --version                      # show version
 ```
 
-### AI Sync
+### AI Prompt
 
-The `sync` command generates a prompt for AI to fix docs in phases (respecting dependencies):
+The `prompt` command generates a prompt for AI to review docs in phases (respecting dependencies):
 
 ```
 Sync 5 docs by launching agents in phases (respecting dependencies).
