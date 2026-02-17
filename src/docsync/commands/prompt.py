@@ -31,7 +31,7 @@ def generate_validation_report(docs_path: Path, config: Config, incremental: boo
     for doc_file in doc_files:
         if _is_ignored(doc_file, config.ignored_paths, repo_root):
             continue
-        parsed = parse_doc(doc_file)
+        parsed = parse_doc(doc_file, config.metadata)
         rel_path = str(doc_file.relative_to(repo_root))
         docs.append(
             {

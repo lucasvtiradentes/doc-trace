@@ -123,7 +123,9 @@ related docs:
 - docs/repo/cicd.md    - CI test jobs
 
 related sources:
-- tests/test_cascade.py   - cascade tests
-- tests/test_parser.py    - parser tests
-- tests/test_tree.py      - tree tests
-- tests/test_validator.py - validation tests
+- tests/cascade/ - cascade tests
+- tests/parser/  - parser tests
+- tests/tree/    - tree tests
+- tests/check/   - validation tests
+- tests/config/  - config tests
+- tests/prompt/  - prompt tests

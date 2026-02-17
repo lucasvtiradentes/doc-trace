@@ -13,9 +13,17 @@ SYNCS_DIR = "syncs"
 
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 
+DEFAULT_METADATA = {
+    "style": "custom",
+    "docs_key": "related docs",
+    "sources_key": "related sources",
+    "require_separator": True,
+}
+
 DEFAULT_CONFIG = {
     "ignored_paths": [],
     "cascade_depth_limit": None,
+    "metadata": DEFAULT_METADATA,
 }
 
 DEFAULT_LOCK = {"last_analyzed_commit": None, "last_run": None, "docs_validated": []}

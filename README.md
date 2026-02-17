@@ -122,9 +122,21 @@ config.json:
 ```json
 {
   "ignored_paths": ["**/migrations/**", "**/*.test.ts"],
-  "cascade_depth_limit": null
+  "cascade_depth_limit": null,
+  "metadata": {
+    "style": "custom",
+    "docs_key": "related docs",
+    "sources_key": "related sources",
+    "require_separator": true
+  }
 }
 ```
+
+metadata options:
+- `style`: "frontmatter" (YAML at top) or "custom" (flexible format)
+- `docs_key`: header for doc references (default: "related docs")
+- `sources_key`: header for source references (default: "related sources")
+- `require_separator`: if true, only parse after `---` (default: true, custom only)
 
 prompt.md (custom template):
 ```markdown

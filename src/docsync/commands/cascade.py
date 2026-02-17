@@ -24,7 +24,7 @@ def find_affected_docs(
     changed_files = _get_changed_files(commit_ref, repo_root)
     if not changed_files:
         return CascadeResult([], [], [], [])
-    source_to_docs, doc_to_docs = _build_indexes(docs_path, repo_root)
+    source_to_docs, doc_to_docs = _build_indexes(docs_path, repo_root, config)
     direct_hits = _find_direct_hits(changed_files, source_to_docs)
     cascade_hits, circular_refs = _cascade(direct_hits, doc_to_docs, config.cascade_depth_limit)
     all_affected = list(set(direct_hits) | set(cascade_hits))
@@ -43,13 +43,15 @@ def _get_changed_files(commit_ref: str, repo_root: Path) -> list[str]:
         return []
 
 
-def _build_indexes(docs_path: Path, repo_root: Path) -> tuple[dict[str, list[Path]], dict[Path, list[Path]]]:
+def _build_indexes(
+    docs_path: Path, repo_root: Path, config: Config
+) -> tuple[dict[str, list[Path]], dict[Path, list[Path]]]:
     source_to_docs: dict[str, list[Path]] = defaultdict(list)
     doc_to_docs: dict[Path, list[Path]] = defaultdict(list)
     doc_files = list(docs_path.rglob("*.md"))
     for doc_file in doc_files:
         try:
-            parsed = parse_doc(doc_file)
+            parsed = parse_doc(doc_file, config.metadata)
         except Exception:
             continue
         for ref in parsed.related_sources:

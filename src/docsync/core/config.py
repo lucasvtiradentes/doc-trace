@@ -4,22 +4,31 @@ import json
 from pathlib import Path
 from typing import Any
 
-from docsync.core.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DOCSYNC_DIR, SYNCS_DIR
+from docsync.core.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DEFAULT_METADATA, DOCSYNC_DIR, SYNCS_DIR
 
 
 class ConfigError(Exception):
     pass
 
 
+class MetadataConfig:
+    def __init__(self, data: dict[str, Any]):
+        self.style: str = data.get("style", DEFAULT_METADATA["style"])
+        self.docs_key: str = data.get("docs_key", DEFAULT_METADATA["docs_key"])
+        self.sources_key: str = data.get("sources_key", DEFAULT_METADATA["sources_key"])
+        self.require_separator: bool = data.get("require_separator", DEFAULT_METADATA["require_separator"])
+
+
 class Config:
     def __init__(self, data: dict[str, Any]):
         self.ignored_paths: list[str] = data.get("ignored_paths", DEFAULT_CONFIG["ignored_paths"])
         self.cascade_depth_limit: int | None = data.get("cascade_depth_limit", DEFAULT_CONFIG["cascade_depth_limit"])
+        self.metadata: MetadataConfig = MetadataConfig(data.get("metadata", {}))
 
 
 def validate_config(data: dict[str, Any], config_path: Path | None = None) -> list[str]:
     errors = []
-    valid_keys = {"ignored_paths", "cascade_depth_limit"}
+    valid_keys = {"ignored_paths", "cascade_depth_limit", "metadata"}
     for key in data:
         if key not in valid_keys:
             errors.append(f"unknown key: {key}")
@@ -32,6 +41,28 @@ def validate_config(data: dict[str, Any], config_path: Path | None = None) -> li
         val = data["cascade_depth_limit"]
         if val is not None and not isinstance(val, int):
             errors.append("cascade_depth_limit must be null or integer")
+    if "metadata" in data:
+        errors.extend(_validate_metadata(data["metadata"]))
+    return errors
+
+
+def _validate_metadata(data: Any) -> list[str]:
+    errors = []
+    if not isinstance(data, dict):
+        return ["metadata must be an object"]
+    valid_keys = {"style", "docs_key", "sources_key", "require_separator"}
+    for key in data:
+        if key not in valid_keys:
+            errors.append(f"metadata: unknown key: {key}")
+    if "style" in data:
+        if data["style"] not in ("frontmatter", "custom"):
+            errors.append("metadata.style must be 'frontmatter' or 'custom'")
+    if "docs_key" in data and not isinstance(data["docs_key"], str):
+        errors.append("metadata.docs_key must be a string")
+    if "sources_key" in data and not isinstance(data["sources_key"], str):
+        errors.append("metadata.sources_key must be a string")
+    if "require_separator" in data and not isinstance(data["require_separator"], bool):
+        errors.append("metadata.require_separator must be a boolean")
     return errors
 
 

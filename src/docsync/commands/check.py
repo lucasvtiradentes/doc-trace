@@ -34,13 +34,13 @@ def check_refs(docs_path: Path, config: Config, repo_root: Path | None = None) -
     for doc_file in doc_files:
         if _is_ignored(doc_file, config.ignored_paths, repo_root):
             continue
-        yield _check_single_doc(doc_file, repo_root)
+        yield _check_single_doc(doc_file, repo_root, config)
 
 
-def _check_single_doc(doc_path: Path, repo_root: Path) -> CheckResult:
+def _check_single_doc(doc_path: Path, repo_root: Path, config: Config) -> CheckResult:
     result = CheckResult(doc_path=doc_path)
     try:
-        parsed = parse_doc(doc_path)
+        parsed = parse_doc(doc_path, config.metadata)
     except Exception as e:
         result.errors.append(
             RefError(
