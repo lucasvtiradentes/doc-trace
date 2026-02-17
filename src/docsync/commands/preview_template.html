@@ -66,7 +66,10 @@
         .doc-empty svg { width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5; }
         .doc-empty p { font-size: 14px; }
         .graph-wrapper.hidden { display: none; }
-        .doc-path { font-size: 12px; color: #94a3b8; margin-bottom: 24px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; font-family: 'SF Mono', Monaco, monospace; }
+        .doc-path { font-size: 12px; color: #94a3b8; padding: 8px 12px; background: #f8fafc; border-radius: 6px; font-family: 'SF Mono', Monaco, monospace; }
+        .doc-stats { display: flex; gap: 16px; margin-bottom: 24px; font-size: 12px; color: #64748b; }
+        .doc-stat { display: flex; align-items: center; gap: 4px; }
+        .doc-stat-label { color: #94a3b8; }
         .doc-content { line-height: 1.7; }
         .doc-content h1 { font-size: 32px; font-weight: 700; margin-bottom: 16px; color: #1e293b; }
         .doc-content h2 { font-size: 24px; font-weight: 600; margin-top: 40px; margin-bottom: 16px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
@@ -351,6 +354,10 @@
             const container = document.getElementById('doc-container');
             const html = marked.parse(md);
             const isOldVersion = currentCommit !== null;
+            const lineCount = md.split('\n').length;
+            const versions = docHistory.length;
+            const lastUpdated = docHistory.length > 0 ? formatDate(docHistory[0].date) : '-';
+            const createdAt = docHistory.length > 0 ? formatDate(docHistory[docHistory.length - 1].date) : '-';
             let diffSummary = '';
             if (highlightChanges && previousContent !== null) {
                 const { added, removed } = computeDiff(previousContent, md);
@@ -380,6 +387,12 @@
                             </button>
                         `}
                     </div>
+                </div>
+                <div class="doc-stats">
+                    <span class="doc-stat"><span class="doc-stat-label">versions:</span> ${versions}</span>
+                    <span class="doc-stat"><span class="doc-stat-label">updated:</span> ${lastUpdated}</span>
+                    <span class="doc-stat"><span class="doc-stat-label">created:</span> ${createdAt}</span>
+                    <span class="doc-stat"><span class="doc-stat-label">lines:</span> ${lineCount}</span>
                 </div>
                 <div class="doc-view">
                     ${diffSummary ? '<div class="doc-diff-summary">' + diffSummary + '</div>' : ''}
