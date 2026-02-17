@@ -1,9 +1,10 @@
 import json
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from docsync.constants import LOCK_FILENAME
+from docsync.constants import DOCSYNC_DIR, LOCK_FILENAME
 
 
 class Lock:
@@ -32,15 +33,17 @@ def load_lock(start_path: Path | None = None) -> Lock:
 def find_lock(start_path: Path) -> Path | None:
     current = start_path.resolve()
     while current != current.parent:
-        lock_path = current / LOCK_FILENAME
+        lock_path = current / DOCSYNC_DIR / LOCK_FILENAME
         if lock_path.exists():
             return lock_path
         current = current.parent
     return None
 
 
-def save_lock(lock: Lock, target_dir: Path) -> Path:
-    lock_path = target_dir / LOCK_FILENAME
+def save_lock(lock: Lock, repo_root: Path) -> Path:
+    docsync_dir = repo_root / DOCSYNC_DIR
+    docsync_dir.mkdir(exist_ok=True)
+    lock_path = docsync_dir / LOCK_FILENAME
     lock.last_run = datetime.now(timezone.utc).isoformat()
     with open(lock_path, "w") as f:
         json.dump(lock.to_dict(), f, indent=2)
@@ -48,8 +51,6 @@ def save_lock(lock: Lock, target_dir: Path) -> Path:
 
 
 def get_current_commit() -> str | None:
-    import subprocess
-
     try:
         result = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True)
         return result.stdout.strip()

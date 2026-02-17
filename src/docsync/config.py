@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from docsync.constants import CONFIG_FILENAME, DEFAULT_CONFIG
+from docsync.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DOCSYNC_DIR
 
 
 class Config:
@@ -23,15 +23,27 @@ def load_config(start_path: Path | None = None) -> Config:
 def find_config(start_path: Path) -> Path | None:
     current = start_path.resolve()
     while current != current.parent:
-        config_path = current / CONFIG_FILENAME
+        config_path = current / DOCSYNC_DIR / CONFIG_FILENAME
         if config_path.exists():
             return config_path
         current = current.parent
     return None
 
 
-def init_config(target_dir: Path) -> Path:
-    config_path = target_dir / CONFIG_FILENAME
+def find_docsync_dir(start_path: Path) -> Path | None:
+    current = start_path.resolve()
+    while current != current.parent:
+        docsync_dir = current / DOCSYNC_DIR
+        if docsync_dir.exists():
+            return docsync_dir
+        current = current.parent
+    return None
+
+
+def init_docsync(target_dir: Path) -> Path:
+    docsync_dir = target_dir / DOCSYNC_DIR
+    docsync_dir.mkdir(exist_ok=True)
+    config_path = docsync_dir / CONFIG_FILENAME
     with open(config_path, "w") as f:
         json.dump(DEFAULT_CONFIG, f, indent=2)
-    return config_path
+    return docsync_dir

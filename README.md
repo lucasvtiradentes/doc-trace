@@ -82,7 +82,7 @@ docsync cascade <commit> --docs <dir>  # list affected docs
 docsync prompt <path>                  # generate prompt for AI validation
 docsync prompt <path> --incremental    # only include changed docs
 docsync prompt <path> --json           # output as JSON for scripts
-docsync init                           # create .docsync.json
+docsync init                           # create .docsync/ folder
 ```
 
 ### Examples
@@ -126,7 +126,16 @@ Exit codes: 0 = ok, 1 = issues found.
 
 ## Configuration
 
-Create `.docsync.json` in your repo root:
+Run `docsync init` to create the `.docsync/` folder:
+
+```
+.docsync/
+├── config.json   # required
+├── prompt.md     # optional - custom prompt template
+└── lock.json     # optional - created by --incremental
+```
+
+### config.json
 
 ```json
 {
@@ -137,6 +146,27 @@ Create `.docsync.json` in your repo root:
   "cascade_depth_limit": null
 }
 ```
+
+### prompt.md (optional)
+
+Custom prompt template with placeholders:
+
+```markdown
+Validate {count} docs in PORTUGUESE.
+
+Launch parallel agents (one per doc).
+
+Each agent should:
+1. Read the doc
+2. Read related sources
+3. Report issues in Portuguese
+
+{docs_list}
+```
+
+Placeholders:
+- `{count}` - number of docs
+- `{docs_list}` - formatted list of docs with sources
 
 ## Install
 

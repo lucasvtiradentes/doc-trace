@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from docsync.config import Config
+from docsync.constants import DEFAULT_PROMPT, DOCSYNC_DIR, PROMPT_FILENAME
 from docsync.parser import RefEntry, parse_doc
 
 
@@ -126,25 +127,15 @@ def print_validation_report(docs_path: Path, config: Config, incremental: bool =
     return json.dumps(report, indent=2)
 
 
-def generate_validation_prompt(docs_path: Path, config: Config, incremental: bool = False) -> str:
-    report = generate_validation_report(docs_path, config, incremental)
-    docs = report["docs"]
-    if not docs:
-        return "No docs to validate."
-    lines = [
-        f"Validate {len(docs)} docs by launching PARALLEL agents (one per doc).",
-        "",
-        "For each doc, launch a subagent that will:",
-        "1. Read the doc file",
-        "2. Read all its related sources",
-        "3. Check if the doc content accurately describes the source code",
-        "4. Report any outdated, incorrect, or missing information",
-        "",
-        "IMPORTANT: Launch ALL agents in a SINGLE message for parallel execution.",
-        "",
-        "Docs to validate:",
-        "",
-    ]
+def _load_prompt_template(repo_root: Path) -> str:
+    prompt_path = repo_root / DOCSYNC_DIR / PROMPT_FILENAME
+    if prompt_path.exists():
+        return prompt_path.read_text()
+    return DEFAULT_PROMPT
+
+
+def _format_docs_list(docs: list[dict[str, Any]]) -> str:
+    lines = []
     for i, doc in enumerate(docs, 1):
         lines.append(f"{i}. {doc['path']}")
         if doc["related_sources"]:
@@ -155,3 +146,14 @@ def generate_validation_prompt(docs_path: Path, config: Config, incremental: boo
             lines.append(f"   related docs: {related}")
         lines.append("")
     return "\n".join(lines)
+
+
+def generate_validation_prompt(docs_path: Path, config: Config, incremental: bool = False) -> str:
+    report = generate_validation_report(docs_path, config, incremental)
+    docs = report["docs"]
+    if not docs:
+        return "No docs to validate."
+    repo_root = Path(report["repo_root"])
+    template = _load_prompt_template(repo_root)
+    docs_list = _format_docs_list(docs)
+    return template.format(count=len(docs), docs_list=docs_list)

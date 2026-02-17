@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from docsync.cascade import find_affected_docs
-from docsync.config import init_config, load_config
+from docsync.config import init_docsync, load_config
 from docsync.validator import check_refs, generate_validation_prompt, print_validation_report
 
 
@@ -81,8 +81,8 @@ def cmd_prompt(docs_path: Path, incremental: bool, as_json: bool) -> int:
 
 
 def cmd_init() -> int:
-    config_path = init_config(Path.cwd())
-    print(f"Created {config_path}")
+    docsync_dir = init_docsync(Path.cwd())
+    print(f"Created {docsync_dir}/")
     return 0
 
 
