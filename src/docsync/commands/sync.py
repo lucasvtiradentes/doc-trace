@@ -5,13 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from docsync.core.config import Config, find_repo_root
-from docsync.core.constants import (
-    DEFAULT_SYNC_PROMPT,
-    DEFAULT_SYNC_PROMPT_PARALLEL,
-    DOCSYNC_DIR,
-    SYNC_FILENAME,
-    SYNCS_DIR,
-)
+from docsync.core.constants import DOCSYNC_DIR, SYNC_FILENAME, SYNCS_DIR, load_default_prompt
 from docsync.core.parser import parse_doc
 
 
@@ -69,7 +63,7 @@ def _load_prompt_template(repo_root: Path, parallel: bool) -> str:
     prompt_path = repo_root / DOCSYNC_DIR / SYNC_FILENAME
     if prompt_path.exists():
         return prompt_path.read_text()
-    return DEFAULT_SYNC_PROMPT_PARALLEL if parallel else DEFAULT_SYNC_PROMPT
+    return load_default_prompt(parallel)
 
 
 def _format_docs_list(docs: list[dict[str, Any]]) -> str:
