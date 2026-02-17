@@ -23,33 +23,41 @@ def build_graph_data(docs_path: Path, config: Config, repo_root: Path) -> dict:
         node_ids[doc] = node_id
         rel_path = str(doc.relative_to(repo_root))
         level = doc_to_level.get(doc, 0)
-        nodes.append({
-            "id": node_id,
-            "path": rel_path,
-            "name": doc.stem,
-            "level": level,
-        })
+        nodes.append(
+            {
+                "id": node_id,
+                "path": rel_path,
+                "name": doc.stem,
+                "level": level,
+            }
+        )
     for doc, deps in tree.doc_deps.items():
         for dep in deps:
             if dep in node_ids:
-                edges.append({
-                    "from": node_ids[dep],
-                    "to": node_ids[doc],
-                })
+                edges.append(
+                    {
+                        "from": node_ids[dep],
+                        "to": node_ids[doc],
+                    }
+                )
     for src, dst in tree.circular:
         if src in node_ids and dst in node_ids:
-            edges.append({
-                "from": node_ids[src],
-                "to": node_ids[dst],
-                "circular": True,
-            })
+            edges.append(
+                {
+                    "from": node_ids[src],
+                    "to": node_ids[dst],
+                    "circular": True,
+                }
+            )
     levels_info = []
     for i, level_docs in enumerate(tree.levels):
-        levels_info.append({
-            "level": i,
-            "count": len(level_docs),
-            "label": "Independent" if i == 0 else f"Level {i}",
-        })
+        levels_info.append(
+            {
+                "level": i,
+                "count": len(level_docs),
+                "label": "Independent" if i == 0 else f"Level {i}",
+            }
+        )
     return {
         "nodes": nodes,
         "edges": edges,

@@ -128,13 +128,15 @@ def get_file_history(repo_root: Path, file_path: str, limit: int = 20) -> list[d
                 continue
             parts = line.split("|", 4)
             if len(parts) >= 5:
-                commits.append({
-                    "hash": parts[0],
-                    "short": parts[1],
-                    "message": parts[2],
-                    "date": parts[3],
-                    "author": parts[4],
-                })
+                commits.append(
+                    {
+                        "hash": parts[0],
+                        "short": parts[1],
+                        "message": parts[2],
+                        "date": parts[3],
+                        "author": parts[4],
+                    }
+                )
         return commits
     except Exception:
         return []

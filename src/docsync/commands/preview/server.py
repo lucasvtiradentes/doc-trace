@@ -22,6 +22,7 @@ class PreviewHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         from urllib.parse import parse_qs, urlparse
+
         parsed = urlparse(self.path)
         if parsed.path == "/" or parsed.path == "/index.html":
             self.send_response(200)
@@ -79,12 +80,13 @@ class PreviewHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
                 self.end_headers()
-                self.wfile.write(b'[]')
+                self.wfile.write(b"[]")
         else:
             self.send_error(404)
 
     def do_POST(self):
         from urllib.parse import parse_qs, urlparse
+
         parsed = urlparse(self.path)
         if parsed.path == "/doc":
             params = parse_qs(parsed.query)
@@ -118,9 +120,7 @@ def run(docs_path: Path, port: int = 8420) -> int:
     html_content = generate_html(graph_data)
 
     def handler(*args, **kwargs):
-        return PreviewHandler(
-            *args, html_content=html_content, repo_root=repo_root, docs_path=docs_path, **kwargs
-        )
+        return PreviewHandler(*args, html_content=html_content, repo_root=repo_root, docs_path=docs_path, **kwargs)
 
     class ReuseAddrTCPServer(socketserver.TCPServer):
         allow_reuse_address = True
