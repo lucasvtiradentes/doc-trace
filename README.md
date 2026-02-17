@@ -4,23 +4,20 @@ CLI tool that keeps documentation in sync with code in large codebases. Detects 
 
 ```
   src/booking/handler.ts changed
-            │
-            v
-  ┌─────────────────────────────────┐
-  │ docsync affected docs/ --last 1 │
-  └───────────┬─────────────────────┘
               │
-              v
-  ┌─────────────────────────┐      ┌─────────────────────────┐
-  │ Direct hits:            │      │ docs/bookings.md        │
-  │  - docs/bookings.md     │ ──>  │                         │
-  └─────────────────────────┘      │ related sources:        │
-              │                    │ - src/booking/  <─────  │ ← matched!
-              v                    └─────────────────────────┘
-  ┌─────────────────────────┐
-  │ Indirect hits:          │      docs/bookings.md references
-  │  - docs/payments.md     │ ──>  docs/payments.md, so it
-  └─────────────────────────┘      might need review too
+              ▼
+  ┌───────────────────────────────────┐
+  │ docsync affected docs/ --last 1   │
+  └───────────────────────────────────┘
+              │
+              ▼
+  ┌───────────────────────────────────┐
+  │ Direct hits:                      │
+  │   docs/bookings.md                │  ← has "related sources: src/booking/"
+  │                                   │
+  │ Indirect hits:                    │
+  │   docs/payments.md                │  ← referenced BY docs/bookings.md
+  └───────────────────────────────────┘
 ```
 
 <details>
@@ -59,13 +56,12 @@ The propagation: if `bookings.md` might be outdated, then `payments.md` (which r
 
 </details>
 
-## Motivation
+<details>
+<summary>Interactive preview explorer</summary>
 
-In large codebases, docs get outdated because:
-1. No one remembers which docs need updating when a file changes
-2. AI agents don't know which files to read to validate each doc
+![Preview](.github/images/preview.png)
 
-docsync solves this by adding "hints" to each doc - `related sources:` tells any AI exactly what to read.
+</details>
 
 ## Features
 
@@ -73,6 +69,14 @@ docsync solves this by adding "hints" to each doc - `related sources:` tells any
 - affected - finds docs affected by code changes (with dependency ordering)
 - preview  - interactive docs explorer in browser
 - lock     - manages lock state for incremental analysis
+
+## Motivation
+
+In large codebases, docs get outdated because:
+1. No one remembers which docs need updating when a file changes
+2. AI agents don't know which files to read to validate each doc
+
+docsync solves this by adding "hints" to each doc - `related sources:` tells any AI exactly what to read.
 
 ## Quickstart
 
@@ -113,8 +117,8 @@ related docs:
   - docs/other-feature.md - brief description
 
 related sources:
-  - src/feature/           - main module
-  - src/feature/utils.ts   - helper functions
+  - src/feature/         - main module
+  - src/feature/utils.ts - helper functions
 ---
 
 # My Feature
@@ -177,7 +181,6 @@ metadata options:
 docsync validate docs/                     # validate all refs exist
 docsync affected docs/ --last 5            # find docs affected by last 5 commits
 docsync affected docs/ --since v1.0.0      # find docs affected since tag/commit/branch
-docsync affected docs/ --last 5 --ordered  # grouped by dependency phases
 docsync preview docs/                      # interactive explorer in browser
 ```
 
