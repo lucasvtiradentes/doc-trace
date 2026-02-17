@@ -64,6 +64,9 @@ def _find_direct_hits(changed_files: list[str], source_to_docs: dict[str, list[P
     for changed in changed_files:
         if changed in source_to_docs:
             hits.extend(source_to_docs[changed])
+        for source_ref, docs in source_to_docs.items():
+            if source_ref.endswith("/") and changed.startswith(source_ref):
+                hits.extend(docs)
     return list(set(hits))
 
 

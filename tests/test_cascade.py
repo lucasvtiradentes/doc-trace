@@ -2,7 +2,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from docsync.cascade import _build_indexes, _cascade, find_affected_docs
+from docsync.cascade import _build_indexes, _cascade, _find_direct_hits, find_affected_docs
 from docsync.config import Config
 
 
@@ -96,6 +96,52 @@ related sources:
 """)
         config = Config({})
         with patch("docsync.cascade._get_changed_files", return_value=["src/changed.py"]):
+            result = find_affected_docs(docs_dir, "HEAD~1", config, repo_root=tmppath)
+        assert len(result.direct_hits) == 1
+        assert result.direct_hits[0] == doc
+
+
+def test_find_direct_hits_exact_match():
+    doc1 = Path("/docs/doc1.md")
+    source_to_docs = {"src/module.py": [doc1]}
+    hits = _find_direct_hits(["src/module.py"], source_to_docs)
+    assert doc1 in hits
+
+
+def test_find_direct_hits_directory_match():
+    doc1 = Path("/docs/doc1.md")
+    source_to_docs = {"src/booking/": [doc1]}
+    hits = _find_direct_hits(["src/booking/booking.module.ts"], source_to_docs)
+    assert doc1 in hits
+
+
+def test_find_direct_hits_directory_no_match_without_slash():
+    doc1 = Path("/docs/doc1.md")
+    source_to_docs = {"src/booking": [doc1]}
+    hits = _find_direct_hits(["src/booking/booking.module.ts"], source_to_docs)
+    assert doc1 not in hits
+
+
+def test_find_direct_hits_nested_directory():
+    doc1 = Path("/docs/doc1.md")
+    source_to_docs = {"api/src/booking/": [doc1]}
+    hits = _find_direct_hits(["api/src/booking/commands/handler.ts"], source_to_docs)
+    assert doc1 in hits
+
+
+def test_find_affected_docs_with_directory_ref():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+        docs_dir = tmppath / "docs"
+        docs_dir.mkdir()
+        doc = docs_dir / "bookings.md"
+        doc.write_text("""# Bookings
+
+related sources:
+- api/src/booking/ - booking module
+""")
+        config = Config({})
+        with patch("docsync.cascade._get_changed_files", return_value=["api/src/booking/booking.module.ts"]):
             result = find_affected_docs(docs_dir, "HEAD~1", config, repo_root=tmppath)
         assert len(result.direct_hits) == 1
         assert result.direct_hits[0] == doc
