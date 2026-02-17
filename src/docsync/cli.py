@@ -3,7 +3,7 @@ import sys
 from importlib.metadata import version
 from pathlib import Path
 
-from docsync.commands import affected, init, lock, tree, validate
+from docsync.commands import affected, init, lock, preview, tree, validate
 
 VERSION = version("docsync")
 
@@ -27,6 +27,11 @@ def main():
 
     tree_parser = subparsers.add_parser("tree", help="show doc dependency tree")
     tree_parser.add_argument("path", type=Path, help="docs directory")
+    tree_parser.add_argument("--html", type=Path, help="output HTML diagram to file")
+
+    preview_parser = subparsers.add_parser("preview", help="interactive docs explorer in browser")
+    preview_parser.add_argument("path", type=Path, nargs="?", default=Path("docs"), help="docs directory")
+    preview_parser.add_argument("--port", type=int, default=8420, help="server port (default: 8420)")
 
     lock_parser = subparsers.add_parser("lock", help="manage lock.json state")
     lock_subparsers = lock_parser.add_subparsers(dest="lock_command", required=True)
@@ -44,7 +49,9 @@ def main():
             affected.run(args.path, args.since_lock, args.last, args.base_branch, args.show_changed_files, args.ordered)
         )
     elif args.command == "tree":
-        sys.exit(tree.run(args.path))
+        sys.exit(tree.run(args.path, args.html))
+    elif args.command == "preview":
+        sys.exit(preview.run(args.path, args.port))
     elif args.command == "lock":
         if args.lock_command == "update":
             sys.exit(lock.run_update())

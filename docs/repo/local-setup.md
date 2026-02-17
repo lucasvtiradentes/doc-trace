@@ -63,8 +63,7 @@ docsync validate docs/
 ---
 
 related docs:
-- docs/repo/tooling.md         - tool configurations
-- docs/guides/setup-project.md - detailed setup guide
+- docs/repo/tooling.md - tool configurations
 
 related sources:
 - Makefile       - command definitions

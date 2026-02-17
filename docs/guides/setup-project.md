@@ -87,7 +87,6 @@ Creates `.docsync/` with default config.
 
 related docs:
 - docs/repo/local-setup.md - quick reference
-- docs/repo/tooling.md     - tool details
 
 related sources:
 - Makefile       - make command definitions

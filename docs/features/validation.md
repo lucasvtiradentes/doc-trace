@@ -85,8 +85,7 @@ Patterns use fnmatch syntax.
 ---
 
 related docs:
-- docs/concepts.md             - ValidateResult, RefError types
-- docs/guides/validate-docs.md - usage guide
+- docs/concepts.md - ValidateResult, RefError types
 
 related sources:
 - src/docsync/commands/validate.py - validation implementation

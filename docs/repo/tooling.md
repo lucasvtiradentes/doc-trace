@@ -85,8 +85,6 @@ bump2version major  # 0.1.0 → 1.0.0
 ---
 
 related docs:
-- docs/repo/local-setup.md - using these tools locally
-- docs/repo/cicd.md        - tools in CI pipelines
 
 related sources:
 - pyproject.toml - tool configurations

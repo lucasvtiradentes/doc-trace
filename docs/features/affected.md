@@ -119,8 +119,7 @@ Detects revisits during propagation traversal.
 ---
 
 related docs:
-- docs/architecture.md - detailed data flow diagrams
-- docs/concepts.md     - AffectedResult type
+- docs/concepts.md - AffectedResult type
 
 related sources:
 - src/docsync/commands/affected.py - affected implementation

@@ -85,8 +85,7 @@ Environment: `pypi`
 ---
 
 related docs:
-- docs/repo/tooling.md     - tool configurations
-- docs/repo/local-setup.md - local equivalents
+- docs/repo/tooling.md - tool configurations
 
 related sources:
 - .github/workflows/prs.yml          - PR workflow

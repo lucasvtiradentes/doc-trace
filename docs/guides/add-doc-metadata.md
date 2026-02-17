@@ -146,8 +146,7 @@ docs/api.md:25: related doc not found: docs/missing.md
 ---
 
 related docs:
-- docs/concepts.md             - RefEntry, ParsedDoc types
-- docs/guides/validate-docs.md - validation guide
+- docs/concepts.md - RefEntry, ParsedDoc types
 
 related sources:
 - src/docsync/core/parser.py - metadata parsing logic

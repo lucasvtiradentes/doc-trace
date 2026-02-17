@@ -83,6 +83,86 @@ def _compute_levels(doc_deps: dict[Path, list[Path]]) -> tuple[list[list[Path]],
     return levels, circular
 
 
+def format_mermaid(tree: DependencyTree, repo_root: Path) -> str:
+    lines = ["flowchart TB"]
+    node_ids: dict[Path, str] = {}
+    doc_to_level: dict[Path, int] = {}
+    for level_idx, level_docs in enumerate(tree.levels):
+        for doc in level_docs:
+            doc_to_level[doc] = level_idx
+    for i, doc in enumerate(tree.doc_deps.keys()):
+        node_ids[doc] = f"N{i}"
+    level_colors = ["#e8f5e9", "#e3f2fd", "#fff3e0", "#fce4ec", "#f3e5f5", "#e0f7fa"]
+    for level_idx, level_docs in enumerate(tree.levels):
+        if not level_docs:
+            continue
+        color = level_colors[level_idx % len(level_colors)]
+        level_label = "Independent" if level_idx == 0 else f"Level {level_idx}"
+        lines.append(f"    subgraph L{level_idx}[{level_label}]")
+        lines.append(f"        style L{level_idx} fill:{color},stroke:#999")
+        for doc in level_docs:
+            node_id = node_ids[doc]
+            rel_path = str(doc.relative_to(repo_root))
+            short_name = doc.stem
+            lines.append(f'        {node_id}["{short_name}"]')
+            lines.append(f'        click {node_id} "#" "{rel_path}"')
+        lines.append("    end")
+    for doc, deps in tree.doc_deps.items():
+        for dep in deps:
+            if dep in node_ids:
+                lines.append(f"    {node_ids[dep]} --> {node_ids[doc]}")
+    for src, dst in tree.circular:
+        if src in node_ids and dst in node_ids:
+            lines.append(f"    {node_ids[src]} -.->|circular| {node_ids[dst]}")
+    return "\n".join(lines)
+
+
+def format_html(tree: DependencyTree, repo_root: Path) -> str:
+    mermaid = format_mermaid(tree, repo_root)
+    total_docs = len(tree.doc_deps)
+    independent = len(tree.levels[0]) if tree.levels else 0
+    dependent = total_docs - independent
+    max_level = len(tree.levels) - 1
+    circular_html = ""
+    if tree.circular:
+        circular_html = f'<span class="warning">| Circular: {len(tree.circular)}</span>'
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Doc Dependency Tree</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #fafafa; }}
+        h1 {{ color: #333; margin-bottom: 10px; }}
+        .stats {{ color: #666; margin-bottom: 20px; font-size: 14px; }}
+        .warning {{ color: #e65100; font-weight: bold; }}
+        .mermaid {{ background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
+        .legend {{ margin-top: 20px; font-size: 12px; color: #666; }}
+        .legend-item {{ display: inline-block; margin-right: 15px; }}
+        .legend-color {{ display: inline-block; width: 12px; height: 12px; margin-right: 4px; border-radius: 2px; vertical-align: middle; }}
+    </style>
+</head>
+<body>
+    <h1>Doc Dependency Tree</h1>
+    <div class="stats">
+        Total: {total_docs} | Independent: {independent} | Dependent: {dependent} | Max depth: {max_level} {circular_html}
+    </div>
+    <div class="mermaid">
+{mermaid}
+    </div>
+    <div class="legend">
+        <span class="legend-item"><span class="legend-color" style="background:#e8f5e9"></span>Independent</span>
+        <span class="legend-item"><span class="legend-color" style="background:#e3f2fd"></span>Level 1</span>
+        <span class="legend-item"><span class="legend-color" style="background:#fff3e0"></span>Level 2</span>
+        <span class="legend-item"><span class="legend-color" style="background:#fce4ec"></span>Level 3+</span>
+        <span class="legend-item" style="margin-left: 20px;">Hover nodes for full path</span>
+    </div>
+    <script>mermaid.initialize({{startOnLoad:true, flowchart: {{curve: 'basis'}}}});</script>
+</body>
+</html>"""
+
+
 def format_tree(tree: DependencyTree, repo_root: Path) -> str:
     lines = []
     for i, level_docs in enumerate(tree.levels):
@@ -110,12 +190,16 @@ def format_tree(tree: DependencyTree, repo_root: Path) -> str:
     return "\n".join(lines)
 
 
-def run(docs_path: Path) -> int:
+def run(docs_path: Path, html_output: Path | None = None) -> int:
     from docsync.core.config import load_config
 
     config = load_config()
     docs_path = docs_path.resolve()
     repo_root = find_repo_root(docs_path)
     tree = build_dependency_tree(docs_path, config, repo_root)
-    print(format_tree(tree, repo_root))
+    if html_output:
+        html_output.write_text(format_html(tree, repo_root))
+        print(f"HTML written to {html_output}")
+    else:
+        print(format_tree(tree, repo_root))
     return 0

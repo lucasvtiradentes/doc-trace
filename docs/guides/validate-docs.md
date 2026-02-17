@@ -102,8 +102,7 @@ Validation continues for other docs, but command exits with code `1` if any pars
 ---
 
 related docs:
-- docs/features/validation.md     - validate command details
-- docs/guides/add-doc-metadata.md - metadata format
+- docs/features/validation.md - validate command details
 
 related sources:
 - src/docsync/commands/validate.py - validation implementation

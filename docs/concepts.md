@@ -122,8 +122,6 @@ related sources:
 ---
 
 related docs:
-- docs/architecture.md      - how types flow through system
-- docs/features/affected.md - affected algorithm using these types
 
 related sources:
 - src/docsync/core/parser.py        - RefEntry, ParsedDoc definitions
