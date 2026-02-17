@@ -1,9 +1,8 @@
 import fnmatch
-import subprocess
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator
+from typing import Any, Iterator
 
 from docsync.config import Config
 from docsync.parser import RefEntry, parse_doc
@@ -85,10 +84,11 @@ def _find_repo_root(start_path: Path) -> Path:
     return start_path.resolve()
 
 
-def validate_docs(docs_path: Path, config: Config, incremental: bool = False) -> Iterator[str]:
+def generate_validation_report(docs_path: Path, config: Config, incremental: bool = False) -> dict[str, Any]:
     docs_path = docs_path.resolve()
     repo_root = _find_repo_root(docs_path)
     doc_files = list(docs_path.rglob("*.md"))
+    metadata: dict[str, Any] = {"incremental": incremental}
     if incremental:
         from docsync.cascade import find_affected_docs
         from docsync.lock import load_lock
@@ -98,69 +98,60 @@ def validate_docs(docs_path: Path, config: Config, incremental: bool = False) ->
             result = find_affected_docs(docs_path, lock.last_analyzed_commit, config, repo_root)
             affected_set = set(result.affected_docs)
             doc_files = [f for f in doc_files if f in affected_set]
-            yield f"Incremental: {len(doc_files)} docs affected since {lock.last_analyzed_commit[:8]}"
+            metadata["since_commit"] = lock.last_analyzed_commit
         else:
-            yield "No previous commit in lock, validating all docs"
-    if not doc_files:
-        yield "No docs to validate"
-        return
-    tasks = []
+            metadata["since_commit"] = None
+    docs = []
     for doc_file in doc_files:
+        if _is_ignored(doc_file, config.ignored_paths, repo_root):
+            continue
         parsed = parse_doc(doc_file)
-        sources = [ref.path for ref in parsed.related_sources]
-        prompt = _build_validation_prompt(doc_file, sources)
-        tasks.append((doc_file, prompt))
-    validated = []
-    yield f"Validating {len(tasks)} docs with {config.parallel_agents} parallel agents..."
-    with ThreadPoolExecutor(max_workers=config.parallel_agents) as executor:
-        futures = {
-            executor.submit(_run_claude_validation_sync, doc_path, prompt, config.timeout_per_doc): doc_path
-            for doc_path, prompt in tasks
-        }
-        for future in as_completed(futures):
-            doc_path = futures[future]
-            try:
-                output = future.result()
-                yield output
-                validated.append(str(doc_path.relative_to(repo_root)))
-            except Exception as e:
-                yield f"[{doc_path}] error: {e}"
-    if incremental:
-        from docsync.lock import Lock, get_current_commit, save_lock
-
-        current = get_current_commit()
-        if current:
-            new_lock = Lock(
-                {
-                    "last_analyzed_commit": current,
-                    "docs_validated": validated,
-                }
-            )
-            save_lock(new_lock, repo_root)
-            yield f"Updated lock to {current[:8]}"
+        rel_path = str(doc_file.relative_to(repo_root))
+        docs.append(
+            {
+                "path": rel_path,
+                "related_docs": [ref.path for ref in parsed.related_docs],
+                "related_sources": [ref.path for ref in parsed.related_sources],
+            }
+        )
+    return {
+        "repo_root": str(repo_root),
+        "metadata": metadata,
+        "docs": docs,
+    }
 
 
-def _build_validation_prompt(doc_path: Path, sources: list[str]) -> str:
-    sources_str = "\n".join(f"- {s}" for s in sources)
-    return f"""Validate the documentation in {doc_path}.
-
-Read the doc and its related sources:
-{sources_str}
-
-Check if the doc content accurately describes the source code.
-Report any outdated or incorrect information."""
+def print_validation_report(docs_path: Path, config: Config, incremental: bool = False) -> str:
+    report = generate_validation_report(docs_path, config, incremental)
+    return json.dumps(report, indent=2)
 
 
-def _run_claude_validation_sync(doc_path: Path, prompt: str, timeout: int) -> str:
-    try:
-        result = subprocess.run(["claude", "--print", prompt], capture_output=True, text=True, timeout=timeout)
-        output = []
-        if result.stdout:
-            output.append(f"[{doc_path}]\n{result.stdout}")
-        if result.stderr:
-            output.append(f"[{doc_path}] stderr: {result.stderr}")
-        return "\n".join(output) if output else f"[{doc_path}] no output"
-    except subprocess.TimeoutExpired:
-        return f"[{doc_path}] validation timed out after {timeout}s"
-    except FileNotFoundError:
-        return f"[{doc_path}] claude cli not found"
+def generate_validation_prompt(docs_path: Path, config: Config, incremental: bool = False) -> str:
+    report = generate_validation_report(docs_path, config, incremental)
+    docs = report["docs"]
+    if not docs:
+        return "No docs to validate."
+    lines = [
+        f"Validate {len(docs)} docs by launching PARALLEL agents (one per doc).",
+        "",
+        "For each doc, launch a subagent that will:",
+        "1. Read the doc file",
+        "2. Read all its related sources",
+        "3. Check if the doc content accurately describes the source code",
+        "4. Report any outdated, incorrect, or missing information",
+        "",
+        "IMPORTANT: Launch ALL agents in a SINGLE message for parallel execution.",
+        "",
+        "Docs to validate:",
+        "",
+    ]
+    for i, doc in enumerate(docs, 1):
+        lines.append(f"{i}. {doc['path']}")
+        if doc["related_sources"]:
+            sources = ", ".join(doc["related_sources"])
+            lines.append(f"   sources: {sources}")
+        if doc["related_docs"]:
+            related = ", ".join(doc["related_docs"])
+            lines.append(f"   related docs: {related}")
+        lines.append("")
+    return "\n".join(lines)

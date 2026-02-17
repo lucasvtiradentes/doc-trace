@@ -7,7 +7,6 @@ LIST_ITEM_PATTERN = re.compile(r"^-\s+(\S+)\s+-\s+(.+)$")
 DEFAULT_CONFIG = {
     "ignored_paths": [],
     "cascade_depth_limit": None,
-    "validation": {"parallel_agents": 3, "timeout_per_doc": 120},
 }
 
 DEFAULT_LOCK = {"last_analyzed_commit": None, "last_run": None, "docs_validated": []}

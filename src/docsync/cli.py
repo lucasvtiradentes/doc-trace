@@ -4,11 +4,11 @@ from pathlib import Path
 
 from docsync.cascade import find_affected_docs
 from docsync.config import init_config, load_config
-from docsync.validator import check_refs, validate_docs
+from docsync.validator import check_refs, generate_validation_prompt, print_validation_report
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Auto-validate and update docs in large codebases")
+    parser = argparse.ArgumentParser(description="Keep docs in sync with code")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     check_parser = subparsers.add_parser("check", help="validate all refs exist")
@@ -18,9 +18,10 @@ def main():
     cascade_parser.add_argument("commit", help="commit ref (e.g., HEAD~1, abc123)")
     cascade_parser.add_argument("--docs", type=Path, default=Path("docs"), help="docs directory")
 
-    validate_parser = subparsers.add_parser("validate", help="run claude to validate doc content")
-    validate_parser.add_argument("path", type=Path, help="docs directory to validate")
-    validate_parser.add_argument("--incremental", action="store_true", help="only validate changed docs")
+    prompt_parser = subparsers.add_parser("prompt", help="generate prompt for AI validation")
+    prompt_parser.add_argument("path", type=Path, help="docs directory")
+    prompt_parser.add_argument("--incremental", action="store_true", help="only include changed docs")
+    prompt_parser.add_argument("--json", action="store_true", help="output as JSON instead of text")
 
     subparsers.add_parser("init", help="create .docsync.json template")
 
@@ -30,8 +31,8 @@ def main():
         sys.exit(cmd_check(args.path))
     elif args.command == "cascade":
         sys.exit(cmd_cascade(args.commit, args.docs))
-    elif args.command == "validate":
-        sys.exit(cmd_validate(args.path, args.incremental))
+    elif args.command == "prompt":
+        sys.exit(cmd_prompt(args.path, args.incremental, args.json))
     elif args.command == "init":
         sys.exit(cmd_init())
 
@@ -70,10 +71,12 @@ def cmd_cascade(commit_ref: str, docs_path: Path) -> int:
     return 0
 
 
-def cmd_validate(docs_path: Path, incremental: bool) -> int:
+def cmd_prompt(docs_path: Path, incremental: bool, as_json: bool) -> int:
     config = load_config()
-    for output in validate_docs(docs_path, config, incremental):
-        print(output)
+    if as_json:
+        print(print_validation_report(docs_path, config, incremental))
+    else:
+        print(generate_validation_prompt(docs_path, config, incremental))
     return 0
 
 

@@ -1,6 +1,6 @@
 # Overview
 
-CLI tool that keeps documentation in sync with code in large codebases. Detects which docs are affected by code changes and validates them using Claude.
+CLI tool that keeps documentation in sync with code in large codebases. Detects which docs are affected by code changes and generates reports for AI validation.
 
 ```
   src/booking/handler.ts changed
@@ -63,25 +63,25 @@ The cascade propagates: if `bookings.md` might be outdated, then `payments.md` (
 
 In large codebases, docs get outdated because:
 1. No one remembers which docs need updating when a file changes
-2. AI tools like Claude Code don't know which files to read to validate each doc
+2. AI agents don't know which files to read to validate each doc
 
-docsync solves this by adding "hints" to each doc - `related sources:` tells Claude exactly what to read.
+docsync solves this by adding "hints" to each doc - `related sources:` tells any AI exactly what to read.
 
 ## Features
 
-- check       - validates all referenced paths exist
-- cascade     - finds docs affected by code changes (with directory matching)
-- validate    - runs Claude to verify doc content against source code
-- parallel    - validates multiple docs simultaneously
-- incremental - only validates docs changed since last run
+- check   - validates all referenced paths exist
+- cascade - finds docs affected by code changes (with directory matching)
+- prompt  - generates prompt for parallel AI validation (provider-agnostic)
+- report  - generates JSON with docs + sources
 
 ## Commands
 
 ```bash
 docsync check <path>                   # validate refs exist
 docsync cascade <commit> --docs <dir>  # list affected docs
-docsync validate <path>                # run claude validation
-docsync validate <path> --incremental  # validate only changed docs
+docsync prompt <path>                  # generate prompt for AI validation
+docsync prompt <path> --incremental    # only include changed docs
+docsync prompt <path> --json           # output as JSON for scripts
 docsync init                           # create .docsync.json
 ```
 
@@ -90,11 +90,39 @@ docsync init                           # create .docsync.json
 ```bash
 docsync check docs/                    # check all docs in docs/
 docsync cascade HEAD~5 --docs docs/    # docs affected by last 5 commits
-docsync cascade abc123 --docs docs/    # docs affected since commit abc123
-docsync validate docs/ --incremental   # validate only what changed
+docsync prompt docs/ | pbcopy          # copy prompt to clipboard
 ```
 
-Exit codes: 0 = ok, 1 = issues found, 2 = config error.
+### AI Validation
+
+The `prompt` command generates a prompt that tells the AI to launch parallel agents:
+
+```
+Validate 5 docs by launching PARALLEL agents (one per doc).
+
+For each doc, launch a subagent that will:
+1. Read the doc file
+2. Read all its related sources
+3. Check if the doc content accurately describes the source code
+4. Report any outdated, incorrect, or missing information
+
+IMPORTANT: Launch ALL agents in a SINGLE message for parallel execution.
+
+Docs to validate:
+
+1. docs/bookings.md
+   sources: src/booking/, src/booking/commands/
+   related docs: docs/payments.md
+...
+```
+
+Use with any AI:
+```bash
+docsync prompt docs/ | pbcopy          # paste into any AI chat
+claude "$(docsync prompt docs/)"       # direct to Claude Code
+```
+
+Exit codes: 0 = ok, 1 = issues found.
 
 ## Configuration
 
@@ -106,11 +134,7 @@ Create `.docsync.json` in your repo root:
     "**/migrations/**",
     "**/*.test.ts"
   ],
-  "cascade_depth_limit": null,
-  "validation": {
-    "parallel_agents": 3,
-    "timeout_per_doc": 120
-  }
+  "cascade_depth_limit": null
 }
 ```
 
