@@ -213,6 +213,7 @@
         let edgeElements = [];
         let currentListView = 'tree';
         let currentMainView = 'diagram';
+        let autoSelectedDoc = false;
 
         function switchListView(view) {
             currentListView = view;
@@ -236,9 +237,22 @@
             document.getElementById('doc-container').classList.toggle('visible', view === 'editor');
             if (view === 'diagram') {
                 document.getElementById('page-title').textContent = 'Dependency Graph';
+                if (autoSelectedDoc) {
+                    currentDoc = null;
+                    updateSidebarSelection(null);
+                    resetHighlight();
+                    autoSelectedDoc = false;
+                }
             } else if (view === 'editor') {
                 if (currentDoc) {
                     loadDocContent(currentDoc);
+                } else if (graphData.nodes.length > 0) {
+                    const firstDoc = document.querySelector('.tree-item:not(.folder)');
+                    if (firstDoc && firstDoc.dataset.path) {
+                        selectDoc(firstDoc.dataset.path, true);
+                    } else {
+                        selectDoc(graphData.nodes[0].path, true);
+                    }
                 } else {
                     showEmptyEditor();
                 }
@@ -263,8 +277,9 @@
             if (activeItem) activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         }
 
-        function selectDoc(path) {
+        function selectDoc(path, isAuto = false) {
             currentDoc = path;
+            autoSelectedDoc = isAuto;
             updateSidebarSelection(path);
             if (currentMainView === 'diagram') {
                 const node = graphData.nodes.find(n => n.path === path);
