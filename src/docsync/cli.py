@@ -23,9 +23,7 @@ def main():
     scope_group.add_argument("--last", type=int, help="compare against HEAD~N (N must be > 0)")
     scope_group.add_argument("--base-branch", help="compare from merge-base(HEAD, <branch>)")
     affected_parser.add_argument("--show-changed-files", action="store_true", help="print changed files before hits")
-    output_group = affected_parser.add_mutually_exclusive_group()
-    output_group.add_argument("--ordered", action="store_true", help="group output by dependency phases")
-    output_group.add_argument("--parallel", action="store_true", help="flat list for parallel processing")
+    affected_parser.add_argument("--ordered", action="store_true", help="group output by dependency phases")
 
     tree_parser = subparsers.add_parser("tree", help="show doc dependency tree")
     tree_parser.add_argument("path", type=Path, help="docs directory")
@@ -44,7 +42,7 @@ def main():
     elif args.command == "affected":
         sys.exit(affected.run(
             args.path, args.since_lock, args.last, args.base_branch,
-            args.show_changed_files, args.ordered, args.parallel
+            args.show_changed_files, args.ordered
         ))
     elif args.command == "tree":
         sys.exit(tree.run(args.path))

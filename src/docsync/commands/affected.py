@@ -201,11 +201,6 @@ def _print_default(result: AffectedResult) -> None:
             print(f"  {src} <-> {dst}")
 
 
-def _print_parallel(docs: list[dict[str, Any]]) -> None:
-    for doc in docs:
-        print(doc["path"])
-
-
 def _print_ordered(levels: list[list[dict[str, Any]]]) -> None:
     for i, level_docs in enumerate(levels):
         if not level_docs:
@@ -229,7 +224,6 @@ def run(
     base_branch: str | None = None,
     show_changed_files: bool = False,
     output_ordered: bool = False,
-    output_parallel: bool = False,
 ) -> int:
     from docsync.core.config import load_config
 
@@ -253,10 +247,7 @@ def run(
         print("No docs affected")
         return 0
 
-    if output_parallel:
-        docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root)
-        _print_parallel(docs_metadata)
-    elif output_ordered:
+    if output_ordered:
         docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root)
         levels = _build_levels(docs_metadata, repo_root)
         _print_ordered(levels)

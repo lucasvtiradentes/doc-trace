@@ -84,11 +84,11 @@ source_to_docs           doc_to_docs               │
                             AffectedResult
                    (affected, direct, indirect, circular)
                                     │
-            ┌───────────────────────┼───────────────────────┐
-            │                       │                       │
-            v                       v                       v
-      default output          --ordered              --parallel
-      (hits grouped)       (by dep phases)         (flat list)
+                    ┌───────────────┴───────────────┐
+                    │                               │
+                    v                               v
+              default output                  --ordered
+              (hits grouped)               (by dep phases)
 ```
 
 ## Propagation Algorithm (BFS)

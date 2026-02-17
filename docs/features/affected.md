@@ -10,7 +10,6 @@ docsync affected docs/ --since-lock
 docsync affected docs/ --base-branch main
 docsync affected docs/ --last 5 --show-changed-files
 docsync affected docs/ --last 1 --ordered
-docsync affected docs/ --last 1 --parallel
 ```
 
 ## Output Formats
@@ -38,16 +37,6 @@ Phase 1 - Independent:
 
 Phase 2 - Level 1:
   docs/api.md (sources: src/api.py)
-```
-
-### --parallel
-
-Flat list for parallel processing:
-
-```
-docs/concepts.md
-docs/api.md
-docs/booking.md
 ```
 
 ## How It Works

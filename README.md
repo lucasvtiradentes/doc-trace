@@ -189,7 +189,6 @@ docsync affected docs/ --last 5 --ordered  # grouped by dependency phases
 | `docsync affected <path> --since-lock`           | list affected docs since lock commit|
 | `docsync affected <path> --base-branch <branch>` | list affected docs from merge-base  |
 | `docsync affected <path> --ordered`              | group output by dependency phases   |
-| `docsync affected <path> --parallel`             | flat list for parallel processing   |
 | `docsync tree <path>`                            | show doc dependency tree            |
 | `docsync lock update`                            | save current commit to lock.json    |
 | `docsync lock show`                              | show lock.json state                |
