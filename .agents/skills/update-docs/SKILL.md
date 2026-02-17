@@ -21,6 +21,13 @@ Examples:
 
 ## Instructions
 
+### Mandatory Execution Model
+
+- Use **one main agent** (parent/orchestrator) for the whole run.
+- The main agent **must spawn subagents** for doc analysis work.
+- For every affected doc in a phase, spawn **exactly 1 subagent per doc**.
+- The main agent **must not** do per-doc validation/update work itself, except re-checking suspicious results.
+
 0. Create sync output directory: `.docsync/syncs/<timestamp>/` (format: `YYYY-MM-DDTHH-MM-SS`)
 
 1. Run `docsyncd affected` to get affected docs:
@@ -35,9 +42,13 @@ Examples:
    - `git.source_to_docs` - which sources affect which docs
 
 3. Process docs in phase order (phase 1 first, then 2, etc.) to respect dependencies.
-   Within each phase, run doc analysis tasks in parallel when safe.
+   Within each phase, run doc analysis tasks in parallel using subagents orchestrated by the main agent.
+   - Launch exactly 1 subagent per affected doc in that phase.
+   - Subagents execute the per-doc prompt; main agent only coordinates.
+   - Do not process docs from the next phase until all subagents in the current phase finish.
+   - The parent agent is responsible for orchestration, conflict handling, and final validation.
 
-4. For each affected doc, run a focused validation/update pass:
+4. For each affected doc, the assigned subagent must run a focused validation/update pass:
    - Read the doc file
    - Read all files in `related sources:` section
    - Read all files in `related docs:` section
@@ -45,6 +56,7 @@ Examples:
    - Identify outdated sections, missing info, or inaccuracies
    - Update metadata if sources/docs changed
    - Apply changes
+   - Write the per-doc report to `{sync_dir}/{doc_name}.md`
 
 5. Per-doc prompt template:
 ```md
@@ -108,17 +120,17 @@ Be conservative - only change things that are clearly wrong or outdated.
 Do not add comments or change formatting unless necessary.
 ```
 
-6. Review phase:
+6. Review phase (parent agent):
    - Read all reports from `{sync_dir}/*.md`
    - Check for any report with `Confidence: low` and run a second review pass
    - Check for inconsistencies between related docs
    - If any change looks suspicious, re-validate before finalizing
 
-7. Run validation:
+7. Run validation (parent agent):
    - Execute `docsyncd validate docs/` to check for broken refs
    - If errors are found, fix them before proceeding
 
-8. Generate consolidated report:
+8. Generate consolidated report (parent agent):
    - Write `{sync_dir}/summary.md` with format:
 ```md
 # Doc Sync Summary
@@ -148,7 +160,7 @@ Docs analyzed: {count}
 - Errors: (if any)
 ```
 
-9. Summarize to user:
+9. Summarize to user (parent agent):
    - Which docs were updated
    - What changes were made
    - Any docs that need manual review (low confidence)
@@ -160,7 +172,8 @@ Docs analyzed: {count}
 
 ## Notes
 
-- Process phases sequentially (dependencies), docs within phase in parallel (speed)
+- Non-negotiable: this skill is a **main-agent + subagents** workflow, not a single-agent workflow.
+- Process phases sequentially (dependencies), launching one subagent per doc inside each phase
 - Low confidence reports trigger automatic re-validation
 - Validate refs after updates to catch broken links early
 - Consolidated summary enables easy PR review
