@@ -23,7 +23,7 @@ def main():
     scope_group.add_argument("--last", type=int, help="compare against HEAD~N (N must be > 0)")
     scope_group.add_argument("--base-branch", help="compare from merge-base(HEAD, <branch>)")
     scope_group.add_argument("--since", help="compare from git ref (commit/tag/branch)")
-    affected_parser.add_argument("--show-changed-files", action="store_true", help="print changed files before hits")
+    affected_parser.add_argument("--verbose", "-V", action="store_true", help="show changed files and match details")
     affected_parser.add_argument("--ordered", action="store_true", help="group output by dependency phases")
 
     preview_parser = subparsers.add_parser("preview", help="interactive docs explorer in browser")
@@ -53,7 +53,7 @@ def main():
                 args.last,
                 args.base_branch,
                 args.since,
-                args.show_changed_files,
+                args.verbose,
                 args.ordered,
             )
         )

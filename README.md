@@ -192,6 +192,7 @@ docsync preview docs/                      # interactive explorer in browser
 | `docsync affected <path> --since-lock`           | list affected docs since lock commit |
 | `docsync affected <path> --base-branch <branch>` | list affected docs from merge-base   |
 | `docsync affected <path> --ordered`              | group output by dependency phases    |
+| `docsync affected <path> --verbose`              | show changed files and match details |
 | `docsync preview <path>`                         | interactive explorer in browser      |
 | `docsync preview <path> --port <N>`              | preview on custom port (default 8420)|
 | `docsync lock update`                            | save current commit to lock.json     |

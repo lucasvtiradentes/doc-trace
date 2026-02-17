@@ -16,6 +16,8 @@ class AffectedResult(NamedTuple):
     direct_hits: list[Path]
     indirect_hits: list[Path]
     circular_refs: list[tuple[Path, Path]]
+    matches: dict[str, list[Path]]
+    indirect_chains: dict[Path, Path]
 
 
 def resolve_commit_ref(
@@ -59,13 +61,18 @@ def _find_affected_docs_for_changes(
     docs_path: Path, changed_files: list[str], config: Config, repo_root: Path
 ) -> AffectedResult:
     if not changed_files:
-        return AffectedResult([], [], [], [])
+        return AffectedResult([], [], [], [], {}, {})
     source_to_docs, doc_to_docs = _build_indexes(docs_path, repo_root, config)
-    direct_hits = _find_direct_hits(changed_files, source_to_docs)
-    indirect_hits, circular_refs = _propagate(direct_hits, doc_to_docs, config.affected_depth_limit)
+    direct_hits, matches = _find_direct_hits(changed_files, source_to_docs)
+    indirect_hits, circular_refs, indirect_chains = _propagate(direct_hits, doc_to_docs, config.affected_depth_limit)
     all_affected = list(set(direct_hits) | set(indirect_hits))
     return AffectedResult(
-        affected_docs=all_affected, direct_hits=direct_hits, indirect_hits=indirect_hits, circular_refs=circular_refs
+        affected_docs=all_affected,
+        direct_hits=direct_hits,
+        indirect_hits=indirect_hits,
+        circular_refs=circular_refs,
+        matches=matches,
+        indirect_chains=indirect_chains,
     )
 
 
@@ -89,22 +96,30 @@ def _build_indexes(
     return source_to_docs, doc_to_docs
 
 
-def _find_direct_hits(changed_files: list[str], source_to_docs: dict[str, list[Path]]) -> list[Path]:
+def _find_direct_hits(
+    changed_files: list[str], source_to_docs: dict[str, list[Path]]
+) -> tuple[list[Path], dict[str, list[Path]]]:
     hits = []
+    matches: dict[str, list[Path]] = defaultdict(list)
     for changed in changed_files:
         if changed in source_to_docs:
             hits.extend(source_to_docs[changed])
+            matches[changed].extend(source_to_docs[changed])
         for source_ref, docs in source_to_docs.items():
             if source_ref.endswith("/") and changed.startswith(source_ref):
                 hits.extend(docs)
-    return list(set(hits))
+                matches[source_ref].extend(docs)
+    for key in matches:
+        matches[key] = list(set(matches[key]))
+    return list(set(hits)), dict(matches)
 
 
 def _propagate(
     initial_docs: list[Path], doc_to_docs: dict[Path, list[Path]], depth_limit: int | None
-) -> tuple[list[Path], list[tuple[Path, Path]]]:
+) -> tuple[list[Path], list[tuple[Path, Path]], dict[Path, Path]]:
     indirect_hits = []
     circular_refs = []
+    indirect_chains: dict[Path, Path] = {}
     visited = set(initial_docs)
     current_level = set(initial_docs)
     depth = 0
@@ -120,10 +135,11 @@ def _propagate(
                     continue
                 visited.add(referencing_doc)
                 indirect_hits.append(referencing_doc)
+                indirect_chains[referencing_doc] = doc
                 next_level.add(referencing_doc)
         current_level = next_level
         depth += 1
-    return indirect_hits, circular_refs
+    return indirect_hits, circular_refs, indirect_chains
 
 
 def _get_doc_metadata(docs: list[Path], config: Config, repo_root: Path) -> list[dict[str, Any]]:
@@ -192,6 +208,40 @@ def _print_default(result: AffectedResult) -> None:
             print(f"  {src} <-> {dst}")
 
 
+def _rel_path(path: Path, repo_root: Path) -> str:
+    try:
+        return str(path.relative_to(repo_root))
+    except ValueError:
+        return str(path)
+
+
+def _print_verbose(result: AffectedResult, changed_files: list[str], repo_root: Path) -> None:
+    print(f"Changed files ({len(changed_files)}):")
+    for f in changed_files:
+        print(f"  {f}")
+
+    print(f"\nMatched ({len(result.matches)} sources -> {len(result.direct_hits)} docs):")
+    for source, docs in sorted(result.matches.items()):
+        doc_names = ", ".join(_rel_path(d, repo_root) for d in docs)
+        print(f"  {source} -> {doc_names}")
+
+    print(f"\nDirect hits ({len(result.direct_hits)}):")
+    for doc in result.direct_hits:
+        print(f"  {_rel_path(doc, repo_root)}")
+
+    if result.indirect_hits:
+        print(f"\nIndirect hits ({len(result.indirect_hits)}):")
+        for doc in result.indirect_hits:
+            via = result.indirect_chains.get(doc)
+            via_str = f" <- {_rel_path(via, repo_root)}" if via else ""
+            print(f"  {_rel_path(doc, repo_root)}{via_str}")
+
+    if result.circular_refs:
+        print("\nWarning: circular refs detected:")
+        for src, dst in result.circular_refs:
+            print(f"  {src} <-> {dst}")
+
+
 def _print_ordered(levels: list[list[dict[str, Any]]]) -> None:
     for i, level_docs in enumerate(levels):
         if not level_docs:
@@ -214,7 +264,7 @@ def run(
     last: int | None = None,
     base_branch: str | None = None,
     since: str | None = None,
-    show_changed_files: bool = False,
+    verbose: bool = False,
     output_ordered: bool = False,
 ) -> int:
     from docsync.core.config import load_config
@@ -228,18 +278,21 @@ def run(
         return 2
 
     changed_files = get_changed_files(commit_ref, repo_root)
-    if show_changed_files:
-        print(f"Changed files ({len(changed_files)}):")
-        for changed_file in changed_files:
-            print(f"  {changed_file}")
-        print("")
-
     result = _find_affected_docs_for_changes(docs_path, changed_files, config, repo_root)
+
     if not result.affected_docs:
-        print("No docs affected")
+        if verbose:
+            print(f"Changed files ({len(changed_files)}):")
+            for f in changed_files:
+                print(f"  {f}")
+            print("\nNo docs affected")
+        else:
+            print("No docs affected")
         return 0
 
-    if output_ordered:
+    if verbose:
+        _print_verbose(result, changed_files, repo_root)
+    elif output_ordered:
         docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root)
         levels = _build_levels(docs_metadata, repo_root)
         _print_ordered(levels)

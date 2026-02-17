@@ -18,7 +18,7 @@ def test_affected_requires_scope_flag():
 
 def test_affected_last_passes_arguments_to_run():
     with patch("docsync.cli.affected.run", return_value=0) as run_mock:
-        with patch.object(sys, "argv", ["docsync", "affected", "docs/", "--last", "5", "--show-changed-files"]):
+        with patch.object(sys, "argv", ["docsync", "affected", "docs/", "--last", "5", "--verbose"]):
             with pytest.raises(SystemExit) as exc:
                 main()
     assert exc.value.code == 0
