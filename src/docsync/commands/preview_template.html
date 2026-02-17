@@ -792,6 +792,21 @@
         buildLevelList();
         updateStats();
         renderGraph();
+        const keyboardShortcuts = {
+            'ArrowLeft': () => switchMainView('diagram'),
+            'ArrowRight': () => switchMainView('editor'),
+            'l': () => switchListView('levels'),
+            't': () => switchListView('tree'),
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            const action = keyboardShortcuts[e.key];
+            if (action) {
+                e.preventDefault();
+                action();
+            }
+        });
     </script>
 </body>
 </html>
