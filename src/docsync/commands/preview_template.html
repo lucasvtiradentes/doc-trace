@@ -67,7 +67,7 @@
         .doc-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; color: #94a3b8; }
         .doc-empty svg { width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5; }
         .doc-empty p { font-size: 14px; }
-        .graph-container.hidden { display: none; }
+        .graph-wrapper.hidden { display: none; }
         .doc-path { font-size: 12px; color: #94a3b8; margin-bottom: 24px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; font-family: 'SF Mono', Monaco, monospace; }
         .doc-content { line-height: 1.7; }
         .doc-content h1 { font-size: 32px; font-weight: 700; margin-bottom: 16px; color: #1e293b; }
@@ -140,6 +140,10 @@
         .search-result-name { font-size: 13px; font-weight: 500; color: #1e293b; margin-bottom: 2px; }
         .search-result-path { font-size: 11px; color: #94a3b8; margin-bottom: 6px; }
         .search-result-match { font-size: 11px; color: #64748b; font-family: 'SF Mono', Monaco, monospace; background: #f8fafc; padding: 4px 8px; border-radius: 4px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .graph-wrapper { position: relative; min-height: 100%; }
+        .graph-export-btn { position: absolute; top: 12px; right: 12px; padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; color: #64748b; z-index: 10; }
+        .graph-export-btn:hover { background: #f1f5f9; color: #3b82f6; border-color: #3b82f6; }
+        .graph-export-btn svg { width: 16px; height: 16px; display: block; }
     </style>
 </head>
 <body>
@@ -189,9 +193,14 @@
                     <span id="stat-depth"></span>
                     <span id="stat-circular"></span>
                 </div>
-            </div>
+                            </div>
             <div class="main-content">
-                <div class="graph-container" id="graph"></div>
+                <div class="graph-wrapper" id="graph-wrapper">
+                    <button class="graph-export-btn" onclick="exportSVG()" title="Download SVG">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    </button>
+                    <div class="graph-container" id="graph"></div>
+                </div>
                 <div class="doc-container" id="doc-container"></div>
             </div>
         </div>
@@ -223,7 +232,7 @@
             document.querySelectorAll('.main-toggle-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.mainView === view);
             });
-            document.getElementById('graph').classList.toggle('hidden', view !== 'diagram');
+            document.getElementById('graph-wrapper').classList.toggle('hidden', view !== 'diagram');
             document.getElementById('doc-container').classList.toggle('visible', view === 'editor');
             if (view === 'diagram') {
                 document.getElementById('page-title').textContent = 'Dependency Graph';
@@ -841,6 +850,19 @@
         buildLevelList();
         updateStats();
         renderGraph();
+        function exportSVG() {
+            const svg = document.querySelector('#graph svg');
+            if (!svg) return;
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([svgData], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'docsync-graph.svg';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
         const keyboardShortcuts = {
             'ArrowLeft': () => switchMainView('diagram'),
             'ArrowRight': () => switchMainView('editor'),
