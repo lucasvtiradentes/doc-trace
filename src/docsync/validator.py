@@ -1,5 +1,6 @@
 import fnmatch
 import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterator
@@ -85,12 +86,58 @@ def _find_repo_root(start_path: Path) -> Path:
 
 
 def validate_docs(docs_path: Path, config: Config, incremental: bool = False) -> Iterator[str]:
+    docs_path = docs_path.resolve()
+    repo_root = _find_repo_root(docs_path)
     doc_files = list(docs_path.rglob("*.md"))
+    if incremental:
+        from docsync.cascade import find_affected_docs
+        from docsync.lock import load_lock
+
+        lock = load_lock(repo_root)
+        if lock.last_analyzed_commit:
+            result = find_affected_docs(docs_path, lock.last_analyzed_commit, config, repo_root)
+            affected_set = set(result.affected_docs)
+            doc_files = [f for f in doc_files if f in affected_set]
+            yield f"Incremental: {len(doc_files)} docs affected since {lock.last_analyzed_commit[:8]}"
+        else:
+            yield "No previous commit in lock, validating all docs"
+    if not doc_files:
+        yield "No docs to validate"
+        return
+    tasks = []
     for doc_file in doc_files:
         parsed = parse_doc(doc_file)
         sources = [ref.path for ref in parsed.related_sources]
         prompt = _build_validation_prompt(doc_file, sources)
-        yield from _run_claude_validation(doc_file, prompt, config.timeout_per_doc)
+        tasks.append((doc_file, prompt))
+    validated = []
+    yield f"Validating {len(tasks)} docs with {config.parallel_agents} parallel agents..."
+    with ThreadPoolExecutor(max_workers=config.parallel_agents) as executor:
+        futures = {
+            executor.submit(_run_claude_validation_sync, doc_path, prompt, config.timeout_per_doc): doc_path
+            for doc_path, prompt in tasks
+        }
+        for future in as_completed(futures):
+            doc_path = futures[future]
+            try:
+                output = future.result()
+                yield output
+                validated.append(str(doc_path.relative_to(repo_root)))
+            except Exception as e:
+                yield f"[{doc_path}] error: {e}"
+    if incremental:
+        from docsync.lock import Lock, get_current_commit, save_lock
+
+        current = get_current_commit()
+        if current:
+            new_lock = Lock(
+                {
+                    "last_analyzed_commit": current,
+                    "docs_validated": validated,
+                }
+            )
+            save_lock(new_lock, repo_root)
+            yield f"Updated lock to {current[:8]}"
 
 
 def _build_validation_prompt(doc_path: Path, sources: list[str]) -> str:
@@ -104,14 +151,16 @@ Check if the doc content accurately describes the source code.
 Report any outdated or incorrect information."""
 
 
-def _run_claude_validation(doc_path: Path, prompt: str, timeout: int) -> Iterator[str]:
+def _run_claude_validation_sync(doc_path: Path, prompt: str, timeout: int) -> str:
     try:
         result = subprocess.run(["claude", "--print", prompt], capture_output=True, text=True, timeout=timeout)
+        output = []
         if result.stdout:
-            yield f"[{doc_path}]\n{result.stdout}"
+            output.append(f"[{doc_path}]\n{result.stdout}")
         if result.stderr:
-            yield f"[{doc_path}] stderr: {result.stderr}"
+            output.append(f"[{doc_path}] stderr: {result.stderr}")
+        return "\n".join(output) if output else f"[{doc_path}] no output"
     except subprocess.TimeoutExpired:
-        yield f"[{doc_path}] validation timed out after {timeout}s"
+        return f"[{doc_path}] validation timed out after {timeout}s"
     except FileNotFoundError:
-        yield f"[{doc_path}] claude cli not found"
+        return f"[{doc_path}] claude cli not found"

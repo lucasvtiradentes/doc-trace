@@ -1,0 +1,75 @@
+import tempfile
+from pathlib import Path
+
+from docsync.config import Config
+from docsync.validator import check_refs
+
+
+def test_check_refs_valid():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+        docs_dir = tmppath / "docs"
+        docs_dir.mkdir()
+        src_dir = tmppath / "src"
+        src_dir.mkdir()
+        (src_dir / "module.py").write_text("# module")
+        doc = docs_dir / "test.md"
+        doc.write_text("""# Test
+
+related sources:
+- src/module.py - module
+""")
+        config = Config({})
+        results = list(check_refs(docs_dir, config, repo_root=tmppath))
+        assert len(results) == 1
+        assert results[0].ok
+
+
+def test_check_refs_missing_source():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+        docs_dir = tmppath / "docs"
+        docs_dir.mkdir()
+        doc = docs_dir / "test.md"
+        doc.write_text("""# Test
+
+related sources:
+- src/notexist.py - missing
+""")
+        config = Config({})
+        results = list(check_refs(docs_dir, config, repo_root=tmppath))
+        assert len(results) == 1
+        assert not results[0].ok
+        assert len(results[0].errors) == 1
+        assert "not found" in results[0].errors[0].message
+
+
+def test_check_refs_missing_doc():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+        docs_dir = tmppath / "docs"
+        docs_dir.mkdir()
+        doc = docs_dir / "test.md"
+        doc.write_text("""# Test
+
+related docs:
+- docs/notexist.md - missing
+""")
+        config = Config({})
+        results = list(check_refs(docs_dir, config, repo_root=tmppath))
+        assert len(results) == 1
+        assert not results[0].ok
+        assert "not found" in results[0].errors[0].message
+
+
+def test_check_refs_ignores_patterns():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+        docs_dir = tmppath / "docs"
+        docs_dir.mkdir()
+        (docs_dir / "test.md").write_text("# Test\n\nrelated sources:\n- src/x.py - x")
+        (docs_dir / "ignore.md").write_text("# Ignore\n\nrelated sources:\n- src/notexist.py - bad")
+        config = Config({"ignored_paths": ["docs/ignore.md"]})
+        results = list(check_refs(docs_dir, config, repo_root=tmppath))
+        assert len(results) == 1
+        assert results[0].doc_path.name == "test.md"
