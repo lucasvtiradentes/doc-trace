@@ -52,9 +52,7 @@
         .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
         .main-header { padding: 12px 24px; background: #fff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
         .main-header h2 { font-size: 15px; font-weight: 600; color: #1e293b; }
-        .header-stats { font-size: 12px; color: #64748b; display: flex; gap: 16px; }
-        .header-stats span { display: flex; align-items: center; gap: 4px; }
-        .main-toggle { display: flex; background: #f1f5f9; border-radius: 6px; padding: 3px; }
+                .main-toggle { display: flex; background: #f1f5f9; border-radius: 6px; padding: 3px; }
         .main-toggle-btn { padding: 6px 14px; font-size: 12px; font-weight: 500; color: #64748b; background: none; border: none; border-radius: 4px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
         .main-toggle-btn:hover { color: #475569; }
         .main-toggle-btn.active { background: #fff; color: #1e293b; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
@@ -191,13 +189,7 @@
                     </div>
                     <h2 id="page-title">Dependency Graph</h2>
                 </div>
-                <div class="header-stats">
-                    <span id="stat-total"></span>
-                    <span id="stat-independent"></span>
-                    <span id="stat-depth"></span>
-                    <span id="stat-circular"></span>
-                </div>
-                            </div>
+                                            </div>
             <div class="main-content">
                 <div class="graph-wrapper" id="graph-wrapper">
                     <button class="graph-export-btn" onclick="exportSVG()" title="Download SVG">
@@ -254,7 +246,7 @@
             });
             document.getElementById('graph-wrapper').classList.toggle('hidden', view !== 'diagram');
             document.getElementById('doc-container').classList.toggle('visible', view === 'editor');
-            if (view === 'diagram') {
+                        if (view === 'diagram') {
                 document.getElementById('page-title').textContent = 'Dependency Graph';
                 if (autoSelectedDoc) {
                     currentDoc = null;
@@ -681,16 +673,6 @@
             });
         }
 
-        function updateStats() {
-            document.getElementById('stat-total').textContent = 'Total: ' + graphData.stats.total;
-            document.getElementById('stat-independent').textContent = 'Independent: ' + graphData.stats.independent;
-            document.getElementById('stat-depth').textContent = 'Depth: ' + graphData.stats.max_depth;
-            if (graphData.stats.circular > 0) {
-                document.getElementById('stat-circular').textContent = 'Circular: ' + graphData.stats.circular;
-                document.getElementById('stat-circular').style.color = '#f59e0b';
-            }
-        }
-
         let searchTimeout = null;
         const searchResultsContainer = document.createElement('div');
         searchResultsContainer.id = 'search-results';
@@ -885,7 +867,6 @@
 
         buildFolderTree();
         buildLevelList();
-        updateStats();
         renderGraph();
         function exportSVG() {
             const svg = document.querySelector('#graph svg');
