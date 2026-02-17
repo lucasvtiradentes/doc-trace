@@ -73,19 +73,46 @@ def generate_html(graph_data: dict) -> str:
     <meta charset="UTF-8">
     <title>Docsync Preview</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #334155; }}
         .container {{ display: flex; height: 100vh; }}
-        .sidebar {{ width: 280px; background: #fff; padding: 20px; overflow-y: auto; border-right: 1px solid #e2e8f0; }}
-        .main {{ flex: 1; display: flex; flex-direction: column; background: #f1f5f9; }}
+        .sidebar {{ width: 280px; background: #fff; padding: 20px; overflow-y: auto; border-right: 1px solid #e2e8f0; flex-shrink: 0; }}
+        .main {{ flex: 1; display: flex; flex-direction: column; background: #f1f5f9; min-width: 0; }}
         .header {{ padding: 15px 20px; background: #fff; border-bottom: 1px solid #e2e8f0; }}
+        .header-top {{ display: flex; align-items: center; justify-content: space-between; }}
         .header h1 {{ font-size: 18px; font-weight: 600; color: #1e293b; }}
+        .tabs {{ display: flex; gap: 4px; }}
+        .tab {{ padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: #64748b; transition: all 0.15s; }}
+        .tab:hover {{ background: #f1f5f9; }}
+        .tab.active {{ background: #3b82f6; color: white; }}
         .stats {{ margin-top: 8px; font-size: 13px; color: #64748b; }}
         .stats span {{ margin-right: 15px; }}
-        .graph-container {{ flex: 1; padding: 20px; overflow: auto; }}
-        .mermaid {{ background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
-        .mermaid svg {{ max-width: 100%; height: auto; }}
+        .content {{ flex: 1; overflow: hidden; position: relative; }}
+        .panel {{ position: absolute; inset: 0; padding: 20px; overflow: auto; transition: opacity 0.2s; }}
+        .panel.hidden {{ opacity: 0; pointer-events: none; }}
+        .graph-panel .mermaid {{ background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
+        .graph-panel .mermaid svg {{ max-width: 100%; height: auto; }}
+        .doc-panel {{ background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 40px; max-width: 900px; margin: 0 auto; }}
+        .doc-panel.empty {{ display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 14px; }}
+        .doc-content {{ line-height: 1.7; }}
+        .doc-content h1 {{ font-size: 28px; font-weight: 700; margin-bottom: 16px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; }}
+        .doc-content h2 {{ font-size: 22px; font-weight: 600; margin-top: 32px; margin-bottom: 12px; color: #1e293b; }}
+        .doc-content h3 {{ font-size: 18px; font-weight: 600; margin-top: 24px; margin-bottom: 8px; color: #334155; }}
+        .doc-content p {{ margin-bottom: 16px; }}
+        .doc-content ul, .doc-content ol {{ margin-bottom: 16px; padding-left: 24px; }}
+        .doc-content li {{ margin-bottom: 6px; }}
+        .doc-content code {{ background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: 'SF Mono', Monaco, monospace; }}
+        .doc-content pre {{ background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; overflow-x: auto; margin-bottom: 16px; }}
+        .doc-content pre code {{ background: none; padding: 0; color: inherit; }}
+        .doc-content table {{ width: 100%; border-collapse: collapse; margin-bottom: 16px; }}
+        .doc-content th, .doc-content td {{ border: 1px solid #e2e8f0; padding: 10px 12px; text-align: left; }}
+        .doc-content th {{ background: #f8fafc; font-weight: 600; }}
+        .doc-content hr {{ border: none; border-top: 1px solid #e2e8f0; margin: 24px 0; }}
+        .doc-content a {{ color: #3b82f6; text-decoration: none; }}
+        .doc-content a:hover {{ text-decoration: underline; }}
+        .doc-path {{ font-size: 12px; color: #94a3b8; margin-bottom: 20px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; font-family: 'SF Mono', Monaco, monospace; }}
         .sidebar h2 {{ font-size: 11px; text-transform: uppercase; color: #94a3b8; margin-bottom: 12px; letter-spacing: 0.5px; font-weight: 600; }}
         .level-group {{ margin-bottom: 16px; }}
         .level-title {{ font-size: 11px; color: #64748b; margin-bottom: 6px; padding: 4px 8px; background: #f1f5f9; border-radius: 4px; font-weight: 500; }}
@@ -94,11 +121,12 @@ def generate_html(graph_data: dict) -> str:
         .doc-item.selected {{ background: #3b82f6; color: white; }}
         .doc-item .path {{ font-size: 10px; color: #94a3b8; margin-top: 2px; }}
         .doc-item.selected .path {{ color: rgba(255,255,255,0.7); }}
+        .doc-item.viewing {{ background: #dbeafe; }}
+        .doc-item.viewing.selected {{ background: #3b82f6; }}
         .legend {{ margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0; }}
         .legend-item {{ display: flex; align-items: center; margin: 6px 0; font-size: 12px; color: #64748b; }}
         .legend-color {{ width: 12px; height: 12px; border-radius: 3px; margin-right: 8px; }}
         .node {{ cursor: pointer; transition: opacity 0.2s; }}
-        .node.dimmed {{ opacity: 0.08 !important; }}
         .flowchart-link {{ transition: opacity 0.2s; }}
         .edgeLabel {{ transition: opacity 0.2s; }}
         .instructions {{ margin-top: 20px; padding: 12px; background: #f1f5f9; border-radius: 6px; font-size: 11px; color: #64748b; line-height: 1.6; }}
@@ -119,13 +147,19 @@ def generate_html(graph_data: dict) -> str:
             </div>
             <div class="instructions">
                 <strong>Tips:</strong><br>
-                Click a node to highlight its connections.<br>
-                Click background to reset view.
+                Click sidebar item to view doc.<br>
+                Click graph node to highlight.
             </div>
         </div>
         <div class="main">
             <div class="header">
-                <h1>Dependency Graph</h1>
+                <div class="header-top">
+                    <h1 id="page-title">Dependency Graph</h1>
+                    <div class="tabs">
+                        <div class="tab active" data-tab="graph">Graph</div>
+                        <div class="tab" data-tab="doc">Doc Preview</div>
+                    </div>
+                </div>
                 <div class="stats">
                     <span id="stat-total"></span>
                     <span id="stat-independent"></span>
@@ -133,14 +167,58 @@ def generate_html(graph_data: dict) -> str:
                     <span id="stat-circular"></span>
                 </div>
             </div>
-            <div class="graph-container">
-                <div class="mermaid" id="graph"></div>
+            <div class="content">
+                <div class="panel graph-panel" id="graph-panel">
+                    <div class="mermaid" id="graph"></div>
+                </div>
+                <div class="panel doc-panel hidden empty" id="doc-panel">
+                    Select a document to preview
+                </div>
             </div>
         </div>
     </div>
     <script>
         const graphData = {graph_json};
         const levelColors = ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#a855f7', '#06b6d4'];
+        let currentTab = 'graph';
+        let currentDoc = null;
+
+        function switchTab(tab) {{
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+            document.getElementById('graph-panel').classList.toggle('hidden', tab !== 'graph');
+            document.getElementById('doc-panel').classList.toggle('hidden', tab !== 'doc');
+            if (tab === 'graph') {{
+                document.getElementById('page-title').textContent = 'Dependency Graph';
+            }}
+        }}
+
+        document.querySelectorAll('.tab').forEach(tab => {{
+            tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+        }});
+
+        async function loadDoc(path) {{
+            currentDoc = path;
+            const docPanel = document.getElementById('doc-panel');
+            docPanel.classList.remove('empty');
+            docPanel.innerHTML = '<div style="color:#94a3b8">Loading...</div>';
+            switchTab('doc');
+            try {{
+                const res = await fetch('/doc?path=' + encodeURIComponent(path));
+                if (!res.ok) throw new Error('Failed to load');
+                const md = await res.text();
+                const html = marked.parse(md);
+                docPanel.innerHTML = '<div class="doc-path">' + path + '</div><div class="doc-content">' + html + '</div>';
+                const node = graphData.nodes.find(n => n.path === path);
+                document.getElementById('page-title').textContent = node ? node.name : path;
+                document.querySelectorAll('.doc-item').forEach(el => {{
+                    const itemPath = graphData.nodes.find(n => n.id === el.dataset.nodeId)?.path;
+                    el.classList.toggle('viewing', itemPath === path);
+                }});
+            }} catch (e) {{
+                docPanel.innerHTML = '<div style="color:#ef4444">Failed to load document</div>';
+            }}
+        }}
 
         function buildMermaidDef() {{
             let lines = ['flowchart TB'];
@@ -193,8 +271,12 @@ def generate_html(graph_data: dict) -> str:
                     const item = document.createElement('div');
                     item.className = 'doc-item';
                     item.dataset.nodeId = n.id;
+                    item.dataset.path = n.path;
                     item.innerHTML = '<div>' + n.name + '</div><div class="path">' + n.path + '</div>';
-                    item.addEventListener('click', () => highlightNode(n.id));
+                    item.addEventListener('click', () => {{
+                        highlightNode(n.id);
+                        loadDoc(n.path);
+                    }});
                     group.appendChild(item);
                 }});
                 container.appendChild(group);
@@ -299,8 +381,14 @@ def generate_html(graph_data: dict) -> str:
                     const nodeId = el.id.split('-')[1];
                     highlightNode(nodeId);
                 }});
+                el.addEventListener('dblclick', (e) => {{
+                    e.stopPropagation();
+                    const nodeId = el.id.split('-')[1];
+                    const node = graphData.nodes.find(n => n.id === nodeId);
+                    if (node) loadDoc(node.path);
+                }});
             }});
-            document.querySelector('.graph-container').addEventListener('click', (e) => {{
+            document.querySelector('.graph-panel').addEventListener('click', (e) => {{
                 if (e.target.closest('.node') === null) {{
                     resetHighlight();
                 }}
@@ -316,16 +404,33 @@ def generate_html(graph_data: dict) -> str:
 
 
 class PreviewHandler(http.server.SimpleHTTPRequestHandler):
-    def __init__(self, *args, html_content: str, **kwargs):
+    def __init__(self, *args, html_content: str, repo_root: Path, **kwargs):
         self.html_content = html_content
+        self.repo_root = repo_root
         super().__init__(*args, **kwargs)
 
     def do_GET(self):
-        if self.path == "/" or self.path == "/index.html":
+        from urllib.parse import parse_qs, urlparse
+        parsed = urlparse(self.path)
+        if parsed.path == "/" or parsed.path == "/index.html":
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
             self.wfile.write(self.html_content.encode())
+        elif parsed.path == "/doc":
+            params = parse_qs(parsed.query)
+            doc_path = params.get("path", [None])[0]
+            if doc_path:
+                full_path = self.repo_root / doc_path
+                if full_path.exists() and full_path.suffix == ".md":
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/plain; charset=utf-8")
+                    self.end_headers()
+                    self.wfile.write(full_path.read_text(encoding="utf-8").encode("utf-8"))
+                else:
+                    self.send_error(404, "Document not found")
+            else:
+                self.send_error(400, "Missing path parameter")
         else:
             self.send_error(404)
 
@@ -340,7 +445,7 @@ def run(docs_path: Path, port: int = 8420) -> int:
     graph_data = build_graph_data(docs_path, config, repo_root)
     html_content = generate_html(graph_data)
 
-    handler = lambda *args, **kwargs: PreviewHandler(*args, html_content=html_content, **kwargs)
+    handler = lambda *args, **kwargs: PreviewHandler(*args, html_content=html_content, repo_root=repo_root, **kwargs)
 
     class ReuseAddrTCPServer(socketserver.TCPServer):
         allow_reuse_address = True
