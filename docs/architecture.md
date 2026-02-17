@@ -28,8 +28,7 @@ src/docsync/
 ├── commands/
 │   ├── validate.py     ← ref validation
 │   ├── affected.py     ← change detection + output formatting
-│   ├── preview.py      ← interactive browser UI
-│   ├── preview_template.html ← HTML template for preview
+│   ├── preview/        ← interactive browser UI module
 │   ├── lock.py         ← lock state management
 │   └── init.py         ← project setup
 ├── core/

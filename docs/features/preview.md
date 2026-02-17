@@ -84,5 +84,4 @@ related docs:
 - docs/concepts.md - core types
 
 related sources:
-- src/docsync/commands/preview.py - preview implementation
-- src/docsync/commands/preview_template.html - HTML/JS template
+- src/docsync/commands/preview/ - preview module

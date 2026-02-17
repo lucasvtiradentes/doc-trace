@@ -25,6 +25,7 @@ Tests are organized by feature area:
 | `tests/validate/`  | valid refs, missing docs, missing sources                        |
 | `tests/config/`    | config validation (valid + invalid)                              |
 | `tests/parser/`    | custom/frontmatter parsing, code blocks, line numbers            |
+| `tests/preview/`   | dependency tree, search, graph building                          |
 | `tests/cli/`       | CLI argument parsing and command dispatch                        |
 
 ## Common Patterns
@@ -60,6 +61,7 @@ related docs:
 related sources:
 - tests/affected/ - affected tests
 - tests/parser/   - parser tests
+- tests/preview/  - preview tests
 - tests/validate/ - validation tests
 - tests/config/   - config tests
 - tests/cli/      - CLI tests

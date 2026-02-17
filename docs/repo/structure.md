@@ -9,8 +9,14 @@ doc-sync/
 │   │   ├── __init__.py
 │   │   ├── validate.py    ← ref validation
 │   │   ├── affected.py    ← change detection + output formatting
-│   │   ├── preview.py     ← interactive browser UI
-│   │   ├── preview_template.html ← HTML template for preview
+│   │   ├── preview/       ← interactive browser UI module
+│   │   │   ├── __init__.py
+│   │   │   ├── server.py  ← HTTP server + run()
+│   │   │   ├── tree.py    ← dependency tree logic
+│   │   │   ├── graph.py   ← graph data building
+│   │   │   ├── git.py     ← git history operations
+│   │   │   ├── search.py  ← doc content search
+│   │   │   └── template.html ← HTML/JS template
 │   │   ├── lock.py        ← lock state management
 │   │   └── init.py        ← project initialization
 │   └── core/              ← shared logic
