@@ -20,8 +20,10 @@ CLI tool that keeps documentation in sync with code in large codebases. Detects 
   └───────────────────────────────────┘
 ```
 
+<div align="center">
 <details>
 <summary>How it works</summary>
+<div align="left">
 
 Each doc ends with metadata sections:
 
@@ -54,14 +56,23 @@ Indirect hits (1):
 
 The propagation: if `bookings.md` might be outdated, then `payments.md` (which references it) might also need review.
 
+</div>
 </details>
+</div>
 
+<div align="center">
 <details>
 <summary>Interactive preview explorer</summary>
+<div align="left">
 
-![Preview](.github/images/preview.png)
+<figure>
+  <img src=".github/images/preview.png" alt="Preview">
+  <figcaption>Interactive panel to visualize dependencies between docs, edit content, and explore git history.</figcaption>
+</figure>
 
+</div>
 </details>
+</div>
 
 ## Features
 
@@ -88,8 +99,10 @@ pipx install docsync
 
 ### 2. Add metadata to your docs
 
+<div align="center">
 <details>
 <summary>Custom style (default) - metadata at bottom</summary>
+<div align="left">
 
 ```markdown
 # My Feature
@@ -106,10 +119,14 @@ related sources:
 - src/feature/utils.ts   - helper functions
 ```
 
+</div>
 </details>
+</div>
 
+<div align="center">
 <details>
 <summary>Frontmatter style - metadata at top</summary>
+<div align="left">
 
 ```markdown
 ---
@@ -135,7 +152,9 @@ Config required:
 }
 ```
 
+</div>
 </details>
+</div>
 
 ### 3. Initialize config (optional)
 
@@ -143,8 +162,10 @@ Config required:
 docsync init    # creates .docsync/ folder
 ```
 
+<div align="center">
 <details>
 <summary>Config options</summary>
+<div align="left">
 
 ```
 .docsync/
@@ -173,7 +194,9 @@ metadata options:
 - `sources_key`:       header for source references (default: "related sources")
 - `require_separator`: if true, only parse after `---` (default: true, custom only)
 
+</div>
 </details>
+</div>
 
 ### 4. Use it
 
@@ -184,8 +207,10 @@ docsync affected docs/ --since v1.0.0      # find docs affected since tag/commit
 docsync preview docs/                      # interactive explorer in browser
 ```
 
+<div align="center">
 <details>
 <summary>All commands</summary>
+<div align="left">
 
 | Command                                          | Description                          |
 |--------------------------------------------------|--------------------------------------|
@@ -203,10 +228,14 @@ docsync preview docs/                      # interactive explorer in browser
 | `docsync init`                                   | create .docsync/ folder              |
 | `docsync --version`                              | show version                         |
 
+</div>
 </details>
+</div>
 
+<div align="center">
 <details>
 <summary>Example output</summary>
+<div align="left">
 
 ```
 Direct hits (3):
@@ -225,7 +254,9 @@ Phases (3):
 
 Phases show dependency order - useful for AI agents processing docs.
 
+</div>
 </details>
+</div>
 
 ## Development
 
