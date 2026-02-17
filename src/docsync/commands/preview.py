@@ -40,6 +40,28 @@ def get_file_history(repo_root: Path, file_path: str, limit: int = 20) -> list[d
         return []
 
 
+def search_docs(repo_root: Path, docs_path: Path, query: str) -> list[dict]:
+    results = []
+    query_lower = query.lower()
+    for md_file in docs_path.rglob("*.md"):
+        try:
+            content = md_file.read_text(encoding="utf-8")
+            content_lower = content.lower()
+            if query_lower in content_lower:
+                rel_path = str(md_file.relative_to(repo_root))
+                lines = content.split("\n")
+                matches = []
+                for i, line in enumerate(lines):
+                    if query_lower in line.lower():
+                        matches.append({"line": i + 1, "text": line.strip()[:100]})
+                        if len(matches) >= 3:
+                            break
+                results.append({"path": rel_path, "name": md_file.stem, "matches": matches})
+        except Exception:
+            pass
+    return results
+
+
 def get_file_at_commit(repo_root: Path, file_path: str, commit: str) -> str | None:
     try:
         result = subprocess.run(
@@ -118,9 +140,10 @@ def generate_html(graph_data: dict) -> str:
 
 
 class PreviewHandler(http.server.SimpleHTTPRequestHandler):
-    def __init__(self, *args, html_content: str, repo_root: Path, **kwargs):
+    def __init__(self, *args, html_content: str, repo_root: Path, docs_path: Path, **kwargs):
         self.html_content = html_content
         self.repo_root = repo_root
+        self.docs_path = docs_path
         super().__init__(*args, **kwargs)
 
     def do_GET(self):
@@ -169,6 +192,20 @@ class PreviewHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps(history).encode("utf-8"))
             else:
                 self.send_error(400, "Missing path parameter")
+        elif parsed.path == "/search":
+            params = parse_qs(parsed.query)
+            query = params.get("q", [None])[0]
+            if query and len(query) >= 2:
+                results = search_docs(self.repo_root, self.docs_path, query)
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps(results).encode("utf-8"))
+            else:
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'[]')
         else:
             self.send_error(404)
 
@@ -206,7 +243,7 @@ def run(docs_path: Path, port: int = 8420) -> int:
     graph_data = build_graph_data(docs_path, config, repo_root)
     html_content = generate_html(graph_data)
 
-    handler = lambda *args, **kwargs: PreviewHandler(*args, html_content=html_content, repo_root=repo_root, **kwargs)
+    handler = lambda *args, **kwargs: PreviewHandler(*args, html_content=html_content, repo_root=repo_root, docs_path=docs_path, **kwargs)
 
     class ReuseAddrTCPServer(socketserver.TCPServer):
         allow_reuse_address = True

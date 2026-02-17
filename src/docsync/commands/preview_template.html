@@ -132,6 +132,14 @@
         .diff-section.deletions .diff-section-title { color: #dc2626; }
         .diff-line { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
         .doc-diff-summary { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
+        .search-results { display: none; }
+        .search-title { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; }
+        .search-empty { color: #94a3b8; font-size: 13px; text-align: center; padding: 24px; }
+        .search-result { padding: 10px 12px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; background: #fff; border: 1px solid #e2e8f0; }
+        .search-result:hover { border-color: #3b82f6; }
+        .search-result-name { font-size: 13px; font-weight: 500; color: #1e293b; margin-bottom: 2px; }
+        .search-result-path { font-size: 11px; color: #94a3b8; margin-bottom: 6px; }
+        .search-result-match { font-size: 11px; color: #64748b; font-family: 'SF Mono', Monaco, monospace; background: #f8fafc; padding: 4px 8px; border-radius: 4px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -637,17 +645,58 @@
             }
         }
 
+        let searchTimeout = null;
+        const searchResultsContainer = document.createElement('div');
+        searchResultsContainer.id = 'search-results';
+        searchResultsContainer.className = 'search-results';
+        document.querySelector('.sidebar-content').prepend(searchResultsContainer);
+
         document.getElementById('search-input').addEventListener('input', (e) => {
-            const q = e.target.value.toLowerCase();
-            document.querySelectorAll('.tree-item:not(.folder)').forEach(item => {
-                const name = item.querySelector('.tree-name').textContent.toLowerCase();
-                item.style.display = name.includes(q) ? '' : 'none';
-            });
-            document.querySelectorAll('.level-item').forEach(item => {
-                const name = item.querySelector('.level-item-name').textContent.toLowerCase();
-                const path = item.querySelector('.level-item-path').textContent.toLowerCase();
-                item.style.display = (name.includes(q) || path.includes(q)) ? '' : 'none';
-            });
+            const q = e.target.value.trim();
+            clearTimeout(searchTimeout);
+            if (q.length === 0) {
+                searchResultsContainer.style.display = 'none';
+                document.getElementById('folder-tree').style.display = '';
+                document.getElementById('level-list').style.display = '';
+                switchListView(currentListView);
+                return;
+            }
+            if (q.length < 3) {
+                searchResultsContainer.style.display = 'none';
+                document.getElementById('folder-tree').style.display = currentListView === 'tree' ? '' : 'none';
+                document.getElementById('level-list').style.display = currentListView === 'levels' ? '' : 'none';
+                const qLower = q.toLowerCase();
+                document.querySelectorAll('.tree-item:not(.folder)').forEach(item => {
+                    const name = item.querySelector('.tree-name').textContent.toLowerCase();
+                    item.style.display = name.includes(qLower) ? '' : 'none';
+                });
+                document.querySelectorAll('.level-item').forEach(item => {
+                    const name = item.querySelector('.level-item-name').textContent.toLowerCase();
+                    item.style.display = name.includes(qLower) ? '' : 'none';
+                });
+                return;
+            }
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const res = await fetch('/search?q=' + encodeURIComponent(q));
+                    const results = await res.json();
+                    document.getElementById('folder-tree').style.display = 'none';
+                    document.getElementById('level-list').style.display = 'none';
+                    searchResultsContainer.style.display = 'block';
+                    if (results.length === 0) {
+                        searchResultsContainer.innerHTML = '<div class="search-empty">No results found</div>';
+                    } else {
+                        searchResultsContainer.innerHTML = '<div class="search-title">Search Results (' + results.length + ')</div>' +
+                            results.map(r => `
+                                <div class="search-result" onclick="selectDoc('${r.path}')">
+                                    <div class="search-result-name">${escapeHtml(r.name)}</div>
+                                    <div class="search-result-path">${escapeHtml(r.path)}</div>
+                                    ${r.matches.map(m => `<div class="search-result-match">L${m.line}: ${escapeHtml(m.text)}</div>`).join('')}
+                                </div>
+                            `).join('');
+                    }
+                } catch (e) {}
+            }, 300);
         });
 
         document.getElementById('logo-btn').addEventListener('click', () => switchMainView('diagram'));
