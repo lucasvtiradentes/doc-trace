@@ -176,6 +176,7 @@ metadata options:
 ```bash
 docsync validate docs/                     # validate all refs exist
 docsync affected docs/ --last 5            # find docs affected by last 5 commits
+docsync affected docs/ --since v1.0.0      # find docs affected since tag/commit/branch
 docsync affected docs/ --last 5 --ordered  # grouped by dependency phases
 docsync preview docs/                      # interactive explorer in browser
 ```
@@ -187,6 +188,7 @@ docsync preview docs/                      # interactive explorer in browser
 |--------------------------------------------------|--------------------------------------|
 | `docsync validate <path>`                        | validate refs exist                  |
 | `docsync affected <path> --last <N>`             | list affected docs by last N commits |
+| `docsync affected <path> --since <ref>`          | list affected docs since ref         |
 | `docsync affected <path> --since-lock`           | list affected docs since lock commit |
 | `docsync affected <path> --base-branch <branch>` | list affected docs from merge-base   |
 | `docsync affected <path> --ordered`              | group output by dependency phases    |

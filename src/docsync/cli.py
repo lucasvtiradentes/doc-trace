@@ -22,6 +22,7 @@ def main():
     scope_group.add_argument("--since-lock", action="store_true", help="compare from lock.json last_analyzed_commit")
     scope_group.add_argument("--last", type=int, help="compare against HEAD~N (N must be > 0)")
     scope_group.add_argument("--base-branch", help="compare from merge-base(HEAD, <branch>)")
+    scope_group.add_argument("--since", help="compare from git ref (commit/tag/branch)")
     affected_parser.add_argument("--show-changed-files", action="store_true", help="print changed files before hits")
     affected_parser.add_argument("--ordered", action="store_true", help="group output by dependency phases")
 
@@ -42,7 +43,15 @@ def main():
         sys.exit(validate.run(args.path))
     elif args.command == "affected":
         sys.exit(
-            affected.run(args.path, args.since_lock, args.last, args.base_branch, args.show_changed_files, args.ordered)
+            affected.run(
+                args.path,
+                args.since_lock,
+                args.last,
+                args.base_branch,
+                args.since,
+                args.show_changed_files,
+                args.ordered,
+            )
         )
     elif args.command == "preview":
         sys.exit(preview.run(args.path, args.port))

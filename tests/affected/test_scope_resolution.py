@@ -41,3 +41,18 @@ def test_resolve_commit_ref_with_base_branch():
 def test_resolve_commit_ref_requires_exactly_one_option():
     with pytest.raises(ValueError, match="choose exactly one scope"):
         resolve_commit_ref(Path("."))
+
+
+def test_resolve_commit_ref_with_since():
+    commit_ref = resolve_commit_ref(Path("."), since="v1.0.0")
+    assert commit_ref == "v1.0.0"
+
+
+def test_resolve_commit_ref_with_since_commit_hash():
+    commit_ref = resolve_commit_ref(Path("."), since="abc123def")
+    assert commit_ref == "abc123def"
+
+
+def test_resolve_commit_ref_with_since_branch():
+    commit_ref = resolve_commit_ref(Path("."), since="feature/my-branch")
+    assert commit_ref == "feature/my-branch"

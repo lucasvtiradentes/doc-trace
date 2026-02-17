@@ -19,11 +19,15 @@ class AffectedResult(NamedTuple):
 
 
 def resolve_commit_ref(
-    repo_root: Path, since_lock: bool = False, last: int | None = None, base_branch: str | None = None
+    repo_root: Path,
+    since_lock: bool = False,
+    last: int | None = None,
+    base_branch: str | None = None,
+    since: str | None = None,
 ) -> str:
-    options_selected = int(since_lock) + int(last is not None) + int(base_branch is not None)
+    options_selected = int(since_lock) + int(last is not None) + int(base_branch is not None) + int(since is not None)
     if options_selected != 1:
-        raise ValueError("choose exactly one scope: --since-lock, --last <N>, or --base-branch <branch>")
+        raise ValueError("choose exactly one scope: --since-lock, --last <N>, --base-branch <branch>, or --since <ref>")
     if since_lock:
         lock = load_lock(repo_root)
         if not lock.last_analyzed_commit:
@@ -33,11 +37,13 @@ def resolve_commit_ref(
         if last <= 0:
             raise ValueError("--last must be greater than 0")
         return f"HEAD~{last}"
-    assert base_branch is not None
-    commit = get_merge_base(base_branch, repo_root)
-    if not commit:
-        raise ValueError(f"could not resolve merge-base with branch '{base_branch}'")
-    return commit
+    if base_branch is not None:
+        commit = get_merge_base(base_branch, repo_root)
+        if not commit:
+            raise ValueError(f"could not resolve merge-base with branch '{base_branch}'")
+        return commit
+    assert since is not None
+    return since
 
 
 def find_affected_docs(
@@ -207,6 +213,7 @@ def run(
     since_lock: bool = False,
     last: int | None = None,
     base_branch: str | None = None,
+    since: str | None = None,
     show_changed_files: bool = False,
     output_ordered: bool = False,
 ) -> int:
@@ -215,7 +222,7 @@ def run(
     config = load_config()
     repo_root = find_repo_root(docs_path)
     try:
-        commit_ref = resolve_commit_ref(repo_root, since_lock, last, base_branch)
+        commit_ref = resolve_commit_ref(repo_root, since_lock, last, base_branch, since)
     except ValueError as e:
         print(f"Scope error: {e}", file=sys.stderr)
         return 2
