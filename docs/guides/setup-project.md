@@ -49,29 +49,29 @@ Should output: `docsync 0.1.0`
 
 ```bash
 source .venv/bin/activate
-docsync check docs/
-docsync cascade docs/ --last 1
+docsync validate docs/
+docsync affected docs/ --last 1
 docsync tree docs/
 ```
 
 ### Without Activation
 
 ```bash
-.venv/bin/docsync check docs/
-.venv/bin/docsync cascade docs/ --last 1
+.venv/bin/docsync validate docs/
+.venv/bin/docsync affected docs/ --last 1
 .venv/bin/docsync tree docs/
 ```
 
 ## Available Make Commands
 
-| Command              | Description               |
-|----------------------|---------------------------|
-| make install         | setup venv + deps         |
-| make check           | lint + format check       |
-| make test            | run pytest                |
-| make practical-test  | run docsync check docs/   |
-| make changelog       | build CHANGELOG.md        |
-| make changelog-draft | preview changelog         |
+| Command              | Description                  |
+|----------------------|------------------------------|
+| make install         | setup venv + deps            |
+| make check           | lint + format check          |
+| make test            | run pytest                   |
+| make practical-test  | run docsync validate docs/   |
+| make changelog       | build CHANGELOG.md           |
+| make changelog-draft | preview changelog            |
 
 ## Initialize Docsync in Your Project
 

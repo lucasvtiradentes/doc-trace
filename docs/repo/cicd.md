@@ -44,7 +44,7 @@ Runs docsync against its own docs.
 ```yaml
 steps:
   - pip install -e ".[dev]"
-  - docsync check docs/
+  - docsync validate docs/
 ```
 
 ## Release Pipeline

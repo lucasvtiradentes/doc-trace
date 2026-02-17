@@ -9,16 +9,16 @@ import pytest
 from docsync.cli import main
 
 
-def test_cascade_requires_scope_flag():
-    with patch.object(sys, "argv", ["docsync", "cascade", "docs/"]):
+def test_affected_requires_scope_flag():
+    with patch.object(sys, "argv", ["docsync", "affected", "docs/"]):
         with pytest.raises(SystemExit) as exc:
             main()
     assert exc.value.code == 2
 
 
-def test_cascade_last_passes_arguments_to_run():
-    with patch("docsync.cli.cascade.run", return_value=0) as run_mock:
-        with patch.object(sys, "argv", ["docsync", "cascade", "docs/", "--last", "5", "--show-changed-files"]):
+def test_affected_last_passes_arguments_to_run():
+    with patch("docsync.cli.affected.run", return_value=0) as run_mock:
+        with patch.object(sys, "argv", ["docsync", "affected", "docs/", "--last", "5", "--show-changed-files"]):
             with pytest.raises(SystemExit) as exc:
                 main()
     assert exc.value.code == 0

@@ -16,7 +16,7 @@ def generate_validation_report(docs_path: Path, config: Config, incremental: boo
     doc_files = list(docs_path.rglob("*.md"))
     metadata: dict[str, Any] = {"incremental": incremental}
     if incremental:
-        from docsync.commands.cascade import find_affected_docs
+        from docsync.commands.affected import find_affected_docs
         from docsync.core.lock import load_lock
 
         lock = load_lock(repo_root)

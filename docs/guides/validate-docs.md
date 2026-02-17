@@ -5,7 +5,7 @@ Guide to validating documentation references.
 ## Basic Validation
 
 ```bash
-docsync check docs/
+docsync validate docs/
 ```
 
 Scans all `*.md` files in `docs/` recursively and validates:
@@ -77,7 +77,7 @@ Fix: Check glob pattern matches at least one file.
 Add to your workflow:
 
 ```yaml
-- run: docsync check docs/
+- run: docsync validate docs/
 ```
 
 Fails build if any refs are invalid.
@@ -95,15 +95,15 @@ Validation continues for other docs, but command exits with code `1` if any pars
 ## Workflow
 
 1. Add/edit metadata in docs
-2. Run `docsync check docs/`
+2. Run `docsync validate docs/`
 3. Fix any reported errors
 4. Commit changes
 
 ---
 
 related docs:
-- docs/features/validation.md     - check command details
+- docs/features/validation.md     - validate command details
 - docs/guides/add-doc-metadata.md - metadata format
 
 related sources:
-- src/docsync/commands/check.py - validation implementation
+- src/docsync/commands/validate.py - validation implementation

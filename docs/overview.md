@@ -29,13 +29,13 @@ CLI tool that keeps documentation in sync with code changes.
 
 ## Commands
 
-| Command | Description                          |
-|---------|:-------------------------------------|
-| check   | validate all doc refs exist          |
-| cascade | list docs affected by git diff       |
-| prompt  | generate AI prompt for doc review    |
-| tree    | show doc dependency graph            |
-| init    | create .docsync/ config directory    |
+| Command  | Description                          |
+|----------|:-------------------------------------|
+| validate | validate all doc refs exist          |
+| affected | list docs affected by git diff       |
+| prompt   | generate AI prompt for doc review    |
+| tree     | show doc dependency graph            |
+| init     | create .docsync/ config directory    |
 
 ## Doc Index
 
@@ -48,8 +48,8 @@ CLI tool that keeps documentation in sync with code changes.
 | docs/repo/tooling.md              | dev tools and configurations             |
 | docs/repo/local-setup.md          | local development setup                  |
 | docs/repo/cicd.md                 | CI/CD pipelines and deployment           |
-| docs/features/validation.md       | check command reference validation       |
-| docs/features/cascade.md          | cascade command change detection         |
+| docs/features/validation.md       | validate command reference validation    |
+| docs/features/affected.md         | affected command change detection        |
 | docs/features/prompt-generation.md| prompt command AI task generation        |
 | docs/features/dependency-tree.md  | tree command dependency visualization    |
 | docs/features/initialization.md   | init command project setup               |

@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from docsync.commands.cascade import resolve_commit_ref
+from docsync.commands.affected import resolve_commit_ref
 from docsync.core.lock import Lock
 
 
@@ -21,13 +21,13 @@ def test_resolve_commit_ref_last_must_be_positive():
 
 
 def test_resolve_commit_ref_with_since_lock():
-    with patch("docsync.commands.cascade.load_lock", return_value=Lock({"last_analyzed_commit": "abc123"})):
+    with patch("docsync.commands.affected.load_lock", return_value=Lock({"last_analyzed_commit": "abc123"})):
         commit_ref = resolve_commit_ref(Path("."), since_lock=True)
     assert commit_ref == "abc123"
 
 
 def test_resolve_commit_ref_since_lock_missing_commit():
-    with patch("docsync.commands.cascade.load_lock", return_value=Lock({})):
+    with patch("docsync.commands.affected.load_lock", return_value=Lock({})):
         with pytest.raises(ValueError, match="lock.json has no last_analyzed_commit"):
             resolve_commit_ref(Path("."), since_lock=True)
 
@@ -36,7 +36,7 @@ def test_resolve_commit_ref_with_base_branch():
     completed = subprocess.CompletedProcess(
         args=["git", "merge-base", "HEAD", "main"], returncode=0, stdout="deadbeef\n", stderr=""
     )
-    with patch("docsync.commands.cascade.subprocess.run", return_value=completed) as run_mock:
+    with patch("docsync.commands.affected.subprocess.run", return_value=completed) as run_mock:
         commit_ref = resolve_commit_ref(Path("/repo"), base_branch="main")
     assert commit_ref == "deadbeef"
     run_mock.assert_called_once()

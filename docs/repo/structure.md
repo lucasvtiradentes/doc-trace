@@ -7,8 +7,8 @@ doc-sync/
 │   ├── cli.py             ← entry point, argparse setup
 │   ├── commands/          ← subcommand implementations
 │   │   ├── __init__.py
-│   │   ├── check.py       ← ref validation
-│   │   ├── cascade.py     ← change detection
+│   │   ├── validate.py    ← ref validation
+│   │   ├── affected.py    ← change detection
 │   │   ├── prompt.py      ← AI prompt generation
 │   │   ├── tree.py        ← dependency visualization
 │   │   └── init.py        ← project initialization
@@ -22,8 +22,8 @@ doc-sync/
 │       └── prompt.md      ← default prompt template
 ├── tests/                 ← pytest test suite
 │   ├── __init__.py
-│   ├── cascade/           ← cascade tests
-│   ├── check/             ← validation tests
+│   ├── affected/          ← affected tests
+│   ├── validate/          ← validation tests
 │   ├── config/            ← config validation tests
 │   ├── parser/            ← parser tests
 │   ├── prompt/            ← prompt generation tests

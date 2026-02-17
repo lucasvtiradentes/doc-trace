@@ -59,8 +59,8 @@ Outputs flat list without dependency ordering:
 Includes docs affected since `lock.json:last_analyzed_commit`.
 
 1. Loads `last_analyzed_commit` from lock.json
-2. Runs cascade analysis from that commit (`find_affected_docs`)
-3. Filters doc list to affected docs (direct hits + cascade hits)
+2. Runs affected analysis from that commit (`find_affected_docs`)
+3. Filters doc list to affected docs (direct hits + indirect hits)
 
 If no lock file or no previous commit, includes all docs.
 
@@ -92,7 +92,7 @@ Generated prompts reference `.docsync/syncs/<timestamp>/` with timestamp format 
 ---
 
 related docs:
-- docs/features/cascade.md         - cascade used for incremental mode
+- docs/features/affected.md        - affected used for incremental mode
 - docs/features/dependency-tree.md - dependency level computation
 - docs/concepts.md                 - Lock type
 

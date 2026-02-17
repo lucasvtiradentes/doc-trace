@@ -10,13 +10,13 @@
 ├─────────────────────────────────────────────────────────────┤
 │  argparse → subcommand dispatcher                           │
 │                                                             │
-│  ┌─────────┐ ┌─────────┐ ┌────────┐ ┌──────┐ ┌──────┐       │
-│  │ check   │ │ cascade │ │ prompt │ │ tree │ │ init │       │
-│  └────┬────┘ └────┬────┘ └───┬────┘ └──┬───┘ └──┬───┘       │
-│       │           │          │         │        │           │
-│       v           v          v         v        v           │
-│  commands/   commands/  commands/  commands/ commands/      │
-│  check.py    cascade.py prompt.py  tree.py   init.py        │
+│  ┌──────────┐ ┌──────────┐ ┌────────┐ ┌──────┐ ┌──────┐     │
+│  │ validate │ │ affected │ │ prompt │ │ tree │ │ init │     │
+│  └────┬─────┘ └────┬─────┘ └───┬────┘ └──┬───┘ └──┬───┘     │
+│       │            │           │         │        │         │
+│       v            v           v         v        v         │
+│  commands/    commands/   commands/  commands/ commands/    │
+│  validate.py  affected.py prompt.py  tree.py   init.py     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -26,8 +26,8 @@
 src/docsync/
 ├── cli.py              ← entry point, arg parsing
 ├── commands/
-│   ├── check.py        ← ref validation
-│   ├── cascade.py      ← change detection
+│   ├── validate.py     ← ref validation
+│   ├── affected.py     ← change detection
 │   ├── prompt.py       ← AI prompt generation
 │   ├── tree.py         ← dependency visualization
 │   └── init.py         ← project setup
@@ -40,13 +40,13 @@ src/docsync/
     └── prompt.md       ← default prompt template
 ```
 
-## Data Flow - Check Command
+## Data Flow - Validate Command
 
 ```
 docs/*.md → parse_doc() → RefEntry list (path, line)
                               │
                               v
-                        check_refs()
+                        validate_refs()
                               │
               ┌───────────────┴───────────────┐
               v                               v
@@ -55,11 +55,11 @@ docs/*.md → parse_doc() → RefEntry list (path, line)
               │                               │
               └───────────────┬───────────────┘
                               v
-                        CheckResult
+                        ValidateResult
                    (doc_path, errors[])
 ```
 
-## Data Flow - Cascade Command
+## Data Flow - Affected Command
 
 ```
 git diff <commit> → _get_changed_files() → changed_files (list[str])
@@ -79,19 +79,19 @@ source_to_docs           doc_to_docs               │
        _find_direct_hits() → direct_hits (docs with changed source refs)
                                     │
                                     v
-       _cascade() → cascade_hits, circular_refs
+       _propagate() → indirect_hits, circular_refs
        (BFS traversal, depth_limit)
                                     │
                                     v
-                            CascadeResult
-                   (affected, direct, cascade, circular)
+                            AffectedResult
+                   (affected, direct, indirect, circular)
 ```
 
-## Cascade Algorithm (BFS)
+## Propagation Algorithm (BFS)
 
 ```
 Input: initial_docs, doc_to_docs, depth_limit
-Output: cascade_hits, circular_refs
+Output: indirect_hits, circular_refs
 
 visited = set(initial_docs)
 current_level = set(initial_docs)
@@ -110,7 +110,7 @@ while current_level not empty:
                     record circular ref
                 continue
             add to visited
-            add to cascade_hits
+            add to indirect_hits
             add to next_level
 
     current_level = next_level
@@ -127,7 +127,7 @@ generate_prompt(docs_path, config, incremental, parallel)
           v                                       v
    incremental=true                      incremental=false
    load lock.json                        scan all docs
-   run cascade from last commit
+   run affected from last commit
    filter to affected
           │                                       │
           └───────────────────┬───────────────────┘
@@ -189,9 +189,9 @@ find_config(start_path):
 ---
 
 related docs:
-- docs/concepts.md            - key types used in data flow
-- docs/features/cascade.md    - cascade algorithm details
-- docs/features/validation.md - check command details
+- docs/concepts.md             - key types used in data flow
+- docs/features/affected.md    - affected algorithm details
+- docs/features/validation.md  - validate command details
 
 related sources:
 - src/docsync/cli.py    - entry point and dispatcher

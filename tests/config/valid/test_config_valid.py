@@ -2,7 +2,7 @@ from docsync.core.config import validate_config
 
 
 def test_validate_config_valid():
-    errors = validate_config({"ignored_paths": ["*.md"], "cascade_depth_limit": 2})
+    errors = validate_config({"ignored_paths": ["*.md"], "affected_depth_limit": 2})
     assert errors == []
 
 

@@ -17,7 +17,7 @@ class RefError:
 
 
 @dataclass
-class CheckResult:
+class ValidateResult:
     doc_path: Path
     errors: list[RefError] = field(default_factory=list)
 
@@ -26,7 +26,7 @@ class CheckResult:
         return len(self.errors) == 0
 
 
-def check_refs(docs_path: Path, config: Config, repo_root: Path | None = None) -> Iterator[CheckResult]:
+def validate_refs(docs_path: Path, config: Config, repo_root: Path | None = None) -> Iterator[ValidateResult]:
     docs_path = docs_path.resolve()
     if repo_root is None:
         repo_root = find_repo_root(docs_path)
@@ -37,8 +37,8 @@ def check_refs(docs_path: Path, config: Config, repo_root: Path | None = None) -
         yield _check_single_doc(doc_file, repo_root, config)
 
 
-def _check_single_doc(doc_path: Path, repo_root: Path, config: Config) -> CheckResult:
-    result = CheckResult(doc_path=doc_path)
+def _check_single_doc(doc_path: Path, repo_root: Path, config: Config) -> ValidateResult:
+    result = ValidateResult(doc_path=doc_path)
     try:
         parsed = parse_doc(doc_path, config.metadata)
     except Exception as e:
@@ -81,7 +81,7 @@ def run(docs_path: Path) -> int:
 
     config = load_config()
     has_errors = False
-    for result in check_refs(docs_path, config):
+    for result in validate_refs(docs_path, config):
         if not result.ok:
             has_errors = True
             for error in result.errors:

@@ -29,7 +29,7 @@ This creates `.venv/` and installs package with dev dependencies.
 | make install         | create venv, install deps         |
 | make check           | ruff lint + format check          |
 | make test            | pytest -v                         |
-| make practical-test  | docsync check docs/               |
+| make practical-test  | docsync validate docs/            |
 | make changelog       | build CHANGELOG.md                |
 | make changelog-draft | preview changelog                 |
 
@@ -47,8 +47,8 @@ python3 -m venv .venv
 After install, use the venv:
 
 ```bash
-.venv/bin/docsync check docs/
-.venv/bin/docsync cascade docs/ --last 1
+.venv/bin/docsync validate docs/
+.venv/bin/docsync affected docs/ --last 1
 .venv/bin/docsync tree docs/
 .venv/bin/docsync init
 ```
@@ -57,7 +57,7 @@ Or activate the venv:
 
 ```bash
 source .venv/bin/activate
-docsync check docs/
+docsync validate docs/
 ```
 
 ---

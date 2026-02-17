@@ -21,14 +21,14 @@ docsync init
 ```json
 {
   "ignored_paths": [],
-  "cascade_depth_limit": null
+  "affected_depth_limit": null
 }
 ```
 
-| Field              | Default | Description                    |
-|--------------------|---------|--------------------------------|
-| ignored_paths      | []      | patterns to skip in validation |
-| cascade_depth_limit| null    | max cascade depth (unlimited)  |
+| Field               | Default | Description                     |
+|---------------------|---------|-------------------------------- |
+| ignored_paths       | []      | patterns to skip in validation  |
+| affected_depth_limit| null    | max propagation depth (unlimited)|
 
 ## syncs/ Directory
 

@@ -1,11 +1,11 @@
-# Validation (check command)
+# Validation (validate command)
 
 Validates that all doc references point to existing files.
 
 ## Usage
 
 ```bash
-docsync check docs/
+docsync validate docs/
 ```
 
 ## What It Checks
@@ -75,19 +75,19 @@ Patterns use fnmatch syntax.
 
 ## Implementation Details
 
-| Function           | Purpose                          |
-|--------------------|----------------------------------|
-| check_refs()       | iterate docs, yield CheckResults |
-| _check_single_doc()| validate one doc                 |
-| _glob_matches()    | check if pattern has matches     |
-| _is_ignored()      | check against ignored_paths      |
+| Function             | Purpose                            |
+|----------------------|------------------------------------|
+| validate_refs()      | iterate docs, yield ValidateResults|
+| _check_single_doc()  | validate one doc                   |
+| _glob_matches()      | check if pattern has matches       |
+| _is_ignored()        | check against ignored_paths        |
 
 ---
 
 related docs:
-- docs/concepts.md             - CheckResult, RefError types
+- docs/concepts.md             - ValidateResult, RefError types
 - docs/guides/validate-docs.md - usage guide
 
 related sources:
-- src/docsync/commands/check.py - validation implementation
-- src/docsync/core/parser.py    - metadata extraction
+- src/docsync/commands/validate.py - validation implementation
+- src/docsync/core/parser.py       - metadata extraction

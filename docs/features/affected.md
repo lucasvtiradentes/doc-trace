@@ -1,14 +1,14 @@
-# Cascade (cascade command)
+# Affected (affected command)
 
 Maps code changes to affected documentation.
 
 ## Usage
 
 ```bash
-docsync cascade docs/ --last 1
-docsync cascade docs/ --since-lock
-docsync cascade docs/ --base-branch main
-docsync cascade docs/ --last 5 --show-changed-files
+docsync affected docs/ --last 1
+docsync affected docs/ --since-lock
+docsync affected docs/ --base-branch main
+docsync affected docs/ --last 5 --show-changed-files
 ```
 
 ## How It Works
@@ -34,7 +34,7 @@ Matches changed files against source_to_docs:
 - Exact path match: `src/module.py` matches `src/module.py`
 - Directory match:  `src/booking/handler.py` matches `src/booking/` (trailing slash required)
 
-### Step 4: Cascade
+### Step 4: Propagate
 
 BFS traversal from direct hits through doc_to_docs:
 - Level 0: direct hits
@@ -48,7 +48,7 @@ Direct hits (2):
   docs/api.md
   docs/booking.md
 
-Cascade hits (1):
+Indirect hits (1):
   docs/overview.md
 
 Warning: circular refs detected:
@@ -57,25 +57,25 @@ Warning: circular refs detected:
 
 ## Configuration
 
-### cascade_depth_limit
+### affected_depth_limit
 
-Limit how deep cascade propagates.
+Limit how deep propagation goes.
 
 ```json
 {
-  "cascade_depth_limit": 2
+  "affected_depth_limit": 2
 }
 ```
 
-| Value | Behavior                    |
-|-------|-----------------------------|
-| null  | unlimited depth             |
-| 0     | direct hits only            |
-| N     | up to N levels of cascade   |
+| Value | Behavior                      |
+|-------|-------------------------------|
+| null  | unlimited depth               |
+| 0     | direct hits only              |
+| N     | up to N levels of propagation |
 
 ## Circular Reference Detection
 
-Detects revisits during cascade traversal.
+Detects revisits during propagation traversal.
 
 - Reported as warnings
 - Does not block processing
@@ -95,19 +95,19 @@ Detects revisits during cascade traversal.
                        _find_direct_hits()
                                 │
                                 v
-                          _cascade()
+                          _propagate()
                            (BFS)
                                 │
                                 v
-                       CascadeResult
+                       AffectedResult
 ```
 
 ---
 
 related docs:
 - docs/architecture.md               - detailed data flow diagrams
-- docs/concepts.md                   - CascadeResult type
-- docs/features/prompt-generation.md - uses cascade for incremental mode
+- docs/concepts.md                   - AffectedResult type
+- docs/features/prompt-generation.md - uses affected for incremental mode
 
 related sources:
-- src/docsync/commands/cascade.py - cascade implementation
+- src/docsync/commands/affected.py - affected implementation

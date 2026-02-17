@@ -134,7 +134,7 @@ related sources:
 After adding metadata, validate:
 
 ```bash
-docsync check docs/
+docsync validate docs/
 ```
 
 Errors show file path and line number:

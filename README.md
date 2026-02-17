@@ -6,9 +6,9 @@ CLI tool that keeps documentation in sync with code in large codebases. Detects 
   src/booking/handler.ts changed
             │
             v
-  ┌─────────────────────────┐
-  │ docsync cascade docs/ --last 1 │
-  └───────────┬─────────────┘
+  ┌─────────────────────────────┐
+  │ docsync affected docs/ --last 1 │
+  └───────────┬─────────────────┘
               │
               v
   ┌─────────────────────────┐      ┌─────────────────────────┐
@@ -18,7 +18,7 @@ CLI tool that keeps documentation in sync with code in large codebases. Detects 
               │                    │ - src/booking/  <─────  │ ← matched!
               v                    └─────────────────────────┘
   ┌─────────────────────────┐
-  │ Cascade hits:           │      docs/bookings.md references
+  │ Indirect hits:          │      docs/bookings.md references
   │  - docs/payments.md     │ ──>  docs/payments.md, so it
   └─────────────────────────┘      might need review too
 ```
@@ -46,16 +46,16 @@ related sources:
 When `src/booking/handler.ts` changes:
 
 ```
-docsync cascade docs/ --last 1
+docsync affected docs/ --last 1
 
 Direct hits (1):
   docs/bookings.md       <- references src/booking/
 
-Cascade hits (1):
+Indirect hits (1):
   docs/payments.md       <- referenced BY docs/bookings.md
 ```
 
-The cascade propagates: if `bookings.md` might be outdated, then `payments.md` (which references it) might also need review.
+The propagation: if `bookings.md` might be outdated, then `payments.md` (which references it) might also need review.
 
 </details>
 
@@ -69,10 +69,10 @@ docsync solves this by adding "hints" to each doc - `related sources:` tells any
 
 ## Features
 
-- check   - validates all referenced paths exist
-- cascade - finds docs affected by code changes (with directory matching)
-- prompt  - generates prompt for AI to review docs (ordered by deps)
-- tree    - shows doc dependency tree
+- validate - validates all referenced paths exist
+- affected - finds docs affected by code changes (with directory matching)
+- prompt   - generates prompt for AI to review docs (ordered by deps)
+- tree     - shows doc dependency tree
 
 ## Quickstart
 
@@ -154,7 +154,7 @@ config.json:
 ```json
 {
   "ignored_paths": ["**/migrations/**", "**/*.test.ts"],
-  "cascade_depth_limit": null,
+  "affected_depth_limit": null,
   "metadata": {
     "style": "custom",
     "docs_key": "related docs",
@@ -184,27 +184,27 @@ Placeholders: `{count}`, `{docs}`, `{syncs_dir}`
 ### 4. Use it
 
 ```bash
-docsync check docs/                    # validate all refs exist
-docsync cascade docs/ --last 5         # find docs affected by last 5 commits
-docsync prompt docs/ | pbcopy          # generate AI prompt, copy to clipboard
+docsync validate docs/                  # validate all refs exist
+docsync affected docs/ --last 5         # find docs affected by last 5 commits
+docsync prompt docs/ | pbcopy           # generate AI prompt, copy to clipboard
 ```
 
 <details>
 <summary>All commands</summary>
 
-| Command                                        | Description                         |
-|------------------------------------------------|-------------------------------------|
-| `docsync check <path>`                         | validate refs exist                 |
-| `docsync cascade <path> --last <N>`            | list affected docs by last N commits|
-| `docsync cascade <path> --since-lock`          | list affected docs since lock commit|
-| `docsync cascade <path> --base-branch <branch>`| list affected docs from merge-base  |
-| `docsync prompt <path>`                        | generate prompt (ordered by deps)   |
-| `docsync prompt <path> --parallel`             | ignore deps, all at once            |
-| `docsync prompt <path> --incremental`          | only include changed docs           |
-| `docsync prompt <path> --update-lock`          | update lock.json after prompt       |
-| `docsync tree <path>`                          | show doc dependency tree            |
-| `docsync init`                                 | create .docsync/ folder             |
-| `docsync --version`                            | show version                        |
+| Command                                          | Description                         |
+|--------------------------------------------------|-------------------------------------|
+| `docsync --version`                              | show version                        |
+| `docsync init`                                   | create .docsync/ folder             |
+| `docsync tree <path>`                            | show doc dependency tree            |
+| `docsync validate <path>`                        | validate refs exist                 |
+| `docsync affected <path> --last <N>`             | list affected docs by last N commits|
+| `docsync affected <path> --since-lock`           | list affected docs since lock commit|
+| `docsync affected <path> --base-branch <branch>` | list affected docs from merge-base  |
+| `docsync prompt <path>`                          | generate prompt (ordered by deps)   |
+| `docsync prompt <path> --parallel`               | ignore deps, all at once            |
+| `docsync prompt <path> --incremental`            | only include changed docs           |
+| `docsync prompt <path> --update-lock`            | update lock.json after prompt       |
 
 </details>
 
@@ -239,8 +239,8 @@ Use `--parallel` to ignore dependencies and prompt all at once.
 ## Development
 
 ```bash
-make install        # create venv + install
-make check          # lint
-make test           # run tests
-docsync check docs/ # practical test
+make install           # create venv + install
+make check             # lint
+make test              # run tests
+docsync validate docs/ # practical test
 ```

@@ -11,10 +11,10 @@ from docsync.core.lock import load_lock
 from docsync.core.parser import parse_doc
 
 
-class CascadeResult(NamedTuple):
+class AffectedResult(NamedTuple):
     affected_docs: list[Path]
     direct_hits: list[Path]
-    cascade_hits: list[Path]
+    indirect_hits: list[Path]
     circular_refs: list[tuple[Path, Path]]
 
 
@@ -49,7 +49,7 @@ def resolve_commit_ref(
 
 def find_affected_docs(
     docs_path: Path, commit_ref: str, config: Config, repo_root: Path | None = None
-) -> CascadeResult:
+) -> AffectedResult:
     if repo_root is None:
         repo_root = find_repo_root(docs_path)
     changed_files = _get_changed_files(commit_ref, repo_root)
@@ -58,15 +58,15 @@ def find_affected_docs(
 
 def _find_affected_docs_for_changes(
     docs_path: Path, changed_files: list[str], config: Config, repo_root: Path
-) -> CascadeResult:
+) -> AffectedResult:
     if not changed_files:
-        return CascadeResult([], [], [], [])
+        return AffectedResult([], [], [], [])
     source_to_docs, doc_to_docs = _build_indexes(docs_path, repo_root, config)
     direct_hits = _find_direct_hits(changed_files, source_to_docs)
-    cascade_hits, circular_refs = _cascade(direct_hits, doc_to_docs, config.cascade_depth_limit)
-    all_affected = list(set(direct_hits) | set(cascade_hits))
-    return CascadeResult(
-        affected_docs=all_affected, direct_hits=direct_hits, cascade_hits=cascade_hits, circular_refs=circular_refs
+    indirect_hits, circular_refs = _propagate(direct_hits, doc_to_docs, config.affected_depth_limit)
+    all_affected = list(set(direct_hits) | set(indirect_hits))
+    return AffectedResult(
+        affected_docs=all_affected, direct_hits=direct_hits, indirect_hits=indirect_hits, circular_refs=circular_refs
     )
 
 
@@ -111,10 +111,10 @@ def _find_direct_hits(changed_files: list[str], source_to_docs: dict[str, list[P
     return list(set(hits))
 
 
-def _cascade(
+def _propagate(
     initial_docs: list[Path], doc_to_docs: dict[Path, list[Path]], depth_limit: int | None
 ) -> tuple[list[Path], list[tuple[Path, Path]]]:
-    cascade_hits = []
+    indirect_hits = []
     circular_refs = []
     visited = set(initial_docs)
     current_level = set(initial_docs)
@@ -130,11 +130,11 @@ def _cascade(
                         circular_refs.append((doc, referencing_doc))
                     continue
                 visited.add(referencing_doc)
-                cascade_hits.append(referencing_doc)
+                indirect_hits.append(referencing_doc)
                 next_level.add(referencing_doc)
         current_level = next_level
         depth += 1
-    return cascade_hits, circular_refs
+    return indirect_hits, circular_refs
 
 
 def run(
@@ -151,7 +151,7 @@ def run(
     try:
         commit_ref = resolve_commit_ref(repo_root, since_lock, last, base_branch)
     except ValueError as e:
-        print(f"Cascade scope error: {e}", file=sys.stderr)
+        print(f"Scope error: {e}", file=sys.stderr)
         return 2
 
     changed_files = _get_changed_files(commit_ref, repo_root)
@@ -168,9 +168,9 @@ def run(
     print(f"Direct hits ({len(result.direct_hits)}):")
     for doc in result.direct_hits:
         print(f"  {doc}")
-    if result.cascade_hits:
-        print(f"\nCascade hits ({len(result.cascade_hits)}):")
-        for doc in result.cascade_hits:
+    if result.indirect_hits:
+        print(f"\nIndirect hits ({len(result.indirect_hits)}):")
+        for doc in result.indirect_hits:
             print(f"  {doc}")
     if result.circular_refs:
         print("\nWarning: circular refs detected:")

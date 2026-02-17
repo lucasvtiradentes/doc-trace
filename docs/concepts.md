@@ -21,28 +21,28 @@ Container for extracted references from a markdown file.
 | related_docs    | list[RefEntry]  | doc-to-doc references    |
 | related_sources | list[RefEntry]  | doc-to-source references |
 
-### CascadeResult
+### AffectedResult
 
-Output from cascade analysis.
+Output from affected analysis.
 
 | Field         | Type                      | Description                         |
 |---------------|---------------------------|-------------------------------------|
 | affected_docs | list[Path]                | all docs needing review             |
 | direct_hits   | list[Path]                | docs with changed source refs       |
-| cascade_hits  | list[Path]                | docs reached via doc-to-doc refs    |
+| indirect_hits | list[Path]                | docs reached via doc-to-doc refs    |
 | circular_refs | list[tuple[Path, Path]]   | detected circular dependencies      |
 
 ### Config
 
 Runtime configuration loaded from .docsync/config.json.
 
-| Field              | Type           | Default | Description                       |
-|--------------------|----------------|---------|-----------------------------------|
-| ignored_paths      | list[str]      | []      | fnmatch patterns to skip          |
-| cascade_depth_limit| int or None    | None    | max cascade depth (None=unlimited)|
-| metadata           | MetadataConfig | defaults| metadata parsing settings         |
+| Field               | Type           | Default | Description                        |
+|---------------------|----------------|---------|----------------------------------- |
+| ignored_paths       | list[str]      | []      | fnmatch patterns to skip           |
+| affected_depth_limit| int or None    | None    | max propagation depth (None=unlimited)|
+| metadata            | MetadataConfig | defaults| metadata parsing settings          |
 
-### CheckResult
+### ValidateResult
 
 Validation result for a single doc.
 
@@ -88,9 +88,9 @@ Dependency graph analysis result.
 
 A doc is a "direct hit" when one of its `related sources:` paths appears in the git diff. These docs directly reference changed code.
 
-### Cascade Hit
+### Indirect Hit
 
-A doc is a "cascade hit" when it references (via `related docs:`) another doc that was affected. Cascade hits propagate through the dependency graph.
+A doc is an "indirect hit" when it references (via `related docs:`) another doc that was affected. Indirect hits propagate through the dependency graph.
 
 ### Circular Dependency
 
@@ -122,13 +122,13 @@ related sources:
 ---
 
 related docs:
-- docs/architecture.md     - how types flow through system
-- docs/features/cascade.md - cascade algorithm using these types
+- docs/architecture.md      - how types flow through system
+- docs/features/affected.md - affected algorithm using these types
 
 related sources:
-- src/docsync/core/parser.py      - RefEntry, ParsedDoc definitions
-- src/docsync/commands/cascade.py - CascadeResult definition
-- src/docsync/commands/check.py   - CheckResult, RefError definitions
-- src/docsync/commands/tree.py    - DependencyTree definition
-- src/docsync/core/config.py      - Config definition
-- src/docsync/core/lock.py        - Lock definition
+- src/docsync/core/parser.py        - RefEntry, ParsedDoc definitions
+- src/docsync/commands/affected.py  - AffectedResult definition
+- src/docsync/commands/validate.py  - ValidateResult, RefError definitions
+- src/docsync/commands/tree.py      - DependencyTree definition
+- src/docsync/core/config.py        - Config definition
+- src/docsync/core/lock.py          - Lock definition

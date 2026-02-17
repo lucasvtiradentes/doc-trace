@@ -22,13 +22,13 @@ class MetadataConfig:
 class Config:
     def __init__(self, data: dict[str, Any]):
         self.ignored_paths: list[str] = data.get("ignored_paths", DEFAULT_CONFIG["ignored_paths"])
-        self.cascade_depth_limit: int | None = data.get("cascade_depth_limit", DEFAULT_CONFIG["cascade_depth_limit"])
+        self.affected_depth_limit: int | None = data.get("affected_depth_limit", DEFAULT_CONFIG["affected_depth_limit"])
         self.metadata: MetadataConfig = MetadataConfig(data.get("metadata", {}))
 
 
 def validate_config(data: dict[str, Any], config_path: Path | None = None) -> list[str]:
     errors = []
-    valid_keys = {"ignored_paths", "cascade_depth_limit", "metadata"}
+    valid_keys = {"ignored_paths", "affected_depth_limit", "metadata"}
     for key in data:
         if key not in valid_keys:
             errors.append(f"unknown key: {key}")
@@ -37,10 +37,10 @@ def validate_config(data: dict[str, Any], config_path: Path | None = None) -> li
             errors.append("ignored_paths must be a list")
         elif not all(isinstance(p, str) for p in data["ignored_paths"]):
             errors.append("ignored_paths must contain only strings")
-    if "cascade_depth_limit" in data:
-        val = data["cascade_depth_limit"]
+    if "affected_depth_limit" in data:
+        val = data["affected_depth_limit"]
         if val is not None and not isinstance(val, int):
-            errors.append("cascade_depth_limit must be null or integer")
+            errors.append("affected_depth_limit must be null or integer")
     if "metadata" in data:
         errors.extend(_validate_metadata(data["metadata"]))
     return errors

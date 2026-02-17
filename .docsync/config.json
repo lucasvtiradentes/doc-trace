@@ -1,6 +1,6 @@
 {
   "ignored_paths": [],
-  "cascade_depth_limit": null,
+  "affected_depth_limit": null,
   "metadata": {
     "style": "custom",
     "docs_key": "related docs",

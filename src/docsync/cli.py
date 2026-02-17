@@ -3,7 +3,7 @@ import sys
 from importlib.metadata import version
 from pathlib import Path
 
-from docsync.commands import cascade, check, init, prompt, tree
+from docsync.commands import affected, init, prompt, tree, validate
 
 VERSION = version("docsync")
 
@@ -13,16 +13,16 @@ def main():
     parser.add_argument("-v", "--version", action="version", version=f"docsync {VERSION}")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    check_parser = subparsers.add_parser("check", help="validate all refs exist")
-    check_parser.add_argument("path", type=Path, help="docs directory to check")
+    validate_parser = subparsers.add_parser("validate", help="validate all refs exist")
+    validate_parser.add_argument("path", type=Path, help="docs directory to validate")
 
-    cascade_parser = subparsers.add_parser("cascade", help="list docs affected by git diff")
-    cascade_parser.add_argument("path", type=Path, nargs="?", default=Path("docs"), help="docs directory")
-    scope_group = cascade_parser.add_mutually_exclusive_group(required=True)
+    affected_parser = subparsers.add_parser("affected", help="list docs affected by git diff")
+    affected_parser.add_argument("path", type=Path, nargs="?", default=Path("docs"), help="docs directory")
+    scope_group = affected_parser.add_mutually_exclusive_group(required=True)
     scope_group.add_argument("--since-lock", action="store_true", help="compare from lock.json last_analyzed_commit")
     scope_group.add_argument("--last", type=int, help="compare against HEAD~N (N must be > 0)")
     scope_group.add_argument("--base-branch", help="compare from merge-base(HEAD, <branch>)")
-    cascade_parser.add_argument("--show-changed-files", action="store_true", help="print changed files before hits")
+    affected_parser.add_argument("--show-changed-files", action="store_true", help="print changed files before hits")
 
     prompt_parser = subparsers.add_parser("prompt", help="generate prompt for AI to review docs")
     prompt_parser.add_argument("path", type=Path, help="docs directory")
@@ -37,10 +37,10 @@ def main():
 
     args = parser.parse_args()
 
-    if args.command == "check":
-        sys.exit(check.run(args.path))
-    elif args.command == "cascade":
-        sys.exit(cascade.run(args.path, args.since_lock, args.last, args.base_branch, args.show_changed_files))
+    if args.command == "validate":
+        sys.exit(validate.run(args.path))
+    elif args.command == "affected":
+        sys.exit(affected.run(args.path, args.since_lock, args.last, args.base_branch, args.show_changed_files))
     elif args.command == "prompt":
         sys.exit(prompt.run(args.path, args.incremental, args.parallel, args.update_lock))
     elif args.command == "tree":

@@ -2,19 +2,21 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from docsync.commands.check import check_refs
+from docsync.commands.validate import validate_refs
 from docsync.core.config import Config
 
 DOCS_DIR = Path(__file__).parent / "docs"
 
 
-def test_check_refs_missing_doc():
+def test_validate_refs_valid():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
         docs_dir = tmppath / "docs"
         shutil.copytree(DOCS_DIR, docs_dir)
+        src_dir = tmppath / "src"
+        src_dir.mkdir()
+        (src_dir / "module.py").write_text("# module")
         config = Config({})
-        results = list(check_refs(docs_dir, config, repo_root=tmppath))
+        results = list(validate_refs(docs_dir, config, repo_root=tmppath))
         assert len(results) == 1
-        assert not results[0].ok
-        assert "not found" in results[0].errors[0].message
+        assert results[0].ok

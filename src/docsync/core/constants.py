@@ -22,7 +22,7 @@ DEFAULT_METADATA = {
 
 DEFAULT_CONFIG = {
     "ignored_paths": [],
-    "cascade_depth_limit": None,
+    "affected_depth_limit": None,
     "metadata": DEFAULT_METADATA,
 }
 

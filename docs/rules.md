@@ -5,11 +5,11 @@
 ### Single-Responsibility Commands
 
 Each command does one thing:
-- `check`   - validates refs
-- `cascade` - finds affected docs
-- `prompt`  - generates AI tasks
-- `tree`    - shows dependencies
-- `init`    - creates config
+- `validate` - validates refs
+- `affected` - finds affected docs
+- `prompt`   - generates AI tasks
+- `tree`     - shows dependencies
+- `init`     - creates config
 
 ### Explicit Paths from Repo Root
 
@@ -23,11 +23,11 @@ related sources:
 
 ### Doc Metadata-Driven
 
-Validation and cascade rely on doc metadata sections. No magic inference or heuristics.
+Validation and affected rely on doc metadata sections. No magic inference or heuristics.
 
 ### Lazy Error Recovery
 
-On parse errors in `check`, report the doc error and continue scanning other docs. The command still exits non-zero when any error exists.
+On parse errors in `validate`, report the doc error and continue scanning other docs. The command still exits non-zero when any error exists.
 
 ## Code Conventions
 
@@ -44,7 +44,7 @@ Enables forward references and modern type syntax.
 ### Lowercase CLI
 
 Commands are lowercase, no hyphens:
-- `check`, `cascade`, `prompt`, `tree`, `init`
+- `validate`, `affected`, `prompt`, `tree`, `init`
 
 ### Path-Based Abstractions
 
@@ -55,18 +55,18 @@ Use `pathlib.Path` everywhere, not string paths.
 Return types are NamedTuples for clear structure:
 - `RefEntry`
 - `ParsedDoc`
-- `CascadeResult`
+- `AffectedResult`
 - `DependencyTree`
 
 ### Iterator Patterns
 
-`check_refs()` yields results one at a time instead of building full list.
+`validate_refs()` yields results one at a time instead of building full list.
 
 ## Anti-Patterns to Avoid
 
 ### Exhaustive Dependency Crawling
 
-Do not recursively follow all refs without limits. Use `cascade_depth_limit`.
+Do not recursively follow all refs without limits. Use `affected_depth_limit`.
 
 ### Committing lock.json
 
