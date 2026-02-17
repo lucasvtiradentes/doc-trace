@@ -2,119 +2,55 @@
 
 ## Framework
 
-Pytest with Python version matrix (3.9, 3.12).
+Pytest configured in `pyproject.toml`:
 
-```bash
-make test           # or
-pytest -v
-```
+- `testpaths = ["tests"]`
+- `python_files = ["test.py", "test_*.py"]`
 
-## Test Files
-
-| File                | Coverage                              |
-|---------------------|---------------------------------------|
-| test_cascade.py     | cascade logic, direct/cascade hits    |
-| test_parser.py      | metadata extraction, line numbers     |
-| test_tree.py        | dependency tree building, levels      |
-| test_validator.py   | ref validation, config validation     |
-
-## Patterns
-
-### Temporary Directories
-
-Tests use `tempfile.TemporaryDirectory` for isolation:
-
-```python
-def test_something():
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tmppath = Path(tmpdir)
-        docs_dir = tmppath / "docs"
-        docs_dir.mkdir()
-        # ... test logic
-```
-
-### Mock Git Subprocess
-
-Git operations mocked with `unittest.mock.patch`:
-
-```python
-with patch("docsync.commands.cascade._get_changed_files", return_value=["src/changed.py"]):
-    result = find_affected_docs(docs_dir, "HEAD~1", config, repo_root=tmppath)
-```
-
-### Inline Test Docs
-
-Test markdown written inline for clarity:
-
-```python
-doc.write_text("""# Test
-
-related sources:
-- src/module.py - impl
-""")
-```
-
-## Test Categories
-
-### Unit Tests
-
-- Parser extraction
-- Config validation
-- Individual functions
-
-### Integration Tests
-
-- Full cascade flow
-- Full validation flow
-- Prompt generation
-
-## CI Testing
-
-### Local Equivalent
+Run tests:
 
 ```bash
 make test
-make practical-test   # docsync check docs/
+# or
+.venv/bin/pytest -v
 ```
 
-### CI Matrix
+## Test Layout
 
-| Job            | Python | Commands                    |
-|----------------|--------|-----------------------------|
-| check          | 3.12   | ruff check, ruff format     |
-| test           | 3.9    | pytest -v                   |
-| test           | 3.12   | pytest -v                   |
-| practical-test | 3.12   | docsync check docs/         |
+Tests are organized by feature area:
 
-## Coverage Areas
+| Directory / File | Coverage |
+|------------------|----------|
+| `tests/cascade/` | index building, direct hits, cascade traversal, depth limits |
+| `tests/check/`   | valid refs, missing docs, missing sources |
+| `tests/config/`  | config validation (valid + invalid) |
+| `tests/parser/`  | custom/frontmatter parsing, code blocks, line numbers |
+| `tests/prompt/`  | ordered output, parallel output, empty docs behavior |
+| `tests/tree/`    | independent docs, dependency levels, circular refs, formatting |
 
-### Cascade Tests
+## Common Patterns
 
-- `_build_indexes`    - source/doc mapping
-- `_cascade`          - BFS traversal, depth limit
-- `_find_direct_hits` - exact and directory matching
-- Circular ref detection
+### Temporary directories
 
-### Parser Tests
+Tests create isolated repos/workspaces with `tempfile.TemporaryDirectory()`.
 
-- Both sections present
-- Empty sections
-- Line number preservation
+### Fixture-style test data
 
-### Tree Tests
+Many tests copy fixture docs with `shutil.copytree(...)` from nearby `docs/` folders.
 
-- Independent docs (level 0)
-- Multi-level dependencies
-- Circular dependency detection
-- Output formatting
+### Mocked change detection
 
-### Validator Tests
+Cascade tests patch change input (for example `_get_changed_files`) to avoid relying on real git history.
 
-- Valid refs
-- Missing source/doc detection
-- ignored_paths filtering
-- Config validation (valid keys, types)
-- Prompt generation modes
+## CI-Relevant Commands
+
+Local equivalents of CI jobs:
+
+```bash
+make check          # ruff check + ruff format --check
+make test           # pytest -v
+make practical-test # docsync check docs/
+```
 
 ---
 

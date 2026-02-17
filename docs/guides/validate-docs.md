@@ -10,7 +10,7 @@ docsync check docs/
 
 Scans all `*.md` files in `docs/` recursively and validates:
 - `related docs:` paths exist
-- `related sources:` paths exist (or glob matches)
+- `related sources:` paths exist (or glob pattern matches)
 
 ## Success Output
 
@@ -44,9 +44,7 @@ Create `.docsync/config.json` to skip certain docs:
 ```
 
 Patterns use fnmatch syntax:
-- `*` matches any characters except `/`
-- `**` matches any characters including `/`
-- `?` matches single character
+- `*` and `?` are supported
 
 ## Common Issues
 
@@ -86,13 +84,13 @@ Fails build if any refs are invalid.
 
 ## Parse Errors
 
-Docs that fail to parse are skipped with error message:
+Docs that fail to parse are reported as errors:
 
 ```
 docs/broken.md:0: failed to parse doc: ...
 ```
 
-This does not block validation of other docs.
+Validation continues for other docs, but command exits with code `1` if any parse error is reported.
 
 ## Workflow
 

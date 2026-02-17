@@ -79,7 +79,7 @@ Environment: `pypi`
 
 ## Branch Strategy
 
-- `main` - primary branch, protected
+- `main` - primary branch for push workflow
 - Tagged releases: `v0.1.0`, `v0.2.0`, etc.
 
 ---

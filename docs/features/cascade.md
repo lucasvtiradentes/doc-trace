@@ -68,11 +68,11 @@ Limit how deep cascade propagates.
 
 ## Circular Reference Detection
 
-Detects when doc A → doc B → doc A (directly or indirectly).
+Detects revisits during cascade traversal.
 
 - Reported as warnings
 - Does not block processing
-- Circular docs still included in results
+- Recorded as `(source_doc, revisited_doc)` tuples
 
 ## Implementation
 

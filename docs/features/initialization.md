@@ -14,7 +14,6 @@ docsync init
 .docsync/
 ├── config.json     ← default configuration
 └── syncs/          ← AI sync report storage
-    └── .gitignore  ← ignore sync outputs
 ```
 
 ## Default config.json
@@ -35,21 +34,20 @@ docsync init
 
 Storage for AI-generated sync reports.
 
-The `.gitignore` ignores all files except itself:
+`init` updates the repository root `.gitignore` to include:
 
 ```
-*
-!.gitignore
+.docsync/syncs/
 ```
 
-This keeps sync outputs local and untracked.
+If `.gitignore` already exists, the entry is appended only if missing.
 
 ## Idempotent
 
 Running `init` multiple times is safe:
 - Existing config.json is overwritten with defaults
 - syncs/ directory created if missing
-- .gitignore recreated
+- `.gitignore` updated only when needed
 
 ## Output
 

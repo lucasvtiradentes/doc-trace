@@ -16,7 +16,7 @@ docsync prompt docs/ --update-lock
 | Flag          | Description                              |
 |---------------|------------------------------------------|
 | --parallel    | ignore dependencies, flat list           |
-| --incremental | only docs changed since last commit      |
+| --incremental | only docs affected since locked commit   |
 | --update-lock | save current commit to lock.json         |
 
 ## Default Behavior (Ordered)
@@ -56,22 +56,23 @@ Outputs flat list without dependency ordering:
 
 ## Incremental Mode
 
-Only includes docs affected since last analyzed commit.
+Includes docs affected since `lock.json:last_analyzed_commit`.
 
 1. Loads `last_analyzed_commit` from lock.json
-2. Runs cascade analysis from that commit
-3. Filters doc list to affected docs only
+2. Runs cascade analysis from that commit (`find_affected_docs`)
+3. Filters doc list to affected docs (direct hits + cascade hits)
 
 If no lock file or no previous commit, includes all docs.
 
 ## Update Lock
 
-With `--update-lock`, saves current commit hash to `.docsync/lock.json`:
+With `--update-lock`, saves current commit hash to `.docsync/lock.json` and updates `last_run`:
 
 ```json
 {
   "last_analyzed_commit": "abc123...",
-  "last_run": "2024-01-15T10:30:00+00:00"
+  "last_run": "2026-02-17T09:52:01+00:00",
+  "docs_validated": []
 }
 ```
 
@@ -86,7 +87,7 @@ Template variables:
 
 ## Output Directory
 
-Generated prompts reference `.docsync/syncs/<timestamp>/` for AI to store results.
+Generated prompts reference `.docsync/syncs/<timestamp>/` with timestamp format `%Y-%m-%dT%H-%M-%S`.
 
 ---
 

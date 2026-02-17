@@ -52,10 +52,13 @@ Recursive computation with memoization. Circular refs detected by tracking visit
 
 ## Circular Dependencies
 
-When doc A references doc B and doc B references doc A:
-- Both assigned level 0 (fallback)
-- Circular pair reported in warnings
-- Processing continues (non-blocking)
+When a cycle is hit during recursive level computation:
+- The cycle edge is recorded in `circular`
+- That recursive branch returns `-1`
+- The current doc falls back to level `0` only if all of its deps are cyclic
+- Processing continues (non-blocking warning in output)
+
+In mixed graphs, docs in the same cycle can end up with different computed levels depending on traversal.
 
 ## Use Cases
 
@@ -72,6 +75,10 @@ When doc A references doc B and doc B references doc A:
 | _build_doc_dependencies()| parse all docs, build dep map     |
 | _compute_levels()        | recursive level assignment        |
 | format_tree()            | render output string              |
+
+Notes from implementation:
+- Docs that fail `parse_doc(...)` are skipped.
+- Only `related docs:` references that exist on disk are included as dependencies.
 
 ---
 

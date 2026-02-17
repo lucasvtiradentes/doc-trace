@@ -70,7 +70,7 @@ Patterns use fnmatch syntax.
 
 - Scans all `*.md` files recursively in target directory
 - Skips docs matching ignored_paths patterns
-- Skips docs that fail to parse (logs error, continues)
+- Reports docs that fail to parse as validation errors (continues scanning)
 - All paths resolved relative to repo root
 
 ## Implementation Details

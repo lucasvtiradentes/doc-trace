@@ -26,12 +26,12 @@ ruff format --check # check formatting
 
 ### Pytest
 
-Test framework with Python version matrix.
+Test framework configured via `pyproject.toml`.
 
 | Setting   | Value      |
 |-----------|------------|
 | testpaths | tests/     |
-| versions  | 3.9, 3.12  |
+| python_files | test.py, test_*.py  |
 
 ```bash
 pytest -v           # run tests verbose
@@ -74,7 +74,7 @@ towncrier build --draft --version X.Y.Z  # preview
 
 ### Bump2version
 
-Version bumping for releases.
+Version bumping tool included in `dev` optional dependencies.
 
 ```bash
 bump2version patch  # 0.1.0 → 0.1.1

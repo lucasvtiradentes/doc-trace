@@ -3,7 +3,7 @@
 ## Requirements
 
 - Python 3.9+
-- make
+- make (optional, for convenience commands)
 
 ## Install
 

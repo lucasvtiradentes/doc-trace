@@ -40,6 +40,7 @@ Runtime configuration loaded from .docsync/config.json.
 |--------------------|----------------|---------|-----------------------------------|
 | ignored_paths      | list[str]      | []      | fnmatch patterns to skip          |
 | cascade_depth_limit| int or None    | None    | max cascade depth (None=unlimited)|
+| metadata           | MetadataConfig | defaults| metadata parsing settings         |
 
 ### CheckResult
 
@@ -93,7 +94,7 @@ A doc is a "cascade hit" when it references (via `related docs:`) another doc th
 
 ### Circular Dependency
 
-Occurs when doc A references doc B and doc B references doc A (directly or through intermediate docs). Detected and warned, but does not block processing.
+Occurs when docs reference each other in a cycle. Commands detect this and continue processing; warnings/recorded pairs are non-blocking.
 
 ### Dependency Level
 
@@ -102,7 +103,7 @@ Occurs when doc A references doc B and doc B references doc A (directly or throu
 
 ### Metadata Section
 
-The portion of a markdown file after the `---` separator containing `related docs:` and `related sources:` lists.
+By default (`metadata.style = "custom"`), metadata is parsed after the last `---` separator and contains `related docs:` / `related sources:` lists. This is configurable via `.docsync/config.json` (`metadata.style`, keys, separator requirement).
 
 ```
 # Doc Title

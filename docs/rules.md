@@ -27,7 +27,7 @@ Validation and cascade rely on doc metadata sections. No magic inference or heur
 
 ### Lazy Error Recovery
 
-On parse errors, skip the doc and continue. Report but do not block.
+On parse errors in `check`, report the doc error and continue scanning other docs. The command still exits non-zero when any error exists.
 
 ## Code Conventions
 
@@ -70,7 +70,7 @@ Do not recursively follow all refs without limits. Use `cascade_depth_limit`.
 
 ### Committing lock.json
 
-The lock file is local state. Add to `.gitignore` or keep in syncs/.
+`lock.json` is stored in `.docsync/lock.json` and used by incremental prompt generation.
 
 ### Hardcoded Doc Paths
 
@@ -78,7 +78,7 @@ Pass paths as arguments. Do not assume `docs/` location.
 
 ### Blocking on Parse Errors
 
-Skip unparseable docs with warning. Do not fail entire operation.
+Do not abort the whole scan on first parse error; accumulate errors and fail at the end with exit code `1`.
 
 ---
 

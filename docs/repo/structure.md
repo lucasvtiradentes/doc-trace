@@ -22,10 +22,12 @@ doc-sync/
 │       └── prompt.md      ← default prompt template
 ├── tests/                 ← pytest test suite
 │   ├── __init__.py
-│   ├── test_cascade.py    ← cascade logic tests
-│   ├── test_parser.py     ← parser tests
-│   ├── test_tree.py       ← tree tests
-│   └── test_validator.py  ← check/config tests
+│   ├── cascade/           ← cascade tests
+│   ├── check/             ← validation tests
+│   ├── config/            ← config validation tests
+│   ├── parser/            ← parser tests
+│   ├── prompt/            ← prompt generation tests
+│   └── tree/              ← dependency tree tests
 ├── docs/                  ← documentation
 ├── .github/workflows/     ← CI/CD pipelines
 │   ├── prs.yml            ← PR checks
@@ -57,7 +59,7 @@ Shared modules used across commands:
 
 ### tests/
 
-Pytest test modules using tempfile for isolation and mock for git subprocess calls.
+Pytest tests grouped by feature area. Most tests use temporary directories and fixture docs copied from local test fixtures.
 
 ---
 

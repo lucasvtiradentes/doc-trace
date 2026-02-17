@@ -2,9 +2,9 @@
 
 Guide to adding metadata sections to documentation files.
 
-## Metadata Format
+## Default Metadata Format (custom style)
 
-Add a `---` separator followed by `related docs:` and/or `related sources:` sections at the end of your doc:
+With default config, add a `---` separator and put metadata after it:
 
 ```markdown
 # Your Doc Title
@@ -20,6 +20,8 @@ related sources:
 - src/path/to/file.py - description
 - src/path/to/dir/ - description
 ```
+
+`docsync` uses the last `---` outside fenced code blocks as the metadata separator.
 
 ## Section Format
 
@@ -61,7 +63,7 @@ Bad:
 
 ## Line Item Format
 
-Each item follows the pattern:
+In default `custom` style, each item must follow:
 
 ```
 - path - description
@@ -74,23 +76,33 @@ Each item follows the pattern:
 | `-`         | yes      | separator                       |
 | description | yes      | human-readable description      |
 
-## Directory References
+## Frontmatter Style (optional)
 
-Trailing slash indicates directory (matches all files within):
+If `.docsync/config.json` sets metadata style to `frontmatter`, metadata is read from the top YAML-like block:
+
+```markdown
+---
+related docs:
+- docs/concepts.md
+related sources:
+- src/module.py
+---
+```
+
+In frontmatter style, list items can omit descriptions (`- path` is valid).
+
+## Separator Behavior
+
+- Default behavior (`require_separator: true`): metadata is parsed only after the separator.
+- Optional behavior (`require_separator: false`): metadata headers can appear without a separator.
+
+## Directory and Glob References
+
+The parser stores paths exactly as written, including directory and glob patterns:
 
 ```
 related sources:
 - src/booking/ - booking module
-```
-
-This doc is flagged if any file in `src/booking/` changes.
-
-## Glob Patterns
-
-Wildcards supported for source paths:
-
-```
-related sources:
 - src/*.py - all Python files in src/
 - tests/**/*.py - all test files recursively
 ```
