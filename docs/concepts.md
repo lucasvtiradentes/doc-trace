@@ -83,16 +83,6 @@ State tracking for incremental mode.
 | last_run             | str or None  | ISO timestamp of last run        |
 | docs_validated       | list[str]    | paths validated in last run      |
 
-### DependencyTree
-
-Dependency graph analysis result.
-
-| Field    | Type                    | Description                      |
-|----------|-------------------------|----------------------------------|
-| levels   | list[list[Path]]        | topological tiers (0=independent)|
-| circular | list[tuple[Path, Path]] | detected circular refs           |
-| doc_deps | dict[Path, list[Path]]  | direct dependencies per doc      |
-
 ## Terminology
 
 ### Direct Hit
@@ -106,11 +96,6 @@ A doc is an "indirect hit" when it references (via `related docs:`) another doc 
 ### Circular Dependency
 
 Occurs when docs reference each other in a cycle. Commands detect this and continue processing; warnings/recorded pairs are non-blocking.
-
-### Dependency Level
-
-- Level 0: docs with no `related docs:` references (independent)
-- Level N: docs whose deepest dependency is at level N-1
 
 ### Metadata Section
 
@@ -138,6 +123,5 @@ related sources:
 - src/docsync/core/parser.py        - RefEntry, ParsedDoc definitions
 - src/docsync/commands/affected.py  - AffectedResult definition
 - src/docsync/commands/validate.py  - ValidateResult, RefError definitions
-- src/docsync/commands/tree.py      - DependencyTree definition
 - src/docsync/core/config.py        - Config definition
 - src/docsync/core/lock.py          - Lock definition

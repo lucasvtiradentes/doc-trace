@@ -9,7 +9,6 @@ doc-sync/
 │   │   ├── __init__.py
 │   │   ├── validate.py    ← ref validation
 │   │   ├── affected.py    ← change detection + output formatting
-│   │   ├── tree.py        ← dependency visualization
 │   │   ├── preview.py     ← interactive browser UI
 │   │   ├── preview_template.html ← HTML template for preview
 │   │   ├── lock.py        ← lock state management
@@ -26,7 +25,6 @@ doc-sync/
 │   ├── validate/          ← validation tests
 │   ├── config/            ← config validation tests
 │   ├── parser/            ← parser tests
-│   ├── tree/              ← dependency tree tests
 │   └── cli/               ← CLI argument tests
 ├── docs/                  ← documentation
 ├── .github/workflows/     ← CI/CD pipelines

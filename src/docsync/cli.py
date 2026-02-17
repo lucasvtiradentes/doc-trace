@@ -3,7 +3,7 @@ import sys
 from importlib.metadata import version
 from pathlib import Path
 
-from docsync.commands import affected, init, lock, preview, tree, validate
+from docsync.commands import affected, init, lock, preview, validate
 
 VERSION = version("docsync")
 
@@ -25,10 +25,6 @@ def main():
     affected_parser.add_argument("--show-changed-files", action="store_true", help="print changed files before hits")
     affected_parser.add_argument("--ordered", action="store_true", help="group output by dependency phases")
 
-    tree_parser = subparsers.add_parser("tree", help="show doc dependency tree")
-    tree_parser.add_argument("path", type=Path, help="docs directory")
-    tree_parser.add_argument("--html", type=Path, help="output HTML diagram to file")
-
     preview_parser = subparsers.add_parser("preview", help="interactive docs explorer in browser")
     preview_parser.add_argument("path", type=Path, nargs="?", default=Path("docs"), help="docs directory")
     preview_parser.add_argument("--port", type=int, default=8420, help="server port (default: 8420)")
@@ -48,8 +44,6 @@ def main():
         sys.exit(
             affected.run(args.path, args.since_lock, args.last, args.base_branch, args.show_changed_files, args.ordered)
         )
-    elif args.command == "tree":
-        sys.exit(tree.run(args.path, args.html))
     elif args.command == "preview":
         sys.exit(preview.run(args.path, args.port))
     elif args.command == "lock":

@@ -10,13 +10,13 @@
 ├─────────────────────────────────────────────────────────────┤
 │  argparse → subcommand dispatcher                           │
 │                                                             │
-│  ┌──────────┐ ┌──────────┐ ┌──────┐ ┌─────────┐ ┌──────┐ ┌──────┐  │
-│  │ validate │ │ affected │ │ tree │ │ preview │ │ lock │ │ init │  │
-│  └────┬─────┘ └────┬─────┘ └──┬───┘ └────┬────┘ └──┬───┘ └──┬───┘  │
-│       │            │          │          │         │        │      │
-│       v            v          v          v         v        v      │
-│  commands/    commands/  commands/  commands/ commands/ commands/  │
-│  validate.py  affected.py tree.py  preview.py lock.py   init.py   │
+│  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────┐ ┌──────┐           │
+│  │ validate │ │ affected │ │ preview │ │ lock │ │ init │           │
+│  └────┬─────┘ └────┬─────┘ └────┬────┘ └──┬───┘ └──┬───┘           │
+│       │            │            │         │        │               │
+│       v            v            v         v        v               │
+│  commands/    commands/    commands/  commands/ commands/          │
+│  validate.py  affected.py  preview.py lock.py   init.py           │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -28,7 +28,6 @@ src/docsync/
 ├── commands/
 │   ├── validate.py     ← ref validation
 │   ├── affected.py     ← change detection + output formatting
-│   ├── tree.py         ← dependency visualization
 │   ├── preview.py      ← interactive browser UI
 │   ├── preview_template.html ← HTML template for preview
 │   ├── lock.py         ← lock state management
@@ -123,37 +122,13 @@ while current_level not empty:
     depth += 1
 ```
 
-## Dependency Tree Computation
-
-```
-_compute_levels(doc_deps)
-│
-├── For each doc, recursively compute level:
-│
-│   doc has no deps? ──yes──→ level = 0 (independent)
-│         │
-│        no
-│         │
-│         v
-│   level = max(dep_levels) + 1
-│
-│   circular detection:
-│   if doc in visiting set → circular
-│
-└── Result:
-    Level 0: [independent docs]
-    Level 1: [docs depending on L0]
-    Level 2: [docs depending on L1]
-    ...
-```
-
 ## Observability
 
 | Signal    | Description                                |
 |-----------|--------------------------------------------|
 | Exit 0    | success, no errors                         |
 | Exit 1    | validation errors found                    |
-| stdout    | results, tree output                       |
+| stdout    | results output                             |
 | Warnings  | circular ref detection (non-blocking)      |
 
 ## Config Loading

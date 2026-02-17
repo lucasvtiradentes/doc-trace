@@ -81,8 +81,7 @@ Opens browser automatically.
 ---
 
 related docs:
-- docs/features/dependency-tree.md - tree data used for graph
-- docs/concepts.md - DependencyTree type
+- docs/concepts.md - core types
 
 related sources:
 - src/docsync/commands/preview.py - preview implementation

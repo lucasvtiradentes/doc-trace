@@ -51,7 +51,6 @@ Should output: `docsync 0.1.0`
 source .venv/bin/activate
 docsync validate docs/
 docsync affected docs/ --last 1
-docsync tree docs/
 docsync preview docs/
 ```
 
@@ -60,7 +59,6 @@ docsync preview docs/
 ```bash
 .venv/bin/docsync validate docs/
 .venv/bin/docsync affected docs/ --last 1
-.venv/bin/docsync tree docs/
 .venv/bin/docsync preview docs/
 ```
 
