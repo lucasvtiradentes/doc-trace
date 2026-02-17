@@ -11,7 +11,7 @@ VERSION = version("docsync")
 def main():
     parser = argparse.ArgumentParser(description="Keep docs in sync with code")
     parser.add_argument("-v", "--version", action="version", version=f"docsync {VERSION}")
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(dest="command")
 
     validate_parser = subparsers.add_parser("validate", help="validate all refs exist")
     validate_parser.add_argument("path", type=Path, help="docs directory to validate")
@@ -38,6 +38,10 @@ def main():
     subparsers.add_parser("init", help="create .docsync/ folder")
 
     args = parser.parse_args()
+
+    if not args.command:
+        parser.print_help()
+        sys.exit(0)
 
     if args.command == "validate":
         sys.exit(validate.run(args.path))
