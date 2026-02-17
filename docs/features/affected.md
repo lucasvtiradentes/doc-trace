@@ -5,12 +5,12 @@ Maps code changes to affected documentation.
 ## Usage
 
 ```bash
-doctrack affected docs/ --last 1
-doctrack affected docs/ --since-lock
-doctrack affected docs/ --base-branch main
-doctrack affected docs/ --since v0.1.0
-doctrack affected docs/ --last 5 --verbose
-doctrack affected docs/ --last 1 --json
+doctrace affected docs/ --last 1
+doctrace affected docs/ --since-lock
+doctrace affected docs/ --base-branch main
+doctrace affected docs/ --since v0.1.0
+doctrace affected docs/ --last 5 --verbose
+doctrace affected docs/ --last 1 --json
 ```
 
 ## Output Formats
@@ -46,7 +46,7 @@ Outputs the full result as JSON instead of text.
 
 Resolves a comparison base from one required scope flag:
 - `--last <N>` -> `HEAD~N`
-- `--since-lock` -> `.doctrack/lock.json:last_analyzed_commit`
+- `--since-lock` -> `.doctrace/lock.json:last_analyzed_commit`
 - `--base-branch <branch>` -> `git merge-base HEAD <branch>`
 - `--since <ref>` -> uses the ref directly (commit, tag, or branch)
 
@@ -124,6 +124,6 @@ related docs:
 - docs/concepts.md - AffectedResult type
 
 related sources:
-- src/doctrack/commands/affected.py - affected implementation
-- src/doctrack/core/git.py - git helpers used by affected (FileChange, commits, tags)
-- src/doctrack/cli.py - CLI flag definitions for affected command
+- src/doctrace/commands/affected.py - affected implementation
+- src/doctrace/core/git.py - git helpers used by affected (FileChange, commits, tags)
+- src/doctrace/cli.py - CLI flag definitions for affected command

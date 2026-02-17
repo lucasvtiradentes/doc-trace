@@ -1,17 +1,17 @@
 # Initialization (init command)
 
-Creates the .doctrack/ configuration directory.
+Creates the .doctrace/ configuration directory.
 
 ## Usage
 
 ```bash
-doctrack init
+doctrace init
 ```
 
 ## What It Creates
 
 ```
-.doctrack/
+.doctrace/
 ├── config.json     ← default configuration
 └── syncs/          ← AI sync report storage
 ```
@@ -47,7 +47,7 @@ Storage for AI-generated sync reports.
 `init` updates the repository root `.gitignore` to include:
 
 ```
-.doctrack/syncs/
+.doctrace/syncs/
 ```
 
 If `.gitignore` already exists, the entry is appended only if missing.
@@ -62,13 +62,13 @@ Running `init` multiple times is safe:
 ## Output
 
 ```
-Created .doctrack/
+Created .doctrace/
 ```
 
 ## Implementation
 
-Uses `init_doctrack()` from config module:
-1. Create .doctrack/ directory
+Uses `init_doctrace()` from config module:
+1. Create .doctrace/ directory
 2. Write config.json with defaults
 3. Create syncs/ subdirectory
 4. Write .gitignore in syncs/
@@ -80,6 +80,6 @@ related docs:
 - docs/guides/setup-project.md - project setup guide
 
 related sources:
-- src/doctrack/commands/init.py  - init command
-- src/doctrack/core/config.py    - init_doctrack function
-- src/doctrack/core/constants.py - default config values
+- src/doctrace/commands/init.py  - init command
+- src/doctrace/core/config.py    - init_doctrace function
+- src/doctrace/core/constants.py - default config values

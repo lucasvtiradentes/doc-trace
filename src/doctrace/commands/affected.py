@@ -6,8 +6,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, NamedTuple
 
-from doctrack.core.config import Config, find_repo_root
-from doctrack.core.git import (
+from doctrace.core.config import Config, find_repo_root
+from doctrace.core.git import (
     FileChange,
     get_changed_files,
     get_changed_files_detailed,
@@ -16,8 +16,8 @@ from doctrack.core.git import (
     get_merged_branches_in_range,
     get_tags_in_range,
 )
-from doctrack.core.lock import load_lock
-from doctrack.core.parser import parse_doc
+from doctrace.core.lock import load_lock
+from doctrace.core.parser import parse_doc
 
 
 class AffectedResult(NamedTuple):
@@ -335,7 +335,7 @@ def run(
     verbose: bool = False,
     output_json: bool = False,
 ) -> int:
-    from doctrack.core.config import load_config
+    from doctrace.core.config import load_config
 
     config = load_config()
     repo_root = find_repo_root(docs_path)

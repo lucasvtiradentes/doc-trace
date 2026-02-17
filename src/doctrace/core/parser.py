@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
-    from doctrack.core.config import MetadataConfig
+    from doctrace.core.config import MetadataConfig
 
 LIST_ITEM = re.compile(r"^-\s+(\S+(?:\s+\S+)*?)\s+-\s+(.+)$")
 LIST_ITEM_SIMPLE = re.compile(r"^\s*-\s+(\S+)(?:\s+-\s+(.+))?$")
@@ -23,7 +23,7 @@ class ParsedDoc(NamedTuple):
 
 
 def parse_doc(filepath: Path, metadata_config: MetadataConfig | None = None) -> ParsedDoc:
-    from doctrack.core.config import MetadataConfig
+    from doctrace.core.config import MetadataConfig
 
     if metadata_config is None:
         metadata_config = MetadataConfig({})

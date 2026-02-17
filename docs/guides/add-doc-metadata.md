@@ -21,7 +21,7 @@ related sources:
 - src/path/to/dir/ - description
 ```
 
-`doctrack` uses the last `---` outside fenced code blocks as the metadata separator.
+`doctrace` uses the last `---` outside fenced code blocks as the metadata separator.
 
 ## Section Format
 
@@ -78,7 +78,7 @@ In default `custom` style, each item must follow:
 
 ## Frontmatter Style (optional)
 
-If `.doctrack/config.json` sets metadata style to `frontmatter`, metadata is read from the top YAML-like block:
+If `.doctrace/config.json` sets metadata style to `frontmatter`, metadata is read from the top YAML-like block:
 
 ```markdown
 ---
@@ -134,7 +134,7 @@ related sources:
 After adding metadata, validate:
 
 ```bash
-doctrack validate docs/
+doctrace validate docs/
 ```
 
 Errors show file path and line number:
@@ -149,4 +149,4 @@ related docs:
 - docs/concepts.md - RefEntry, ParsedDoc types
 
 related sources:
-- src/doctrack/core/parser.py - metadata parsing logic
+- src/doctrace/core/parser.py - metadata parsing logic

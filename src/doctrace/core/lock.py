@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from doctrack.core.constants import DOCSYNC_DIR, LOCK_FILENAME
-from doctrack.core.git import get_current_commit
+from doctrace.core.constants import DOCSYNC_DIR, LOCK_FILENAME
+from doctrace.core.git import get_current_commit
 
 
 class Lock:
@@ -43,9 +43,9 @@ def find_lock(start_path: Path) -> Path | None:
 
 
 def save_lock(lock: Lock, repo_root: Path) -> Path:
-    doctrack_dir = repo_root / DOCSYNC_DIR
-    doctrack_dir.mkdir(exist_ok=True)
-    lock_path = doctrack_dir / LOCK_FILENAME
+    doctrace_dir = repo_root / DOCSYNC_DIR
+    doctrace_dir.mkdir(exist_ok=True)
+    lock_path = doctrace_dir / LOCK_FILENAME
     lock.last_run = datetime.now(timezone.utc).isoformat()
     with open(lock_path, "w") as f:
         json.dump(lock.to_dict(), f, indent=2)

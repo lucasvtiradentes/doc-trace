@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from doctrack.commands.preview.tree import build_dependency_tree
-from doctrack.core.config import Config
+from doctrace.commands.preview.tree import build_dependency_tree
+from doctrace.core.config import Config
 
 TEMPLATE_PATH = Path(__file__).parent / "template.html"
 

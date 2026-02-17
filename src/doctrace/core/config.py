@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from doctrack.core.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DEFAULT_METADATA, DOCSYNC_DIR, SYNCS_DIR
+from doctrace.core.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DEFAULT_METADATA, DOCSYNC_DIR, SYNCS_DIR
 
 
 class ConfigError(Exception):
@@ -89,12 +89,12 @@ def find_config(start_path: Path) -> Path | None:
     return None
 
 
-def find_doctrack_dir(start_path: Path) -> Path | None:
+def find_doctrace_dir(start_path: Path) -> Path | None:
     current = start_path.resolve()
     while current != current.parent:
-        doctrack_dir = current / DOCSYNC_DIR
-        if doctrack_dir.exists():
-            return doctrack_dir
+        doctrace_dir = current / DOCSYNC_DIR
+        if doctrace_dir.exists():
+            return doctrace_dir
         current = current.parent
     return None
 
@@ -108,21 +108,21 @@ def find_repo_root(start_path: Path) -> Path:
     return start_path.resolve()
 
 
-def init_doctrack(target_dir: Path) -> Path:
-    doctrack_dir = target_dir / DOCSYNC_DIR
-    doctrack_dir.mkdir(exist_ok=True)
-    config_path = doctrack_dir / CONFIG_FILENAME
+def init_doctrace(target_dir: Path) -> Path:
+    doctrace_dir = target_dir / DOCSYNC_DIR
+    doctrace_dir.mkdir(exist_ok=True)
+    config_path = doctrace_dir / CONFIG_FILENAME
     with open(config_path, "w") as f:
         json.dump(DEFAULT_CONFIG, f, indent=2)
-    syncs_dir = doctrack_dir / SYNCS_DIR
+    syncs_dir = doctrace_dir / SYNCS_DIR
     syncs_dir.mkdir(exist_ok=True)
     _add_syncs_to_gitignore(target_dir)
-    return doctrack_dir
+    return doctrace_dir
 
 
 def _add_syncs_to_gitignore(target_dir: Path) -> None:
     gitignore_path = target_dir / ".gitignore"
-    syncs_entry = ".doctrack/syncs/"
+    syncs_entry = ".doctrace/syncs/"
     if gitignore_path.exists():
         content = gitignore_path.read_text()
         if syncs_entry not in content:

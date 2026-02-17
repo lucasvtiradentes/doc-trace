@@ -39,12 +39,12 @@ steps:
 
 ### practical-test
 
-Runs doctrack against its own docs.
+Runs doctrace against its own docs.
 
 ```yaml
 steps:
   - pip install -e ".[dev]"
-  - doctrack validate docs/
+  - doctrace validate docs/
 ```
 
 ## Release Pipeline

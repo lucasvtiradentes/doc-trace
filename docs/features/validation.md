@@ -5,7 +5,7 @@ Validates that all doc references point to existing files.
 ## Usage
 
 ```bash
-doctrack validate docs/
+doctrace validate docs/
 ```
 
 ## What It Checks
@@ -88,5 +88,5 @@ related docs:
 - docs/concepts.md - ValidateResult, RefError types
 
 related sources:
-- src/doctrack/commands/validate.py - validation implementation
-- src/doctrack/core/parser.py       - metadata extraction
+- src/doctrace/commands/validate.py - validation implementation
+- src/doctrace/core/parser.py       - metadata extraction

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from doctrack.core.config import find_repo_root
-from doctrack.core.lock import Lock, get_current_commit, load_lock, save_lock
+from doctrace.core.config import find_repo_root
+from doctrace.core.lock import Lock, get_current_commit, load_lock, save_lock
 
 
 def run_update(path: Path | None = None) -> int:

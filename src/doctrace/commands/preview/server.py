@@ -7,10 +7,10 @@ import threading
 import webbrowser
 from pathlib import Path
 
-from doctrack.commands.preview.graph import build_graph_data, generate_html
-from doctrack.commands.preview.search import search_docs
-from doctrack.core.config import find_repo_root, load_config
-from doctrack.core.git import get_file_at_commit, get_file_history
+from doctrace.commands.preview.graph import build_graph_data, generate_html
+from doctrace.commands.preview.search import search_docs
+from doctrace.core.config import find_repo_root, load_config
+from doctrace.core.git import get_file_at_commit, get_file_history
 
 
 class PreviewHandler(http.server.SimpleHTTPRequestHandler):

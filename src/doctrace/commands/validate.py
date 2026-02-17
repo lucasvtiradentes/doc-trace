@@ -5,8 +5,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterator
 
-from doctrack.core.config import Config, find_repo_root
-from doctrack.core.parser import RefEntry, parse_doc
+from doctrace.core.config import Config, find_repo_root
+from doctrace.core.parser import RefEntry, parse_doc
 
 
 @dataclass
@@ -77,7 +77,7 @@ def _is_ignored(path: Path, ignored_patterns: list[str], repo_root: Path) -> boo
 
 
 def run(docs_path: Path) -> int:
-    from doctrack.core.config import load_config
+    from doctrace.core.config import load_config
 
     config = load_config()
     has_errors = False

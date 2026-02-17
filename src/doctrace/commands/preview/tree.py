@@ -4,8 +4,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import NamedTuple
 
-from doctrack.core.config import Config, find_repo_root
-from doctrack.core.parser import parse_doc
+from doctrace.core.config import Config, find_repo_root
+from doctrace.core.parser import parse_doc
 
 
 class DependencyTree(NamedTuple):

@@ -3,14 +3,14 @@ import sys
 from importlib.metadata import version
 from pathlib import Path
 
-from doctrack.commands import affected, init, lock, preview, validate
+from doctrace.commands import affected, init, lock, preview, validate
 
-VERSION = version("doctrack")
+VERSION = version("doctrace")
 
 
 def main():
     parser = argparse.ArgumentParser(description="Keep docs in sync with code")
-    parser.add_argument("-v", "--version", action="version", version=f"doctrack {VERSION}")
+    parser.add_argument("-v", "--version", action="version", version=f"doctrace {VERSION}")
     subparsers = parser.add_subparsers(dest="command")
 
     validate_parser = subparsers.add_parser("validate", help="validate all refs exist")
@@ -35,7 +35,7 @@ def main():
     lock_subparsers.add_parser("update", help="save current commit to lock.json")
     lock_subparsers.add_parser("show", help="show lock.json state")
 
-    subparsers.add_parser("init", help="create .doctrack/ folder")
+    subparsers.add_parser("init", help="create .doctrace/ folder")
 
     args = parser.parse_args()
 

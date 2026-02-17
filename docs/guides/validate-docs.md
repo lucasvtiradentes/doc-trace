@@ -5,7 +5,7 @@ Guide to validating documentation references.
 ## Basic Validation
 
 ```bash
-doctrack validate docs/
+doctrace validate docs/
 ```
 
 Scans all `*.md` files in `docs/` recursively and validates:
@@ -31,7 +31,7 @@ Exit code: 1
 
 ## Ignoring Paths
 
-Create `.doctrack/config.json` to skip certain docs:
+Create `.doctrace/config.json` to skip certain docs:
 
 ```json
 {
@@ -77,7 +77,7 @@ Fix: Check glob pattern matches at least one file.
 Add to your workflow:
 
 ```yaml
-- run: doctrack validate docs/
+- run: doctrace validate docs/
 ```
 
 Fails build if any refs are invalid.
@@ -95,7 +95,7 @@ Validation continues for other docs, but command exits with code `1` if any pars
 ## Workflow
 
 1. Add/edit metadata in docs
-2. Run `doctrack validate docs/`
+2. Run `doctrace validate docs/`
 3. Fix any reported errors
 4. Commit changes
 
@@ -105,4 +105,4 @@ related docs:
 - docs/features/validation.md - validate command details
 
 related sources:
-- src/doctrack/commands/validate.py - validation implementation
+- src/doctrace/commands/validate.py - validation implementation

@@ -1,4 +1,4 @@
-from doctrack.core.config import validate_config
+from doctrace.core.config import validate_config
 
 
 def test_validate_config_unknown_key():

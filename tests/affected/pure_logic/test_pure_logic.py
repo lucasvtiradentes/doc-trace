@@ -2,8 +2,8 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from doctrack.commands.affected import _find_direct_hits, _propagate, find_affected_docs
-from doctrack.core.config import Config
+from doctrace.commands.affected import _find_direct_hits, _propagate, find_affected_docs
+from doctrace.core.config import Config
 
 
 def test_propagate_no_depth_limit():
@@ -52,7 +52,7 @@ def test_find_affected_docs_no_changes():
         docs_dir = tmppath / "docs"
         docs_dir.mkdir()
         config = Config({})
-        with patch("doctrack.commands.affected.get_changed_files", return_value=[]):
+        with patch("doctrace.commands.affected.get_changed_files", return_value=[]):
             result = find_affected_docs(docs_dir, "HEAD~1", config, repo_root=tmppath)
         assert len(result.affected_docs) == 0
 

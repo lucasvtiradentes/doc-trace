@@ -4,7 +4,7 @@ RELATED_DOCS_PATTERN = re.compile(r"^related docs:\s*$", re.MULTILINE | re.IGNOR
 RELATED_SOURCES_PATTERN = re.compile(r"^related sources:\s*$", re.MULTILINE | re.IGNORECASE)
 LIST_ITEM_PATTERN = re.compile(r"^-\s+(\S+)\s+-\s+(.+)$")
 
-DOCSYNC_DIR = ".doctrack"
+DOCSYNC_DIR = ".doctrace"
 CONFIG_FILENAME = "config.json"
 LOCK_FILENAME = "lock.json"
 SYNCS_DIR = "syncs"
