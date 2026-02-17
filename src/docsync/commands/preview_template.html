@@ -93,6 +93,8 @@
         .doc-btn svg { width: 14px; height: 14px; }
         .doc-btn-edit { color: #3b82f6; background: #eff6ff; }
         .doc-btn-edit:hover { background: #dbeafe; }
+        .doc-btn-history { color: #8b5cf6; background: #f3e8ff; }
+        .doc-btn-history:hover { background: #ede9fe; }
         .doc-btn-save { color: #fff; background: #22c55e; }
         .doc-btn-save:hover { background: #16a34a; }
         .doc-btn-cancel { color: #64748b; background: #f1f5f9; }
@@ -103,15 +105,17 @@
         .doc-view.hidden { display: none; }
         .doc-edit { display: none; }
         .doc-edit.visible { display: block; }
-        .doc-wrapper { display: flex; gap: 24px; }
-        .doc-main { flex: 1; min-width: 0; }
-        .doc-history { width: 280px; flex-shrink: 0; }
-        .history-panel { background: #f8fafc; border-radius: 8px; padding: 16px; position: sticky; top: 0; }
-        .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-        .history-title { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-        .history-toggle { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #64748b; cursor: pointer; }
+        .history-panel { position: fixed; top: 0; right: -320px; width: 320px; height: 100vh; background: #fff; border-left: 1px solid #e2e8f0; box-shadow: -4px 0 20px rgba(0,0,0,0.1); z-index: 100; display: flex; flex-direction: column; transition: right 0.25s ease; }
+        .history-panel.visible { right: 0; }
+        .history-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; }
+        .history-title { font-size: 14px; font-weight: 600; color: #1e293b; }
+        .history-close { padding: 4px; background: none; border: none; cursor: pointer; color: #94a3b8; border-radius: 4px; }
+        .history-close:hover { background: #f1f5f9; color: #64748b; }
+        .history-close svg { width: 18px; height: 18px; display: block; }
+        .history-options { padding: 12px 20px; border-bottom: 1px solid #e2e8f0; }
+        .history-toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; cursor: pointer; }
         .history-toggle input { cursor: pointer; }
-        .history-list { display: flex; flex-direction: column; gap: 4px; max-height: 400px; overflow-y: auto; }
+        .history-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; padding: 16px 20px; }
         .history-item { padding: 10px 12px; background: #fff; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
         .history-item:hover { border-color: #e2e8f0; }
         .history-item.active { border-color: #3b82f6; background: #eff6ff; }
@@ -204,6 +208,21 @@
                 <div class="doc-container" id="doc-container"></div>
             </div>
         </div>
+    </div>
+    <div class="history-panel" id="history-panel">
+        <div class="history-header">
+            <span class="history-title">Version History</span>
+            <button class="history-close" onclick="closeHistoryPanel()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="history-options">
+            <label class="history-toggle">
+                <input type="checkbox" id="highlight-toggle" onchange="toggleHighlight()">
+                Show changes
+            </label>
+        </div>
+        <div class="history-list" id="history-list"></div>
     </div>
     <script>
         const graphData = "__GRAPH_DATA__";
@@ -350,47 +369,50 @@
                 }
             }
             container.innerHTML = `
-                <div class="doc-wrapper">
-                    <div class="doc-main">
-                        <div class="doc-header">
-                            <div class="doc-path">${path}${isOldVersion ? ' @ ' + currentCommit.substring(0, 7) : ''}</div>
-                            <div class="doc-actions">
-                                ${isOldVersion ? `
-                                    <button class="doc-btn doc-btn-cancel" onclick="loadCurrentVersion()">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-                                        Back to current
-                                    </button>
-                                ` : `
-                                    <button class="doc-btn doc-btn-edit" onclick="enterEditMode()">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                        Edit
-                                    </button>
-                                `}
-                            </div>
-                        </div>
-                        <div class="doc-view">
-                            ${diffSummary ? '<div class="doc-diff-summary">' + diffSummary + '</div>' : ''}
-                            <div class="doc-content">${html}</div>
-                        </div>
-                        <div class="doc-edit">
-                            <textarea class="doc-editor" id="doc-editor">${escapeHtml(md)}</textarea>
-                        </div>
+                <div class="doc-header">
+                    <div class="doc-path">${path}${isOldVersion ? ' @ ' + currentCommit.substring(0, 7) : ''}</div>
+                    <div class="doc-actions">
+                        ${isOldVersion ? `
+                            <button class="doc-btn doc-btn-cancel" onclick="loadCurrentVersion()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                                Back to current
+                            </button>
+                        ` : `
+                            <button class="doc-btn doc-btn-history" onclick="toggleHistoryPanel()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                History
+                            </button>
+                            <button class="doc-btn doc-btn-edit" onclick="enterEditMode()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                Edit
+                            </button>
+                        `}
                     </div>
-                    <div class="doc-history">
-                        <div class="history-panel">
-                            <div class="history-header">
-                                <span class="history-title">History</span>
-                                <label class="history-toggle">
-                                    <input type="checkbox" id="highlight-toggle" ${highlightChanges ? 'checked' : ''} onchange="toggleHighlight()">
-                                    Show changes
-                                </label>
-                            </div>
-                            <div class="history-list" id="history-list"></div>
-                        </div>
-                    </div>
+                </div>
+                <div class="doc-view">
+                    ${diffSummary ? '<div class="doc-diff-summary">' + diffSummary + '</div>' : ''}
+                    <div class="doc-content">${html}</div>
+                </div>
+                <div class="doc-edit">
+                    <textarea class="doc-editor" id="doc-editor">${escapeHtml(md)}</textarea>
                 </div>
             `;
             renderHistoryList();
+        }
+
+        function toggleHistoryPanel() {
+            const panel = document.getElementById('history-panel');
+            if (panel.classList.contains('visible')) {
+                panel.classList.remove('visible');
+            } else {
+                document.getElementById('highlight-toggle').checked = highlightChanges;
+                renderHistoryList();
+                panel.classList.add('visible');
+            }
+        }
+
+        function closeHistoryPanel() {
+            document.getElementById('history-panel').classList.remove('visible');
         }
 
         function renderHistoryList() {
