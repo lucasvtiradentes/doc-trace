@@ -34,6 +34,7 @@ CLI tool that keeps documentation in sync with code changes.
 | validate | validate all doc refs exist          |
 | affected | list docs affected by git diff       |
 | tree     | show doc dependency graph            |
+| preview  | interactive docs explorer in browser |
 | lock     | manage lock.json state               |
 | init     | create .docsync/ config directory    |
 
@@ -52,6 +53,7 @@ CLI tool that keeps documentation in sync with code changes.
 | docs/features/affected.md        | affected command change detection        |
 | docs/features/dependency-tree.md | tree command dependency visualization    |
 | docs/features/initialization.md  | init command project setup               |
+| docs/features/preview.md         | preview command interactive explorer     |
 | docs/rules.md                    | coding principles and conventions        |
 | docs/testing.md                  | testing strategy and patterns            |
 | docs/guides/setup-project.md     | how to set up dev environment            |

@@ -42,6 +42,17 @@ Runtime configuration loaded from .docsync/config.json.
 | affected_depth_limit| int or None    | None    | max propagation depth (None=unlimited)|
 | metadata            | MetadataConfig | defaults| metadata parsing settings          |
 
+### MetadataConfig
+
+Settings for how doc metadata is parsed.
+
+| Field             | Type | Default          | Description                              |
+|-------------------|------|------------------|------------------------------------------|
+| style             | str  | "custom"         | parsing style ("custom" or "frontmatter")|
+| docs_key          | str  | "related docs"   | header for doc references section        |
+| sources_key       | str  | "related sources"| header for source references section     |
+| require_separator | bool | True             | require --- separator before metadata    |
+
 ### ValidateResult
 
 Validation result for a single doc.

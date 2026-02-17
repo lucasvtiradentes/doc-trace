@@ -8,6 +8,7 @@ Each command does one thing:
 - `validate` - validates refs
 - `affected` - finds affected docs
 - `tree`     - shows dependencies
+- `preview`  - interactive explorer
 - `lock`     - manages state
 - `init`     - creates config
 

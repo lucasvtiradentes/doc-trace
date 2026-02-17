@@ -50,6 +50,7 @@ After install, use the venv:
 .venv/bin/docsync validate docs/
 .venv/bin/docsync affected docs/ --last 1
 .venv/bin/docsync tree docs/
+.venv/bin/docsync preview docs/
 .venv/bin/docsync init
 ```
 

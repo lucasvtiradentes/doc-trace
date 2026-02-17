@@ -10,13 +10,13 @@
 ├─────────────────────────────────────────────────────────────┤
 │  argparse → subcommand dispatcher                           │
 │                                                             │
-│  ┌──────────┐ ┌──────────┐ ┌──────┐ ┌──────┐ ┌──────┐       │
-│  │ validate │ │ affected │ │ tree │ │ lock │ │ init │       │
-│  └────┬─────┘ └────┬─────┘ └──┬───┘ └──┬───┘ └──┬───┘       │
-│       │            │          │        │        │           │
-│       v            v          v        v        v           │
-│  commands/    commands/  commands/ commands/ commands/      │
-│  validate.py  affected.py tree.py  lock.py   init.py       │
+│  ┌──────────┐ ┌──────────┐ ┌──────┐ ┌─────────┐ ┌──────┐ ┌──────┐  │
+│  │ validate │ │ affected │ │ tree │ │ preview │ │ lock │ │ init │  │
+│  └────┬─────┘ └────┬─────┘ └──┬───┘ └────┬────┘ └──┬───┘ └──┬───┘  │
+│       │            │          │          │         │        │      │
+│       v            v          v          v         v        v      │
+│  commands/    commands/  commands/  commands/ commands/ commands/  │
+│  validate.py  affected.py tree.py  preview.py lock.py   init.py   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -29,6 +29,8 @@ src/docsync/
 │   ├── validate.py     ← ref validation
 │   ├── affected.py     ← change detection + output formatting
 │   ├── tree.py         ← dependency visualization
+│   ├── preview.py      ← interactive browser UI
+│   ├── preview_template.html ← HTML template for preview
 │   ├── lock.py         ← lock state management
 │   └── init.py         ← project setup
 ├── core/
@@ -172,6 +174,7 @@ related docs:
 - docs/concepts.md             - key types used in data flow
 - docs/features/affected.md    - affected algorithm details
 - docs/features/validation.md  - validate command details
+- docs/features/preview.md     - preview command details
 
 related sources:
 - src/docsync/cli.py    - entry point and dispatcher

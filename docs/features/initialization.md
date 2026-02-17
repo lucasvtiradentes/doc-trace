@@ -21,14 +21,24 @@ docsync init
 ```json
 {
   "ignored_paths": [],
-  "affected_depth_limit": null
+  "affected_depth_limit": null,
+  "metadata": {
+    "style": "custom",
+    "docs_key": "related docs",
+    "sources_key": "related sources",
+    "require_separator": true
+  }
 }
 ```
 
-| Field               | Default | Description                     |
-|---------------------|---------|-------------------------------- |
-| ignored_paths       | []      | patterns to skip in validation  |
-| affected_depth_limit| null    | max propagation depth (unlimited)|
+| Field                     | Default          | Description                        |
+|---------------------------|------------------|------------------------------------|
+| ignored_paths             | []               | patterns to skip in validation     |
+| affected_depth_limit      | null             | max propagation depth (unlimited)  |
+| metadata.style            | "custom"         | "custom" or "frontmatter"          |
+| metadata.docs_key         | "related docs"   | header for doc refs section        |
+| metadata.sources_key      | "related sources"| header for source refs section     |
+| metadata.require_separator| true             | require --- before metadata        |
 
 ## syncs/ Directory
 

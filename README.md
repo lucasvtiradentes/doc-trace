@@ -72,6 +72,7 @@ docsync solves this by adding "hints" to each doc - `related sources:` tells any
 - validate - validates all referenced paths exist
 - affected - finds docs affected by code changes (with dependency ordering)
 - tree     - shows doc dependency tree
+- preview  - interactive docs explorer in browser
 - lock     - manages lock state for incremental analysis
 
 ## Quickstart
@@ -174,9 +175,10 @@ metadata options:
 ### 4. Use it
 
 ```bash
-docsync validate docs/                  # validate all refs exist
-docsync affected docs/ --last 5         # find docs affected by last 5 commits
+docsync validate docs/                     # validate all refs exist
+docsync affected docs/ --last 5            # find docs affected by last 5 commits
 docsync affected docs/ --last 5 --ordered  # grouped by dependency phases
+docsync preview docs/                      # interactive explorer in browser
 ```
 
 <details>
@@ -190,6 +192,9 @@ docsync affected docs/ --last 5 --ordered  # grouped by dependency phases
 | `docsync affected <path> --base-branch <branch>` | list affected docs from merge-base  |
 | `docsync affected <path> --ordered`              | group output by dependency phases   |
 | `docsync tree <path>`                            | show doc dependency tree            |
+| `docsync tree <path> --html <file>`              | export tree as HTML diagram         |
+| `docsync preview <path>`                         | interactive explorer in browser     |
+| `docsync preview <path> --port <N>`              | preview on custom port (default 8420)|
 | `docsync lock update`                            | save current commit to lock.json    |
 | `docsync lock show`                              | show lock.json state                |
 | `docsync init`                                   | create .docsync/ folder             |

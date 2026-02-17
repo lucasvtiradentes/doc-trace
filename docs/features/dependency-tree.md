@@ -6,6 +6,7 @@ Visualizes documentation dependency graph.
 
 ```bash
 docsync tree docs/
+docsync tree docs/ --html output.html
 ```
 
 ## Output Format
@@ -74,7 +75,9 @@ In mixed graphs, docs in the same cycle can end up with different computed level
 | build_dependency_tree()  | main entry, returns DependencyTree|
 | _build_doc_dependencies()| parse all docs, build dep map     |
 | _compute_levels()        | recursive level assignment        |
-| format_tree()            | render output string              |
+| format_tree()            | render text output string         |
+| format_mermaid()         | render mermaid diagram definition |
+| format_html()            | render standalone HTML page       |
 
 Notes from implementation:
 - Docs that fail `parse_doc(...)` are skipped.
@@ -82,9 +85,26 @@ Notes from implementation:
 
 ---
 
+## HTML Output
+
+With `--html`, generates a standalone HTML page with mermaid diagram:
+
+```bash
+docsync tree docs/ --html tree.html
+```
+
+Features:
+- Color-coded levels (green=independent, blue=level 1, etc.)
+- Hover nodes for full path
+- Subgraph groupings by level
+- Stats: total docs, independent, dependent, max depth, circular count
+
+---
+
 related docs:
 - docs/concepts.md          - DependencyTree type
 - docs/features/affected.md - uses levels for --ordered output
+- docs/features/preview.md  - uses tree for interactive graph
 
 related sources:
 - src/docsync/commands/tree.py - tree implementation

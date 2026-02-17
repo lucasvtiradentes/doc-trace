@@ -10,6 +10,8 @@ doc-sync/
 │   │   ├── validate.py    ← ref validation
 │   │   ├── affected.py    ← change detection + output formatting
 │   │   ├── tree.py        ← dependency visualization
+│   │   ├── preview.py     ← interactive browser UI
+│   │   ├── preview_template.html ← HTML template for preview
 │   │   ├── lock.py        ← lock state management
 │   │   └── init.py        ← project initialization
 │   └── core/              ← shared logic
