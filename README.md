@@ -114,7 +114,7 @@ docsync init    # creates .docsync/ folder
 .docsync/
 ├── config.json   # required
 ├── sync.md       # optional - custom prompt template
-├── lock.json     # optional - created by --incremental
+├── lock.json     # optional - tracks last synced commit
 └── syncs/        # ignored - AI writes sync reports here
 ```
 
@@ -128,12 +128,12 @@ config.json:
 
 sync.md (custom template):
 ```markdown
-Sync {count} docs. Write reports to .docsync/syncs/{datetime}/
+Sync {count} docs. Write reports to {syncs_dir}/
 
-{docs_list}
+{phases}
 ```
 
-Placeholders: `{count}`, `{docs_list}`, `{datetime}`
+Placeholders: `{count}`, `{phases}`, `{docs_list}`, `{syncs_dir}`
 
 </details>
 
@@ -159,9 +159,11 @@ docsync cascade <commit> --docs <dir>  # list affected docs
 docsync sync <path>                    # generate prompt (ordered by deps)
 docsync sync <path> --parallel         # ignore deps, all at once
 docsync sync <path> --incremental      # only include changed docs
+docsync sync <path> --update-lock      # update lock.json after sync
 docsync sync <path> --json             # output as JSON for scripts
 docsync tree <path>                    # show doc dependency tree
 docsync init                           # create .docsync/ folder
+docsync --version                      # show version
 ```
 
 ### AI Sync

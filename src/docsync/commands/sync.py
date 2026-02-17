@@ -154,12 +154,19 @@ def generate_sync_prompt(docs_path: Path, config: Config, incremental: bool = Fa
         return template.format(count=len(docs), phases=phases, syncs_dir=syncs_dir)
 
 
-def run(docs_path: Path, incremental: bool, as_json: bool, parallel: bool) -> int:
-    from docsync.core.config import load_config
+def run(docs_path: Path, incremental: bool, as_json: bool, parallel: bool, update_lock: bool = False) -> int:
+    from docsync.core.config import find_repo_root, load_config
+    from docsync.core.lock import Lock, get_current_commit, save_lock
 
     config = load_config()
     if as_json:
         print(print_validation_report(docs_path, config, incremental))
     else:
         print(generate_sync_prompt(docs_path, config, incremental, parallel))
+    if update_lock:
+        repo_root = find_repo_root(docs_path)
+        commit = get_current_commit()
+        if commit:
+            lock = Lock({"last_analyzed_commit": commit})
+            save_lock(lock, repo_root)
     return 0

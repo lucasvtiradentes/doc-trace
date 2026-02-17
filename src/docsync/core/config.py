@@ -5,18 +5,44 @@ from typing import Any
 from docsync.core.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DOCSYNC_DIR, SYNCS_DIR
 
 
+class ConfigError(Exception):
+    pass
+
+
 class Config:
     def __init__(self, data: dict[str, Any]):
         self.ignored_paths: list[str] = data.get("ignored_paths", DEFAULT_CONFIG["ignored_paths"])
         self.cascade_depth_limit: int | None = data.get("cascade_depth_limit", DEFAULT_CONFIG["cascade_depth_limit"])
 
 
-def load_config(start_path: Path | None = None) -> Config:
+def validate_config(data: dict[str, Any], config_path: Path | None = None) -> list[str]:
+    errors = []
+    valid_keys = {"ignored_paths", "cascade_depth_limit"}
+    for key in data:
+        if key not in valid_keys:
+            errors.append(f"unknown key: {key}")
+    if "ignored_paths" in data:
+        if not isinstance(data["ignored_paths"], list):
+            errors.append("ignored_paths must be a list")
+        elif not all(isinstance(p, str) for p in data["ignored_paths"]):
+            errors.append("ignored_paths must contain only strings")
+    if "cascade_depth_limit" in data:
+        val = data["cascade_depth_limit"]
+        if val is not None and not isinstance(val, int):
+            errors.append("cascade_depth_limit must be null or integer")
+    return errors
+
+
+def load_config(start_path: Path | None = None, validate: bool = True) -> Config:
     config_path = find_config(start_path or Path.cwd())
     if config_path is None:
         return Config({})
     with open(config_path) as f:
         data = json.load(f)
+    if validate:
+        errors = validate_config(data, config_path)
+        if errors:
+            raise ConfigError(f"{config_path}: {', '.join(errors)}")
     return Config(data)
 
 

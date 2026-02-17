@@ -1,12 +1,16 @@
 import argparse
 import sys
+from importlib.metadata import version
 from pathlib import Path
 
 from docsync.commands import cascade, check, init, sync, tree
 
+VERSION = version("docsync")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Keep docs in sync with code")
+    parser.add_argument("-v", "--version", action="version", version=f"docsync {VERSION}")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     check_parser = subparsers.add_parser("check", help="validate all refs exist")
@@ -21,6 +25,7 @@ def main():
     sync_parser.add_argument("--incremental", action="store_true", help="only include changed docs")
     sync_parser.add_argument("--json", action="store_true", help="output as JSON instead of text")
     sync_parser.add_argument("--parallel", action="store_true", help="ignore dependencies, sync all at once")
+    sync_parser.add_argument("--update-lock", action="store_true", help="update lock.json with current commit")
 
     tree_parser = subparsers.add_parser("tree", help="show doc dependency tree")
     tree_parser.add_argument("path", type=Path, help="docs directory")
@@ -34,7 +39,7 @@ def main():
     elif args.command == "cascade":
         sys.exit(cascade.run(args.commit, args.docs))
     elif args.command == "sync":
-        sys.exit(sync.run(args.path, args.incremental, args.json, args.parallel))
+        sys.exit(sync.run(args.path, args.incremental, args.json, args.parallel, args.update_lock))
     elif args.command == "tree":
         sys.exit(tree.run(args.path))
     elif args.command == "init":
