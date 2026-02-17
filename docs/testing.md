@@ -21,7 +21,7 @@ Tests are organized by feature area:
 
 | Directory / File   | Coverage                                                         |
 |--------------------|------------------------------------------------------------------|
-| `tests/affected/`  | index building, direct hits, propagation traversal, depth limits |
+| `tests/affected/`  | index building, direct hits, propagation, depth limits, scope resolution |
 | `tests/validate/`  | valid refs, missing docs, missing sources                        |
 | `tests/config/`    | config validation (valid + invalid)                              |
 | `tests/parser/`    | custom/frontmatter parsing, code blocks, line numbers            |
@@ -40,7 +40,7 @@ Many tests copy fixture docs with `shutil.copytree(...)` from nearby `docs/` fol
 
 ### Mocked change detection
 
-Affected tests patch change input (for example `_get_changed_files`) to avoid relying on real git history.
+Affected tests patch change input (for example `get_changed_files`) to avoid relying on real git history.
 
 ## CI-Relevant Commands
 

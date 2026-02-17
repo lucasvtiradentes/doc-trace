@@ -31,6 +31,7 @@ doc-sync/
 │   ├── validate/          ← validation tests
 │   ├── config/            ← config validation tests
 │   ├── parser/            ← parser tests
+│   ├── preview/           ← preview tests
 │   └── cli/               ← CLI argument tests
 ├── docs/                  ← documentation
 ├── .github/workflows/     ← CI/CD pipelines
@@ -59,6 +60,7 @@ Shared modules used across commands:
 - `parser.py`    - extracts metadata from markdown
 - `config.py`    - loads and validates config.json
 - `lock.py`      - manages lock.json state
+- `git.py`       - git operations, change detection
 - `constants.py` - file/dir names, default values
 
 ### tests/

@@ -25,12 +25,14 @@ Container for extracted references from a markdown file.
 
 Output from affected analysis.
 
-| Field         | Type                      | Description                         |
-|---------------|---------------------------|-------------------------------------|
-| affected_docs | list[Path]                | all docs needing review             |
-| direct_hits   | list[Path]                | docs with changed source refs       |
-| indirect_hits | list[Path]                | docs reached via doc-to-doc refs    |
-| circular_refs | list[tuple[Path, Path]]   | detected circular dependencies      |
+| Field            | Type                      | Description                              |
+|------------------|---------------------------|------------------------------------------|
+| affected_docs    | list[Path]                | all docs needing review                  |
+| direct_hits      | list[Path]                | docs with changed source refs            |
+| indirect_hits    | list[Path]                | docs reached via doc-to-doc refs         |
+| circular_refs    | list[tuple[Path, Path]]   | detected circular dependencies           |
+| matches          | dict[str, list[Path]]     | changed source paths to affected docs    |
+| indirect_chains  | dict[Path, Path]          | indirect hit doc to doc it was reached through |
 
 ### Config
 
@@ -125,3 +127,4 @@ related sources:
 - src/docsync/commands/validate.py  - ValidateResult, RefError definitions
 - src/docsync/core/config.py        - Config definition
 - src/docsync/core/lock.py          - Lock definition
+- src/docsync/core/git.py           - FileChange, CommitInfo definitions

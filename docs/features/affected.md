@@ -8,15 +8,16 @@ Maps code changes to affected documentation.
 docsync affected docs/ --last 1
 docsync affected docs/ --since-lock
 docsync affected docs/ --base-branch main
-docsync affected docs/ --last 5 --show-changed-files
-docsync affected docs/ --last 1 --ordered
+docsync affected docs/ --since v0.1.0
+docsync affected docs/ --last 5 --verbose
+docsync affected docs/ --last 1 --json
 ```
 
 ## Output Formats
 
 ### Default
 
-Shows direct and indirect hits:
+Shows direct hits, indirect hits (with propagation chain), and phases:
 
 ```
 Direct hits (2):
@@ -24,20 +25,20 @@ Direct hits (2):
   docs/booking.md
 
 Indirect hits (1):
-  docs/overview.md
+  docs/overview.md <- docs/api.md
+
+Phases (2):
+  1. docs/api.md, docs/booking.md
+  2. docs/overview.md
 ```
 
-### --ordered
+### --verbose
 
-Groups docs by dependency phases:
+Adds git context before the default output: changed files with status and line stats, commits, tags, merged branches, and source-to-doc matches.
 
-```
-Phase 1 - Independent:
-  docs/concepts.md (sources: src/types.py)
+### --json
 
-Phase 2 - Level 1:
-  docs/api.md (sources: src/api.py)
-```
+Outputs the full result as JSON instead of text.
 
 ## How It Works
 
@@ -47,6 +48,7 @@ Resolves a comparison base from one required scope flag:
 - `--last <N>` -> `HEAD~N`
 - `--since-lock` -> `.docsync/lock.json:last_analyzed_commit`
 - `--base-branch <branch>` -> `git merge-base HEAD <branch>`
+- `--since <ref>` -> uses the ref directly (commit, tag, or branch)
 
 Then runs `git diff --name-only <base>` to get changed source files.
 
@@ -123,3 +125,5 @@ related docs:
 
 related sources:
 - src/docsync/commands/affected.py - affected implementation
+- src/docsync/core/git.py - git helpers used by affected (FileChange, commits, tags)
+- src/docsync/cli.py - CLI flag definitions for affected command

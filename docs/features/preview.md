@@ -25,7 +25,7 @@ Starts a local HTTP server serving an interactive single-page application for ex
 
 ### Document Viewer/Editor
 
-- Markdown rendering with syntax highlighting
+- Markdown rendering via marked.js
 - Edit docs directly in browser
 - View git history for each doc
 - Compare versions with diff highlighting
@@ -36,7 +36,8 @@ Starts a local HTTP server serving an interactive single-page application for ex
 - Folder tree view (collapsible)
 - Level-based grouping view
 - Full-text search across all docs
-- Keyboard shortcuts (arrow keys, t/l for views)
+- Bidirectional selection sync between sidebar and graph
+- Keyboard shortcuts (left/right arrows for views, t/l for sidebar)
 
 ## Server Endpoints
 
@@ -85,3 +86,4 @@ related docs:
 
 related sources:
 - src/docsync/commands/preview/ - preview module
+- src/docsync/core/git.py       - get_file_history, get_file_at_commit

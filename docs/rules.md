@@ -44,7 +44,7 @@ Enables forward references and modern type syntax.
 ### Lowercase CLI
 
 Commands are lowercase, no hyphens:
-- `validate`, `affected`, `tree`, `lock`, `init`
+- `validate`, `affected`, `preview`, `lock`, `init`
 
 ### Path-Based Abstractions
 

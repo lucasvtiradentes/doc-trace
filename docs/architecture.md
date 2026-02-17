@@ -61,8 +61,8 @@ docs/*.md → parse_doc() → RefEntry list (path, line)
 ## Data Flow - Affected Command
 
 ```
-git diff <commit> → _get_changed_files() → changed_files (list[str])
-                                                   │
+git diff <commit> → get_changed_files() → changed_files (list[str])
+                    (core/git.py)                  │
 docs/*.md → _build_indexes()                       │
                    │                               │
        ┌───────────┴───────────┐                   │
@@ -78,25 +78,25 @@ source_to_docs           doc_to_docs               │
        _find_direct_hits() → direct_hits (docs with changed source refs)
                                     │
                                     v
-       _propagate() → indirect_hits, circular_refs
+       _propagate() → indirect_hits, circular_refs, indirect_chains
        (BFS traversal, depth_limit)
                                     │
                                     v
                             AffectedResult
-                   (affected, direct, indirect, circular)
+              (affected, direct, indirect, circular, matches, indirect_chains)
                                     │
                     ┌───────────────┴───────────────┐
                     │                               │
                     v                               v
-              default output                  --ordered
-              (hits grouped)               (by dep phases)
+              default output                  --json
+           (phases always shown)           (JSON output)
 ```
 
 ## Propagation Algorithm (BFS)
 
 ```
 Input: initial_docs, doc_to_docs, depth_limit
-Output: indirect_hits, circular_refs
+Output: indirect_hits, circular_refs, indirect_chains
 
 visited = set(initial_docs)
 current_level = set(initial_docs)
@@ -128,6 +128,7 @@ while current_level not empty:
 |-----------|--------------------------------------------|
 | Exit 0    | success, no errors                         |
 | Exit 1    | validation errors found                    |
+| Exit 2    | scope error (affected command)             |
 | stdout    | results output                             |
 | Warnings  | circular ref detection (non-blocking)      |
 
