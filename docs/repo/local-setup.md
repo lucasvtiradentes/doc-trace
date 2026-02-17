@@ -1,0 +1,71 @@
+# Local Setup
+
+## Requirements
+
+- Python 3.9+
+- make
+
+## Install
+
+```bash
+make install
+```
+
+This creates `.venv/` and installs package with dev dependencies.
+
+## Dev Dependencies
+
+| Package      | Purpose                    |
+|--------------|----------------------------|
+| pytest       | testing framework          |
+| ruff         | linter and formatter       |
+| towncrier    | changelog generation       |
+| bump2version | version bumping            |
+
+## Available Commands
+
+| Command              | Description                       |
+|----------------------|-----------------------------------|
+| make install         | create venv, install deps         |
+| make check           | ruff lint + format check          |
+| make test            | pytest -v                         |
+| make practical-test  | docsync check docs/               |
+| make changelog       | build CHANGELOG.md                |
+| make changelog-draft | preview changelog                 |
+
+## Manual Install
+
+If not using make:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -e ".[dev]"
+```
+
+## Running Commands
+
+After install, use the venv:
+
+```bash
+.venv/bin/docsync check docs/
+.venv/bin/docsync cascade HEAD~1
+.venv/bin/docsync tree docs/
+.venv/bin/docsync init
+```
+
+Or activate the venv:
+
+```bash
+source .venv/bin/activate
+docsync check docs/
+```
+
+---
+
+related docs:
+- docs/repo/tooling.md         - tool configurations
+- docs/guides/setup-project.md - detailed setup guide
+
+related sources:
+- Makefile       - command definitions
+- pyproject.toml - project dependencies
