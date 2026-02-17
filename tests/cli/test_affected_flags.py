@@ -25,9 +25,9 @@ def test_affected_last_passes_arguments_to_run():
     run_mock.assert_called_once_with(Path("docs"), False, 5, None, None, True, False)
 
 
-def test_affected_ordered_flag():
+def test_affected_json_flag():
     with patch("docsync.cli.affected.run", return_value=0) as run_mock:
-        with patch.object(sys, "argv", ["docsync", "affected", "docs/", "--last", "1", "--ordered"]):
+        with patch.object(sys, "argv", ["docsync", "affected", "docs/", "--last", "1", "--json"]):
             with pytest.raises(SystemExit) as exc:
                 main()
     assert exc.value.code == 0

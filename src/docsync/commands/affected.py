@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -194,18 +195,21 @@ def _build_levels(docs: list[dict[str, Any]], repo_root: Path) -> list[list[dict
     return [level for level in levels if level]
 
 
-def _print_default(result: AffectedResult) -> None:
+def _print_default(result: AffectedResult, levels: list[list[dict[str, Any]]], repo_root: Path) -> None:
     print(f"Direct hits ({len(result.direct_hits)}):")
     for doc in result.direct_hits:
-        print(f"  {doc}")
+        print(f"  {_rel_path(doc, repo_root)}")
     if result.indirect_hits:
         print(f"\nIndirect hits ({len(result.indirect_hits)}):")
         for doc in result.indirect_hits:
-            print(f"  {doc}")
+            via = result.indirect_chains.get(doc)
+            via_str = f" <- {_rel_path(via, repo_root)}" if via else ""
+            print(f"  {_rel_path(doc, repo_root)}{via_str}")
     if result.circular_refs:
         print("\nWarning: circular refs detected:")
         for src, dst in result.circular_refs:
             print(f"  {src} <-> {dst}")
+    _print_phases(levels)
 
 
 def _rel_path(path: Path, repo_root: Path) -> str:
@@ -241,7 +245,9 @@ def _format_file_changes(changes: list[FileChange]) -> list[str]:
     return lines
 
 
-def _print_verbose(result: AffectedResult, changed_files: list[FileChange], repo_root: Path) -> None:
+def _print_verbose(
+    result: AffectedResult, changed_files: list[FileChange], levels: list[list[dict[str, Any]]], repo_root: Path
+) -> None:
     print(f"Changed files ({len(changed_files)}):")
     for line in _format_file_changes(changed_files):
         print(line)
@@ -267,21 +273,50 @@ def _print_verbose(result: AffectedResult, changed_files: list[FileChange], repo
         for src, dst in result.circular_refs:
             print(f"  {src} <-> {dst}")
 
+    _print_phases(levels)
 
-def _print_ordered(levels: list[list[dict[str, Any]]]) -> None:
+
+def _print_phases(levels: list[list[dict[str, Any]]]) -> None:
+    if not levels:
+        return
+    print(f"\nPhases ({len(levels)}):")
     for i, level_docs in enumerate(levels):
         if not level_docs:
             continue
-        if i == 0:
-            print("Phase 1 - Independent:")
-        else:
-            print(f"\nPhase {i + 1} - Level {i}:")
-        for doc in level_docs:
-            sources = ", ".join(doc["related_sources"]) if doc["related_sources"] else ""
-            if sources:
-                print(f"  {doc['path']} (sources: {sources})")
-            else:
-                print(f"  {doc['path']}")
+        docs_str = ", ".join(d["path"] for d in level_docs)
+        print(f"  {i + 1}. {docs_str}")
+
+
+def _build_json(
+    result: AffectedResult,
+    levels: list[list[dict[str, Any]]],
+    repo_root: Path,
+    changed_files: list[FileChange] | None = None,
+) -> dict[str, Any]:
+    data: dict[str, Any] = {
+        "direct_hits": [_rel_path(d, repo_root) for d in result.direct_hits],
+        "indirect_hits": [
+            {"doc": _rel_path(d, repo_root), "via": _rel_path(result.indirect_chains[d], repo_root)}
+            for d in result.indirect_hits
+            if d in result.indirect_chains
+        ],
+        "phases": [[d["path"] for d in level] for level in levels],
+    }
+    if result.circular_refs:
+        data["circular_refs"] = [[str(a), str(b)] for a, b in result.circular_refs]
+    if changed_files is not None:
+        data["changed_files"] = [
+            {
+                "path": fc.path,
+                "status": fc.status,
+                "added": fc.added,
+                "removed": fc.removed,
+                **({"old_path": fc.old_path} if fc.old_path else {}),
+            }
+            for fc in changed_files
+        ]
+        data["matches"] = {src: [_rel_path(d, repo_root) for d in docs] for src, docs in result.matches.items()}
+    return data
 
 
 def run(
@@ -291,7 +326,7 @@ def run(
     base_branch: str | None = None,
     since: str | None = None,
     verbose: bool = False,
-    output_ordered: bool = False,
+    output_json: bool = False,
 ) -> int:
     from docsync.core.config import load_config
 
@@ -300,7 +335,10 @@ def run(
     try:
         commit_ref = resolve_commit_ref(repo_root, since_lock, last, base_branch, since)
     except ValueError as e:
-        print(f"Scope error: {e}", file=sys.stderr)
+        if output_json:
+            print(json.dumps({"error": str(e)}))
+        else:
+            print(f"Scope error: {e}", file=sys.stderr)
         return 2
 
     changed_files = get_changed_files(commit_ref, repo_root)
@@ -308,7 +346,15 @@ def run(
     result = _find_affected_docs_for_changes(docs_path, changed_files, config, repo_root)
 
     if not result.affected_docs:
-        if verbose:
+        if output_json:
+            data: dict[str, Any] = {"direct_hits": [], "indirect_hits": [], "phases": []}
+            if verbose:
+                data["changed_files"] = [
+                    {"path": fc.path, "status": fc.status, "added": fc.added, "removed": fc.removed}
+                    for fc in changed_files_detailed
+                ]
+            print(json.dumps(data, indent=2))
+        elif verbose:
             print(f"Changed files ({len(changed_files_detailed)}):")
             for line in _format_file_changes(changed_files_detailed):
                 print(line)
@@ -317,13 +363,15 @@ def run(
             print("No docs affected")
         return 0
 
-    if verbose:
-        _print_verbose(result, changed_files_detailed, repo_root)
-    elif output_ordered:
-        docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root)
-        levels = _build_levels(docs_metadata, repo_root)
-        _print_ordered(levels)
+    docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root)
+    levels = _build_levels(docs_metadata, repo_root)
+
+    if output_json:
+        data = _build_json(result, levels, repo_root, changed_files_detailed if verbose else None)
+        print(json.dumps(data, indent=2))
+    elif verbose:
+        _print_verbose(result, changed_files_detailed, levels, repo_root)
     else:
-        _print_default(result)
+        _print_default(result, levels, repo_root)
 
     return 0

@@ -191,8 +191,8 @@ docsync preview docs/                      # interactive explorer in browser
 | `docsync affected <path> --since <ref>`          | list affected docs since ref         |
 | `docsync affected <path> --since-lock`           | list affected docs since lock commit |
 | `docsync affected <path> --base-branch <branch>` | list affected docs from merge-base   |
-| `docsync affected <path> --ordered`              | group output by dependency phases    |
 | `docsync affected <path> --verbose`              | show changed files and match details |
+| `docsync affected <path> --json`                 | output as JSON                       |
 | `docsync preview <path>`                         | interactive explorer in browser      |
 | `docsync preview <path> --port <N>`              | preview on custom port (default 8420)|
 | `docsync lock update`                            | save current commit to lock.json     |
@@ -203,21 +203,24 @@ docsync preview docs/                      # interactive explorer in browser
 </details>
 
 <details>
-<summary>Example --ordered output</summary>
+<summary>Example output</summary>
 
 ```
-Phase 1 - Independent:
-  docs/concepts.md (sources: src/types.py)
-  docs/utils.md (sources: src/utils/)
+Direct hits (3):
+  docs/concepts.md
+  docs/api.md
+  docs/utils.md
 
-Phase 2 - Level 1:
-  docs/api.md (sources: src/api.py)
+Indirect hits (1):
+  docs/overview.md <- docs/api.md
 
-Phase 3 - Level 2:
-  docs/overview.md (sources: src/)
+Phases (3):
+  1. docs/concepts.md, docs/utils.md
+  2. docs/api.md
+  3. docs/overview.md
 ```
 
-Useful for AI agents that need to process docs in dependency order.
+Phases show dependency order - useful for AI agents processing docs.
 
 </details>
 

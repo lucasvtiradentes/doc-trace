@@ -24,7 +24,7 @@ def main():
     scope_group.add_argument("--base-branch", help="compare from merge-base(HEAD, <branch>)")
     scope_group.add_argument("--since", help="compare from git ref (commit/tag/branch)")
     affected_parser.add_argument("--verbose", "-V", action="store_true", help="show changed files and match details")
-    affected_parser.add_argument("--ordered", action="store_true", help="group output by dependency phases")
+    affected_parser.add_argument("--json", action="store_true", help="output as JSON")
 
     preview_parser = subparsers.add_parser("preview", help="interactive docs explorer in browser")
     preview_parser.add_argument("path", type=Path, nargs="?", default=Path("docs"), help="docs directory")
@@ -54,7 +54,7 @@ def main():
                 args.base_branch,
                 args.since,
                 args.verbose,
-                args.ordered,
+                args.json,
             )
         )
     elif args.command == "preview":
