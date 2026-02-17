@@ -9,4 +9,4 @@ related docs:
 
 related sources:
 - src/docsync/cli.py    - CLI implementation
-- src/docsync/parser.py - parser implementation
+- src/docsync/core/parser.py - parser implementation

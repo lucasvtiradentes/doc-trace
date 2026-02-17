@@ -1,98 +1,28 @@
 import fnmatch
 import json
-from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
-from docsync.config import Config
-from docsync.constants import DEFAULT_SYNC_PROMPT, DEFAULT_SYNC_PROMPT_PARALLEL, DOCSYNC_DIR, SYNC_FILENAME, SYNCS_DIR
-from docsync.parser import RefEntry, parse_doc
-
-
-@dataclass
-class RefError:
-    doc_path: Path
-    ref: RefEntry
-    message: str
-
-
-@dataclass
-class CheckResult:
-    doc_path: Path
-    errors: list[RefError] = field(default_factory=list)
-
-    @property
-    def ok(self) -> bool:
-        return len(self.errors) == 0
-
-
-def check_refs(docs_path: Path, config: Config, repo_root: Path | None = None) -> Iterator[CheckResult]:
-    docs_path = docs_path.resolve()
-    if repo_root is None:
-        repo_root = _find_repo_root(docs_path)
-    doc_files = list(docs_path.rglob("*.md"))
-    for doc_file in doc_files:
-        if _is_ignored(doc_file, config.ignored_paths, repo_root):
-            continue
-        yield _check_single_doc(doc_file, repo_root)
-
-
-def _check_single_doc(doc_path: Path, repo_root: Path) -> CheckResult:
-    result = CheckResult(doc_path=doc_path)
-    try:
-        parsed = parse_doc(doc_path)
-    except Exception as e:
-        result.errors.append(
-            RefError(
-                doc_path=doc_path,
-                ref=RefEntry(path="", description="", line_number=0),
-                message=f"failed to parse doc: {e}",
-            )
-        )
-        return result
-    for ref in parsed.related_docs:
-        ref_path = repo_root / ref.path
-        if not ref_path.exists():
-            result.errors.append(RefError(doc_path=doc_path, ref=ref, message=f"related doc not found: {ref.path}"))
-    for ref in parsed.related_sources:
-        ref_path = repo_root / ref.path
-        if not ref_path.exists() and not _glob_matches(ref.path, repo_root):
-            result.errors.append(RefError(doc_path=doc_path, ref=ref, message=f"related source not found: {ref.path}"))
-    return result
-
-
-def _glob_matches(pattern: str, repo_root: Path) -> bool:
-    if "*" in pattern or "?" in pattern:
-        matches = list(repo_root.glob(pattern))
-        return len(matches) > 0
-    return False
-
-
-def _is_ignored(path: Path, ignored_patterns: list[str], repo_root: Path) -> bool:
-    rel_path = str(path.relative_to(repo_root))
-    for pattern in ignored_patterns:
-        if fnmatch.fnmatch(rel_path, pattern):
-            return True
-    return False
-
-
-def _find_repo_root(start_path: Path) -> Path:
-    current = start_path.resolve()
-    while current != current.parent:
-        if (current / ".git").exists():
-            return current
-        current = current.parent
-    return start_path.resolve()
+from docsync.core.config import Config, find_repo_root
+from docsync.core.constants import (
+    DEFAULT_SYNC_PROMPT,
+    DEFAULT_SYNC_PROMPT_PARALLEL,
+    DOCSYNC_DIR,
+    SYNC_FILENAME,
+    SYNCS_DIR,
+)
+from docsync.core.parser import parse_doc
 
 
 def generate_validation_report(docs_path: Path, config: Config, incremental: bool = False) -> dict[str, Any]:
     docs_path = docs_path.resolve()
-    repo_root = _find_repo_root(docs_path)
+    repo_root = find_repo_root(docs_path)
     doc_files = list(docs_path.rglob("*.md"))
     metadata: dict[str, Any] = {"incremental": incremental}
     if incremental:
-        from docsync.cascade import find_affected_docs
-        from docsync.lock import load_lock
+        from docsync.commands.cascade import find_affected_docs
+        from docsync.core.lock import load_lock
 
         lock = load_lock(repo_root)
         if lock.last_analyzed_commit:
@@ -120,6 +50,14 @@ def generate_validation_report(docs_path: Path, config: Config, incremental: boo
         "metadata": metadata,
         "docs": docs,
     }
+
+
+def _is_ignored(path: Path, ignored_patterns: list[str], repo_root: Path) -> bool:
+    rel_path = str(path.relative_to(repo_root))
+    for pattern in ignored_patterns:
+        if fnmatch.fnmatch(rel_path, pattern):
+            return True
+    return False
 
 
 def print_validation_report(docs_path: Path, config: Config, incremental: bool = False) -> str:
@@ -166,9 +104,7 @@ def _format_phases(levels: list[list[dict[str, Any]]]) -> str:
     return "\n".join(lines)
 
 
-def _get_syncs_dir(repo_root: Path) -> str:
-    from datetime import datetime
-
+def _get_syncs_dir() -> str:
     timestamp = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     return f".docsync/{SYNCS_DIR}/{timestamp}"
 
@@ -212,7 +148,7 @@ def generate_sync_prompt(docs_path: Path, config: Config, incremental: bool = Fa
     if not docs:
         return "No docs to sync."
     repo_root = Path(report["repo_root"])
-    syncs_dir = _get_syncs_dir(repo_root)
+    syncs_dir = _get_syncs_dir()
     template = _load_prompt_template(repo_root, parallel)
 
     if parallel:
@@ -224,7 +160,12 @@ def generate_sync_prompt(docs_path: Path, config: Config, incremental: bool = Fa
         return template.format(count=len(docs), phases=phases, syncs_dir=syncs_dir)
 
 
-def generate_validation_prompt(
-    docs_path: Path, config: Config, incremental: bool = False, parallel: bool = False
-) -> str:
-    return generate_sync_prompt(docs_path, config, incremental, parallel)
+def run(docs_path: Path, incremental: bool, as_json: bool, parallel: bool) -> int:
+    from docsync.core.config import load_config
+
+    config = load_config()
+    if as_json:
+        print(print_validation_report(docs_path, config, incremental))
+    else:
+        print(generate_sync_prompt(docs_path, config, incremental, parallel))
+    return 0

@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from docsync.constants import DOCSYNC_DIR, LOCK_FILENAME
+from docsync.core.constants import DOCSYNC_DIR, LOCK_FILENAME
 
 
 class Lock:

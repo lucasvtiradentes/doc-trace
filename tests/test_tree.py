@@ -1,8 +1,8 @@
 import tempfile
 from pathlib import Path
 
-from docsync.config import Config
-from docsync.tree import build_dependency_tree, format_tree
+from docsync.commands.tree import build_dependency_tree, format_tree
+from docsync.core.config import Config
 
 
 def test_tree_independent_docs():

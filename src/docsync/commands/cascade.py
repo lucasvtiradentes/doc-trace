@@ -3,8 +3,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import NamedTuple
 
-from docsync.config import Config
-from docsync.parser import parse_doc
+from docsync.core.config import Config, find_repo_root
+from docsync.core.parser import parse_doc
 
 
 class CascadeResult(NamedTuple):
@@ -18,7 +18,7 @@ def find_affected_docs(
     docs_path: Path, commit_ref: str, config: Config, repo_root: Path | None = None
 ) -> CascadeResult:
     if repo_root is None:
-        repo_root = _find_repo_root(docs_path)
+        repo_root = find_repo_root(docs_path)
     changed_files = _get_changed_files(commit_ref, repo_root)
     if not changed_files:
         return CascadeResult([], [], [], [])
@@ -96,10 +96,23 @@ def _cascade(
     return cascade_hits, circular_refs
 
 
-def _find_repo_root(start_path: Path) -> Path:
-    current = start_path.resolve()
-    while current != current.parent:
-        if (current / ".git").exists():
-            return current
-        current = current.parent
-    return start_path.resolve()
+def run(commit_ref: str, docs_path: Path) -> int:
+    from docsync.core.config import load_config
+
+    config = load_config()
+    result = find_affected_docs(docs_path, commit_ref, config)
+    if not result.affected_docs:
+        print("No docs affected")
+        return 0
+    print(f"Direct hits ({len(result.direct_hits)}):")
+    for doc in result.direct_hits:
+        print(f"  {doc}")
+    if result.cascade_hits:
+        print(f"\nCascade hits ({len(result.cascade_hits)}):")
+        for doc in result.cascade_hits:
+            print(f"  {doc}")
+    if result.circular_refs:
+        print("\nWarning: circular refs detected:")
+        for src, dst in result.circular_refs:
+            print(f"  {src} <-> {dst}")
+    return 0

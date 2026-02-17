@@ -1,7 +1,7 @@
 import tempfile
 from pathlib import Path
 
-from docsync.parser import parse_doc
+from docsync.core.parser import parse_doc
 
 
 def test_parse_doc_with_both_sections():

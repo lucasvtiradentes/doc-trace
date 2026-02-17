@@ -1,8 +1,9 @@
 import tempfile
 from pathlib import Path
 
-from docsync.config import Config
-from docsync.validator import check_refs, generate_sync_prompt
+from docsync.commands.check import check_refs
+from docsync.commands.sync import generate_sync_prompt
+from docsync.core.config import Config
 
 
 def test_check_refs_valid():

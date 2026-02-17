@@ -2,8 +2,8 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from docsync.cascade import _build_indexes, _cascade, _find_direct_hits, find_affected_docs
-from docsync.config import Config
+from docsync.commands.cascade import _build_indexes, _cascade, _find_direct_hits, find_affected_docs
+from docsync.core.config import Config
 
 
 def test_build_indexes():
@@ -78,7 +78,7 @@ def test_find_affected_docs_no_changes():
         docs_dir = tmppath / "docs"
         docs_dir.mkdir()
         config = Config({})
-        with patch("docsync.cascade._get_changed_files", return_value=[]):
+        with patch("docsync.commands.cascade._get_changed_files", return_value=[]):
             result = find_affected_docs(docs_dir, "HEAD~1", config, repo_root=tmppath)
         assert len(result.affected_docs) == 0
 
@@ -95,7 +95,7 @@ related sources:
 - src/changed.py - impl
 """)
         config = Config({})
-        with patch("docsync.cascade._get_changed_files", return_value=["src/changed.py"]):
+        with patch("docsync.commands.cascade._get_changed_files", return_value=["src/changed.py"]):
             result = find_affected_docs(docs_dir, "HEAD~1", config, repo_root=tmppath)
         assert len(result.direct_hits) == 1
         assert result.direct_hits[0] == doc
@@ -141,7 +141,7 @@ related sources:
 - api/src/booking/ - booking module
 """)
         config = Config({})
-        with patch("docsync.cascade._get_changed_files", return_value=["api/src/booking/booking.module.ts"]):
+        with patch("docsync.commands.cascade._get_changed_files", return_value=["api/src/booking/booking.module.ts"]):
             result = find_affected_docs(docs_dir, "HEAD~1", config, repo_root=tmppath)
         assert len(result.direct_hits) == 1
         assert result.direct_hits[0] == doc

@@ -2,8 +2,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import NamedTuple
 
-from docsync.config import Config
-from docsync.parser import parse_doc
+from docsync.core.config import Config, find_repo_root
+from docsync.core.parser import parse_doc
 
 
 class DependencyTree(NamedTuple):
@@ -14,7 +14,7 @@ class DependencyTree(NamedTuple):
 
 def build_dependency_tree(docs_path: Path, config: Config, repo_root: Path | None = None) -> DependencyTree:
     if repo_root is None:
-        repo_root = _find_repo_root(docs_path)
+        repo_root = find_repo_root(docs_path)
     doc_deps = _build_doc_dependencies(docs_path, repo_root)
     levels, circular = _compute_levels(doc_deps)
     return DependencyTree(levels=levels, circular=circular, doc_deps=doc_deps)
@@ -108,10 +108,12 @@ def format_tree(tree: DependencyTree, repo_root: Path) -> str:
     return "\n".join(lines)
 
 
-def _find_repo_root(start_path: Path) -> Path:
-    current = start_path.resolve()
-    while current != current.parent:
-        if (current / ".git").exists():
-            return current
-        current = current.parent
-    return start_path.resolve()
+def run(docs_path: Path) -> int:
+    from docsync.core.config import load_config
+
+    config = load_config()
+    docs_path = docs_path.resolve()
+    repo_root = find_repo_root(docs_path)
+    tree = build_dependency_tree(docs_path, config, repo_root)
+    print(format_tree(tree, repo_root))
+    return 0

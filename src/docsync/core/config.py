@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from docsync.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DOCSYNC_DIR, SYNCS_DIR
+from docsync.core.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DOCSYNC_DIR, SYNCS_DIR
 
 
 class Config:
@@ -38,6 +38,15 @@ def find_docsync_dir(start_path: Path) -> Path | None:
             return docsync_dir
         current = current.parent
     return None
+
+
+def find_repo_root(start_path: Path) -> Path:
+    current = start_path.resolve()
+    while current != current.parent:
+        if (current / ".git").exists():
+            return current
+        current = current.parent
+    return start_path.resolve()
 
 
 def init_docsync(target_dir: Path) -> Path:
