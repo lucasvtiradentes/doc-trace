@@ -2,6 +2,15 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
+from typing import NamedTuple
+
+
+class FileChange(NamedTuple):
+    path: str
+    status: str
+    added: int | None
+    removed: int | None
+    old_path: str | None = None
 
 
 def get_current_commit(cwd: Path | None = None) -> str | None:
@@ -45,6 +54,62 @@ def get_changed_files(commit_ref: str, repo_root: Path) -> list[str]:
         return [f.strip() for f in result.stdout.splitlines() if f.strip()]
     except (subprocess.CalledProcessError, FileNotFoundError):
         return []
+
+
+def get_changed_files_detailed(commit_ref: str, repo_root: Path) -> list[FileChange]:
+    status_map: dict[str, tuple[str, str | None]] = {}
+    try:
+        result = subprocess.run(
+            ["git", "diff", "--name-status", commit_ref],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=repo_root,
+        )
+        for line in result.stdout.splitlines():
+            if not line.strip():
+                continue
+            parts = line.split("\t")
+            status = parts[0][0]
+            if status == "R" and len(parts) >= 3:
+                old_path, new_path = parts[1], parts[2]
+                status_map[new_path] = (status, old_path)
+            elif len(parts) >= 2:
+                status_map[parts[1]] = (status, None)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return []
+
+    stats_map: dict[str, tuple[int | None, int | None]] = {}
+    try:
+        result = subprocess.run(
+            ["git", "diff", "--numstat", commit_ref],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=repo_root,
+        )
+        for line in result.stdout.splitlines():
+            if not line.strip():
+                continue
+            parts = line.split("\t")
+            if len(parts) >= 3:
+                added = int(parts[0]) if parts[0] != "-" else None
+                removed = int(parts[1]) if parts[1] != "-" else None
+                path = parts[2]
+                if " => " in path:
+                    path = path.split(" => ")[-1].rstrip("}")
+                    if "{" in parts[2]:
+                        prefix = parts[2].split("{")[0]
+                        path = prefix + path
+                stats_map[path] = (added, removed)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
+
+    changes = []
+    for path, (status, old_path) in status_map.items():
+        added, removed = stats_map.get(path, (None, None))
+        changes.append(FileChange(path, status, added, removed, old_path))
+    return changes
 
 
 def get_file_history(repo_root: Path, file_path: str, limit: int = 20) -> list[dict]:

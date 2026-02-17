@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 from docsync.core.config import Config, find_repo_root
-from docsync.core.git import get_changed_files, get_merge_base
+from docsync.core.git import FileChange, get_changed_files, get_changed_files_detailed, get_merge_base
 from docsync.core.lock import load_lock
 from docsync.core.parser import parse_doc
 
@@ -215,10 +215,36 @@ def _rel_path(path: Path, repo_root: Path) -> str:
         return str(path)
 
 
-def _print_verbose(result: AffectedResult, changed_files: list[str], repo_root: Path) -> None:
+def _format_stats(fc: FileChange) -> str:
+    if fc.added is None and fc.removed is None:
+        return ""
+    added = f"+{fc.added}" if fc.added else ""
+    removed = f"-{fc.removed}" if fc.removed else ""
+    if added and removed:
+        return f"({added} {removed})"
+    elif added:
+        return f"({added})"
+    elif removed:
+        return f"({removed})"
+    return ""
+
+
+def _format_file_changes(changes: list[FileChange]) -> list[str]:
+    stats_list = [_format_stats(fc) for fc in changes]
+    max_stats_width = max((len(s) for s in stats_list), default=0)
+    lines = []
+    for fc, stats in zip(changes, stats_list):
+        status = fc.status[0]
+        stats_padded = stats.ljust(max_stats_width)
+        rename = f" <- {fc.old_path}" if fc.old_path else ""
+        lines.append(f"  {status}  {stats_padded}  {fc.path}{rename}")
+    return lines
+
+
+def _print_verbose(result: AffectedResult, changed_files: list[FileChange], repo_root: Path) -> None:
     print(f"Changed files ({len(changed_files)}):")
-    for f in changed_files:
-        print(f"  {f}")
+    for line in _format_file_changes(changed_files):
+        print(line)
 
     print(f"\nMatched ({len(result.matches)} sources -> {len(result.direct_hits)} docs):")
     for source, docs in sorted(result.matches.items()):
@@ -278,20 +304,21 @@ def run(
         return 2
 
     changed_files = get_changed_files(commit_ref, repo_root)
+    changed_files_detailed = get_changed_files_detailed(commit_ref, repo_root) if verbose else []
     result = _find_affected_docs_for_changes(docs_path, changed_files, config, repo_root)
 
     if not result.affected_docs:
         if verbose:
-            print(f"Changed files ({len(changed_files)}):")
-            for f in changed_files:
-                print(f"  {f}")
+            print(f"Changed files ({len(changed_files_detailed)}):")
+            for line in _format_file_changes(changed_files_detailed):
+                print(line)
             print("\nNo docs affected")
         else:
             print("No docs affected")
         return 0
 
     if verbose:
-        _print_verbose(result, changed_files, repo_root)
+        _print_verbose(result, changed_files_detailed, repo_root)
     elif output_ordered:
         docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root)
         levels = _build_levels(docs_metadata, repo_root)
