@@ -104,6 +104,29 @@ class PreviewHandler(http.server.SimpleHTTPRequestHandler):
         else:
             self.send_error(404)
 
+    def do_POST(self):
+        from urllib.parse import parse_qs, urlparse
+        parsed = urlparse(self.path)
+        if parsed.path == "/doc":
+            params = parse_qs(parsed.query)
+            doc_path = params.get("path", [None])[0]
+            if doc_path:
+                full_path = self.repo_root / doc_path
+                if full_path.exists() and full_path.suffix == ".md":
+                    content_length = int(self.headers.get("Content-Length", 0))
+                    body = self.rfile.read(content_length).decode("utf-8")
+                    full_path.write_text(body, encoding="utf-8")
+                    self.send_response(200)
+                    self.send_header("Content-type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(b'{"ok":true}')
+                else:
+                    self.send_error(404, "Document not found")
+            else:
+                self.send_error(400, "Missing path parameter")
+        else:
+            self.send_error(404)
+
     def log_message(self, format, *args):
         pass
 
