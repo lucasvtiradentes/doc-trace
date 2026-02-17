@@ -1,6 +1,6 @@
 # Overview
 
-CLI tool that keeps documentation in sync with code in large codebases. Detects which docs are affected by code changes and generates reports for AI validation.
+CLI tool that keeps documentation in sync with code in large codebases. Detects which docs are affected by code changes.
 
 ```
   src/booking/handler.ts changed
@@ -70,9 +70,9 @@ docsync solves this by adding "hints" to each doc - `related sources:` tells any
 ## Features
 
 - validate - validates all referenced paths exist
-- affected - finds docs affected by code changes (with directory matching)
-- prompt   - generates prompt for AI to review docs (ordered by deps)
+- affected - finds docs affected by code changes (with dependency ordering)
 - tree     - shows doc dependency tree
+- lock     - manages lock state for incremental analysis
 
 ## Quickstart
 
@@ -145,9 +145,8 @@ docsync init    # creates .docsync/ folder
 ```
 .docsync/
 ├── config.json   # required
-├── prompt.md     # optional - custom prompt template
-├── lock.json     # optional - tracks last synced commit
-└── syncs/        # AI writes sync reports here (added to .gitignore)
+├── lock.json     # tracks last analyzed commit
+└── syncs/        # output directory (added to .gitignore)
 ```
 
 config.json:
@@ -170,15 +169,6 @@ metadata options:
 - `sources_key`:       header for source references (default: "related sources")
 - `require_separator`: if true, only parse after `---` (default: true, custom only)
 
-prompt.md (custom template):
-```markdown
-Review {count} docs. Write reports to {syncs_dir}/
-
-{docs}
-```
-
-Placeholders: `{count}`, `{docs}`, `{syncs_dir}`
-
 </details>
 
 ### 4. Use it
@@ -186,7 +176,7 @@ Placeholders: `{count}`, `{docs}`, `{syncs_dir}`
 ```bash
 docsync validate docs/                  # validate all refs exist
 docsync affected docs/ --last 5         # find docs affected by last 5 commits
-docsync prompt docs/ | pbcopy           # generate AI prompt, copy to clipboard
+docsync affected docs/ --last 5 --ordered  # grouped by dependency phases
 ```
 
 <details>
@@ -194,45 +184,36 @@ docsync prompt docs/ | pbcopy           # generate AI prompt, copy to clipboard
 
 | Command                                          | Description                         |
 |--------------------------------------------------|-------------------------------------|
-| `docsync --version`                              | show version                        |
-| `docsync init`                                   | create .docsync/ folder             |
-| `docsync tree <path>`                            | show doc dependency tree            |
 | `docsync validate <path>`                        | validate refs exist                 |
 | `docsync affected <path> --last <N>`             | list affected docs by last N commits|
 | `docsync affected <path> --since-lock`           | list affected docs since lock commit|
 | `docsync affected <path> --base-branch <branch>` | list affected docs from merge-base  |
-| `docsync prompt <path>`                          | generate prompt (ordered by deps)   |
-| `docsync prompt <path> --parallel`               | ignore deps, all at once            |
-| `docsync prompt <path> --incremental`            | only include changed docs           |
-| `docsync prompt <path> --update-lock`            | update lock.json after prompt       |
+| `docsync affected <path> --ordered`              | group output by dependency phases   |
+| `docsync affected <path> --parallel`             | flat list for parallel processing   |
+| `docsync tree <path>`                            | show doc dependency tree            |
+| `docsync lock update`                            | save current commit to lock.json    |
+| `docsync lock show`                              | show lock.json state                |
+| `docsync init`                                   | create .docsync/ folder             |
+| `docsync --version`                              | show version                        |
 
 </details>
 
 <details>
-<summary>Example prompt output</summary>
+<summary>Example --ordered output</summary>
 
 ```
-Review 5 docs by launching agents in phases (respecting dependencies).
+Phase 1 - Independent:
+  docs/concepts.md (sources: src/types.py)
+  docs/utils.md (sources: src/utils/)
 
-Each agent will:
-1. Read the doc + all related sources
-2. Fix any outdated/incorrect content directly in the doc
-3. Write a report to .docsync/syncs/2024-01-15T10-30-00/
+Phase 2 - Level 1:
+  docs/api.md (sources: src/api.py)
 
-Phase 1 - Independent (launch parallel):
-  docs/utils.md
-  docs/config.md
-
-Phase 2 - Level 1 (after phase 1 completes):
-  docs/auth.md
-    sources: src/auth/
-
-Phase 3 - Level 2 (after phase 2 completes):
-  docs/login.md
-    sources: src/login/
+Phase 3 - Level 2:
+  docs/overview.md (sources: src/)
 ```
 
-Use `--parallel` to ignore dependencies and prompt all at once.
+Useful for AI agents that need to process docs in dependency order.
 
 </details>
 

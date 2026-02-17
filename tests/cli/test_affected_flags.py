@@ -22,4 +22,22 @@ def test_affected_last_passes_arguments_to_run():
             with pytest.raises(SystemExit) as exc:
                 main()
     assert exc.value.code == 0
-    run_mock.assert_called_once_with(Path("docs"), False, 5, None, True)
+    run_mock.assert_called_once_with(Path("docs"), False, 5, None, True, False, False)
+
+
+def test_affected_ordered_flag():
+    with patch("docsync.cli.affected.run", return_value=0) as run_mock:
+        with patch.object(sys, "argv", ["docsync", "affected", "docs/", "--last", "1", "--ordered"]):
+            with pytest.raises(SystemExit) as exc:
+                main()
+    assert exc.value.code == 0
+    run_mock.assert_called_once_with(Path("docs"), False, 1, None, False, True, False)
+
+
+def test_affected_parallel_flag():
+    with patch("docsync.cli.affected.run", return_value=0) as run_mock:
+        with patch.object(sys, "argv", ["docsync", "affected", "docs/", "--last", "1", "--parallel"]):
+            with pytest.raises(SystemExit) as exc:
+                main()
+    assert exc.value.code == 0
+    run_mock.assert_called_once_with(Path("docs"), False, 1, None, False, False, True)

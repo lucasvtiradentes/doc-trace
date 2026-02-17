@@ -3,7 +3,7 @@ import sys
 from importlib.metadata import version
 from pathlib import Path
 
-from docsync.commands import affected, init, prompt, tree, validate
+from docsync.commands import affected, init, lock, tree, validate
 
 VERSION = version("docsync")
 
@@ -23,15 +23,17 @@ def main():
     scope_group.add_argument("--last", type=int, help="compare against HEAD~N (N must be > 0)")
     scope_group.add_argument("--base-branch", help="compare from merge-base(HEAD, <branch>)")
     affected_parser.add_argument("--show-changed-files", action="store_true", help="print changed files before hits")
-
-    prompt_parser = subparsers.add_parser("prompt", help="generate prompt for AI to review docs")
-    prompt_parser.add_argument("path", type=Path, help="docs directory")
-    prompt_parser.add_argument("--incremental", action="store_true", help="only include changed docs")
-    prompt_parser.add_argument("--parallel", action="store_true", help="ignore dependencies, all at once")
-    prompt_parser.add_argument("--update-lock", action="store_true", help="update lock.json with current commit")
+    output_group = affected_parser.add_mutually_exclusive_group()
+    output_group.add_argument("--ordered", action="store_true", help="group output by dependency phases")
+    output_group.add_argument("--parallel", action="store_true", help="flat list for parallel processing")
 
     tree_parser = subparsers.add_parser("tree", help="show doc dependency tree")
     tree_parser.add_argument("path", type=Path, help="docs directory")
+
+    lock_parser = subparsers.add_parser("lock", help="manage lock.json state")
+    lock_subparsers = lock_parser.add_subparsers(dest="lock_command", required=True)
+    lock_subparsers.add_parser("update", help="save current commit to lock.json")
+    lock_subparsers.add_parser("show", help="show lock.json state")
 
     subparsers.add_parser("init", help="create .docsync/ folder")
 
@@ -40,11 +42,17 @@ def main():
     if args.command == "validate":
         sys.exit(validate.run(args.path))
     elif args.command == "affected":
-        sys.exit(affected.run(args.path, args.since_lock, args.last, args.base_branch, args.show_changed_files))
-    elif args.command == "prompt":
-        sys.exit(prompt.run(args.path, args.incremental, args.parallel, args.update_lock))
+        sys.exit(affected.run(
+            args.path, args.since_lock, args.last, args.base_branch,
+            args.show_changed_files, args.ordered, args.parallel
+        ))
     elif args.command == "tree":
         sys.exit(tree.run(args.path))
+    elif args.command == "lock":
+        if args.lock_command == "update":
+            sys.exit(lock.run_update())
+        elif args.lock_command == "show":
+            sys.exit(lock.run_show())
     elif args.command == "init":
         sys.exit(init.run())
 

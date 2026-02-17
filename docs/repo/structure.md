@@ -8,26 +8,24 @@ doc-sync/
 │   ├── commands/          ← subcommand implementations
 │   │   ├── __init__.py
 │   │   ├── validate.py    ← ref validation
-│   │   ├── affected.py    ← change detection
-│   │   ├── prompt.py      ← AI prompt generation
+│   │   ├── affected.py    ← change detection + output formatting
 │   │   ├── tree.py        ← dependency visualization
+│   │   ├── lock.py        ← lock state management
 │   │   └── init.py        ← project initialization
-│   ├── core/              ← shared logic
-│   │   ├── __init__.py
-│   │   ├── parser.py      ← metadata extraction
-│   │   ├── config.py      ← config loading/validation
-│   │   ├── lock.py        ← state persistence
-│   │   └── constants.py   ← shared constants
-│   └── prompts/
-│       └── prompt.md      ← default prompt template
+│   └── core/              ← shared logic
+│       ├── __init__.py
+│       ├── parser.py      ← metadata extraction
+│       ├── config.py      ← config loading/validation
+│       ├── lock.py        ← state persistence
+│       └── constants.py   ← shared constants
 ├── tests/                 ← pytest test suite
 │   ├── __init__.py
 │   ├── affected/          ← affected tests
 │   ├── validate/          ← validation tests
 │   ├── config/            ← config validation tests
 │   ├── parser/            ← parser tests
-│   ├── prompt/            ← prompt generation tests
-│   └── tree/              ← dependency tree tests
+│   ├── tree/              ← dependency tree tests
+│   └── cli/               ← CLI argument tests
 ├── docs/                  ← documentation
 ├── .github/workflows/     ← CI/CD pipelines
 │   ├── prs.yml            ← PR checks

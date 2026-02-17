@@ -83,8 +83,8 @@ Notes from implementation:
 ---
 
 related docs:
-- docs/concepts.md                   - DependencyTree type
-- docs/features/prompt-generation.md - uses levels for phase ordering
+- docs/concepts.md          - DependencyTree type
+- docs/features/affected.md - uses levels for --ordered output
 
 related sources:
 - src/docsync/commands/tree.py - tree implementation

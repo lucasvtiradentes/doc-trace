@@ -4,7 +4,7 @@ import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 from docsync.core.config import Config, find_repo_root
 from docsync.core.lock import load_lock
@@ -137,12 +137,99 @@ def _propagate(
     return indirect_hits, circular_refs
 
 
+def _get_doc_metadata(docs: list[Path], config: Config, repo_root: Path) -> list[dict[str, Any]]:
+    result = []
+    for doc_file in docs:
+        try:
+            abs_path = doc_file if doc_file.is_absolute() else repo_root / doc_file
+            parsed = parse_doc(abs_path, config.metadata)
+            rel_path = str(abs_path.relative_to(repo_root))
+            result.append({
+                "path": rel_path,
+                "related_docs": [ref.path for ref in parsed.related_docs],
+                "related_sources": [ref.path for ref in parsed.related_sources],
+            })
+        except Exception:
+            continue
+    return result
+
+
+def _build_levels(docs: list[dict[str, Any]], repo_root: Path) -> list[list[dict[str, Any]]]:
+    doc_paths = {repo_root / d["path"] for d in docs}
+    doc_by_path = {repo_root / d["path"]: d for d in docs}
+    deps: dict[Path, list[Path]] = {}
+    for d in docs:
+        path = repo_root / d["path"]
+        deps[path] = [repo_root / rd for rd in d["related_docs"] if (repo_root / rd) in doc_paths]
+    assigned: dict[Path, int] = {}
+
+    def get_level(doc: Path, visiting: set[Path]) -> int:
+        if doc in assigned:
+            return assigned[doc]
+        if doc in visiting:
+            return 0
+        if not deps.get(doc):
+            assigned[doc] = 0
+            return 0
+        visiting.add(doc)
+        max_dep = max((get_level(dep, visiting) for dep in deps[doc]), default=-1)
+        visiting.remove(doc)
+        level = max_dep + 1
+        assigned[doc] = level
+        return level
+
+    for path in doc_paths:
+        get_level(path, set())
+    max_level = max(assigned.values()) if assigned else 0
+    levels: list[list[dict[str, Any]]] = [[] for _ in range(max_level + 1)]
+    for path, level in assigned.items():
+        levels[level].append(doc_by_path[path])
+    return [level for level in levels if level]
+
+
+def _print_default(result: AffectedResult) -> None:
+    print(f"Direct hits ({len(result.direct_hits)}):")
+    for doc in result.direct_hits:
+        print(f"  {doc}")
+    if result.indirect_hits:
+        print(f"\nIndirect hits ({len(result.indirect_hits)}):")
+        for doc in result.indirect_hits:
+            print(f"  {doc}")
+    if result.circular_refs:
+        print("\nWarning: circular refs detected:")
+        for src, dst in result.circular_refs:
+            print(f"  {src} <-> {dst}")
+
+
+def _print_parallel(docs: list[dict[str, Any]]) -> None:
+    for doc in docs:
+        print(doc["path"])
+
+
+def _print_ordered(levels: list[list[dict[str, Any]]]) -> None:
+    for i, level_docs in enumerate(levels):
+        if not level_docs:
+            continue
+        if i == 0:
+            print("Phase 1 - Independent:")
+        else:
+            print(f"\nPhase {i + 1} - Level {i}:")
+        for doc in level_docs:
+            sources = ", ".join(doc["related_sources"]) if doc["related_sources"] else ""
+            if sources:
+                print(f"  {doc['path']} (sources: {sources})")
+            else:
+                print(f"  {doc['path']}")
+
+
 def run(
     docs_path: Path,
     since_lock: bool = False,
     last: int | None = None,
     base_branch: str | None = None,
     show_changed_files: bool = False,
+    output_ordered: bool = False,
+    output_parallel: bool = False,
 ) -> int:
     from docsync.core.config import load_config
 
@@ -165,15 +252,15 @@ def run(
     if not result.affected_docs:
         print("No docs affected")
         return 0
-    print(f"Direct hits ({len(result.direct_hits)}):")
-    for doc in result.direct_hits:
-        print(f"  {doc}")
-    if result.indirect_hits:
-        print(f"\nIndirect hits ({len(result.indirect_hits)}):")
-        for doc in result.indirect_hits:
-            print(f"  {doc}")
-    if result.circular_refs:
-        print("\nWarning: circular refs detected:")
-        for src, dst in result.circular_refs:
-            print(f"  {src} <-> {dst}")
+
+    if output_parallel:
+        docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root)
+        _print_parallel(docs_metadata)
+    elif output_ordered:
+        docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root)
+        levels = _build_levels(docs_metadata, repo_root)
+        _print_ordered(levels)
+    else:
+        _print_default(result)
+
     return 0

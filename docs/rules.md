@@ -7,8 +7,8 @@
 Each command does one thing:
 - `validate` - validates refs
 - `affected` - finds affected docs
-- `prompt`   - generates AI tasks
 - `tree`     - shows dependencies
+- `lock`     - manages state
 - `init`     - creates config
 
 ### Explicit Paths from Repo Root
@@ -44,7 +44,7 @@ Enables forward references and modern type syntax.
 ### Lowercase CLI
 
 Commands are lowercase, no hyphens:
-- `validate`, `affected`, `prompt`, `tree`, `init`
+- `validate`, `affected`, `tree`, `lock`, `init`
 
 ### Path-Based Abstractions
 
@@ -70,7 +70,7 @@ Do not recursively follow all refs without limits. Use `affected_depth_limit`.
 
 ### Committing lock.json
 
-`lock.json` is stored in `.docsync/lock.json` and used by incremental prompt generation.
+`lock.json` is stored in `.docsync/lock.json` and used for incremental analysis.
 
 ### Hardcoded Doc Paths
 

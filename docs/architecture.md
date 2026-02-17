@@ -10,13 +10,13 @@
 ├─────────────────────────────────────────────────────────────┤
 │  argparse → subcommand dispatcher                           │
 │                                                             │
-│  ┌──────────┐ ┌──────────┐ ┌────────┐ ┌──────┐ ┌──────┐     │
-│  │ validate │ │ affected │ │ prompt │ │ tree │ │ init │     │
-│  └────┬─────┘ └────┬─────┘ └───┬────┘ └──┬───┘ └──┬───┘     │
-│       │            │           │         │        │         │
-│       v            v           v         v        v         │
-│  commands/    commands/   commands/  commands/ commands/    │
-│  validate.py  affected.py prompt.py  tree.py   init.py     │
+│  ┌──────────┐ ┌──────────┐ ┌──────┐ ┌──────┐ ┌──────┐       │
+│  │ validate │ │ affected │ │ tree │ │ lock │ │ init │       │
+│  └────┬─────┘ └────┬─────┘ └──┬───┘ └──┬───┘ └──┬───┘       │
+│       │            │          │        │        │           │
+│       v            v          v        v        v           │
+│  commands/    commands/  commands/ commands/ commands/      │
+│  validate.py  affected.py tree.py  lock.py   init.py       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -27,17 +27,15 @@ src/docsync/
 ├── cli.py              ← entry point, arg parsing
 ├── commands/
 │   ├── validate.py     ← ref validation
-│   ├── affected.py     ← change detection
-│   ├── prompt.py       ← AI prompt generation
+│   ├── affected.py     ← change detection + output formatting
 │   ├── tree.py         ← dependency visualization
+│   ├── lock.py         ← lock state management
 │   └── init.py         ← project setup
 ├── core/
 │   ├── parser.py       ← doc metadata extraction
 │   ├── config.py       ← runtime configuration
-│   ├── lock.py         ← state tracking
+│   ├── lock.py         ← lock state persistence
 │   └── constants.py    ← shared constants
-└── prompts/
-    └── prompt.md       ← default prompt template
 ```
 
 ## Data Flow - Validate Command
@@ -85,6 +83,12 @@ source_to_docs           doc_to_docs               │
                                     v
                             AffectedResult
                    (affected, direct, indirect, circular)
+                                    │
+            ┌───────────────────────┼───────────────────────┐
+            │                       │                       │
+            v                       v                       v
+      default output          --ordered              --parallel
+      (hits grouped)       (by dep phases)         (flat list)
 ```
 
 ## Propagation Algorithm (BFS)
@@ -117,30 +121,6 @@ while current_level not empty:
     depth += 1
 ```
 
-## Prompt Generation Flow
-
-```
-generate_prompt(docs_path, config, incremental, parallel)
-                              │
-          ┌───────────────────┴───────────────────┐
-          │                                       │
-          v                                       v
-   incremental=true                      incremental=false
-   load lock.json                        scan all docs
-   run affected from last commit
-   filter to affected
-          │                                       │
-          └───────────────────┬───────────────────┘
-                              │
-          ┌───────────────────┴───────────────────┐
-          │                                       │
-          v                                       v
-   parallel=true                         parallel=false
-   flat list output                      _build_sync_levels()
-   no dependency order                   topological sort
-                                         output phases
-```
-
 ## Dependency Tree Computation
 
 ```
@@ -171,7 +151,7 @@ _compute_levels(doc_deps)
 |-----------|--------------------------------------------|
 | Exit 0    | success, no errors                         |
 | Exit 1    | validation errors found                    |
-| stdout    | results, prompts, tree output              |
+| stdout    | results, tree output                       |
 | Warnings  | circular ref detection (non-blocking)      |
 
 ## Config Loading
