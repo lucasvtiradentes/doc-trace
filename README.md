@@ -84,7 +84,8 @@ pipx install docsync
 
 ### 2. Add metadata to your docs
 
-Each doc needs two sections at the end (after a `---` separator):
+<details>
+<summary>Custom style (default) - metadata at bottom</summary>
 
 ```markdown
 # My Feature
@@ -100,6 +101,37 @@ related sources:
 - src/feature/           - main module
 - src/feature/utils.ts   - helper functions
 ```
+
+</details>
+
+<details>
+<summary>Frontmatter style - metadata at top</summary>
+
+```markdown
+---
+related docs:
+  - docs/other-feature.md - brief description
+
+related sources:
+  - src/feature/           - main module
+  - src/feature/utils.ts   - helper functions
+---
+
+# My Feature
+
+Documentation content here...
+```
+
+Config required:
+```json
+{
+  "metadata": {
+    "style": "frontmatter"
+  }
+}
+```
+
+</details>
 
 ### 3. Initialize config (optional)
 
@@ -149,40 +181,36 @@ Placeholders: `{count}`, `{docs}`, `{syncs_dir}`
 
 </details>
 
-### 4. Validate your setup
+### 4. Use it
 
 ```bash
-docsync check docs/    # ensures all paths exist
+docsync check docs/                    # validate all refs exist
+docsync cascade HEAD~5 --docs docs/    # find docs affected by last 5 commits
+docsync prompt docs/ | pbcopy          # generate AI prompt, copy to clipboard
 ```
 
-### 5. Use it
+<details>
+<summary>All commands</summary>
 
-```bash
-docsync cascade HEAD~5 --docs docs/    # docs affected by last 5 commits
-docsync prompt docs/ | pbcopy          # generate AI prompt
-claude "$(docsync prompt docs/)"       # or pipe directly to AI
-```
+| Command                                 | Description                       |
+|-----------------------------------------|-----------------------------------|
+| `docsync check <path>`                  | validate refs exist               |
+| `docsync cascade <commit> --docs <dir>` | list affected docs                |
+| `docsync prompt <path>`                 | generate prompt (ordered by deps) |
+| `docsync prompt <path> --parallel`      | ignore deps, all at once          |
+| `docsync prompt <path> --incremental`   | only include changed docs         |
+| `docsync prompt <path> --update-lock`   | update lock.json after prompt     |
+| `docsync tree <path>`                   | show doc dependency tree          |
+| `docsync init`                          | create .docsync/ folder           |
+| `docsync --version`                     | show version                      |
 
-## Commands
+</details>
 
-```bash
-docsync check <path>                   # validate refs exist
-docsync cascade <commit> --docs <dir>  # list affected docs
-docsync prompt <path>                  # generate prompt (ordered by deps)
-docsync prompt <path> --parallel       # ignore deps, all at once
-docsync prompt <path> --incremental    # only include changed docs
-docsync prompt <path> --update-lock    # update lock.json after prompt
-docsync tree <path>                    # show doc dependency tree
-docsync init                           # create .docsync/ folder
-docsync --version                      # show version
-```
-
-### AI Prompt
-
-The `prompt` command generates a prompt for AI to review docs in phases (respecting dependencies):
+<details>
+<summary>Example prompt output</summary>
 
 ```
-Sync 5 docs by launching agents in phases (respecting dependencies).
+Review 5 docs by launching agents in phases (respecting dependencies).
 
 Each agent will:
 1. Read the doc + all related sources
@@ -202,7 +230,9 @@ Phase 3 - Level 2 (after phase 2 completes):
     sources: src/login/
 ```
 
-Use `--parallel` to ignore dependencies and sync all at once.
+Use `--parallel` to ignore dependencies and prompt all at once.
+
+</details>
 
 ## Development
 
