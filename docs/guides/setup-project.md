@@ -50,7 +50,7 @@ Should output: `docsync 0.1.0`
 ```bash
 source .venv/bin/activate
 docsync check docs/
-docsync cascade HEAD~1
+docsync cascade docs/ --last 1
 docsync tree docs/
 ```
 
@@ -58,7 +58,7 @@ docsync tree docs/
 
 ```bash
 .venv/bin/docsync check docs/
-.venv/bin/docsync cascade HEAD~1
+.venv/bin/docsync cascade docs/ --last 1
 .venv/bin/docsync tree docs/
 ```
 

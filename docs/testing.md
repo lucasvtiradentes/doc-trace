@@ -19,14 +19,14 @@ make test
 
 Tests are organized by feature area:
 
-| Directory / File | Coverage |
-|------------------|----------|
-| `tests/cascade/` | index building, direct hits, cascade traversal, depth limits |
-| `tests/check/`   | valid refs, missing docs, missing sources |
-| `tests/config/`  | config validation (valid + invalid) |
-| `tests/parser/`  | custom/frontmatter parsing, code blocks, line numbers |
-| `tests/prompt/`  | ordered output, parallel output, empty docs behavior |
-| `tests/tree/`    | independent docs, dependency levels, circular refs, formatting |
+| Directory / File | Coverage                                                      |
+|------------------|---------------------------------------------------------------|
+| `tests/cascade/` | index building, direct hits, cascade traversal, depth limits  |
+| `tests/check/`   | valid refs, missing docs, missing sources                     |
+| `tests/config/`  | config validation (valid + invalid)                           |
+| `tests/parser/`  | custom/frontmatter parsing, code blocks, line numbers         |
+| `tests/prompt/`  | ordered output, parallel output, empty docs behavior          |
+| `tests/tree/`    | independent docs, dependency levels, circular refs, formatting|
 
 ## Common Patterns
 

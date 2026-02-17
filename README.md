@@ -7,7 +7,7 @@ CLI tool that keeps documentation in sync with code in large codebases. Detects 
             │
             v
   ┌─────────────────────────┐
-  │ docsync cascade HEAD~1  │
+  │ docsync cascade docs/ --last 1 │
   └───────────┬─────────────┘
               │
               v
@@ -15,7 +15,7 @@ CLI tool that keeps documentation in sync with code in large codebases. Detects 
   │ Direct hits:            │      │ docs/bookings.md        │
   │  - docs/bookings.md     │ ──>  │                         │
   └─────────────────────────┘      │ related sources:        │
-              │                    │  - src/booking/  <───── │ ← matched!
+              │                    │ - src/booking/  <─────  │ ← matched!
               v                    └─────────────────────────┘
   ┌─────────────────────────┐
   │ Cascade hits:           │      docs/bookings.md references
@@ -46,7 +46,7 @@ related sources:
 When `src/booking/handler.ts` changes:
 
 ```
-docsync cascade HEAD~1
+docsync cascade docs/ --last 1
 
 Direct hits (1):
   docs/bookings.md       <- references src/booking/
@@ -165,9 +165,9 @@ config.json:
 ```
 
 metadata options:
-- `style`: "frontmatter" (YAML at top) or "custom" (flexible format)
-- `docs_key`: header for doc references (default: "related docs")
-- `sources_key`: header for source references (default: "related sources")
+- `style`:             "frontmatter" (YAML at top) or "custom" (flexible format)
+- `docs_key`:          header for doc references (default: "related docs")
+- `sources_key`:       header for source references (default: "related sources")
 - `require_separator`: if true, only parse after `---` (default: true, custom only)
 
 prompt.md (custom template):
@@ -185,24 +185,26 @@ Placeholders: `{count}`, `{docs}`, `{syncs_dir}`
 
 ```bash
 docsync check docs/                    # validate all refs exist
-docsync cascade HEAD~5 --docs docs/    # find docs affected by last 5 commits
+docsync cascade docs/ --last 5         # find docs affected by last 5 commits
 docsync prompt docs/ | pbcopy          # generate AI prompt, copy to clipboard
 ```
 
 <details>
 <summary>All commands</summary>
 
-| Command                                 | Description                       |
-|-----------------------------------------|-----------------------------------|
-| `docsync check <path>`                  | validate refs exist               |
-| `docsync cascade <commit> --docs <dir>` | list affected docs                |
-| `docsync prompt <path>`                 | generate prompt (ordered by deps) |
-| `docsync prompt <path> --parallel`      | ignore deps, all at once          |
-| `docsync prompt <path> --incremental`   | only include changed docs         |
-| `docsync prompt <path> --update-lock`   | update lock.json after prompt     |
-| `docsync tree <path>`                   | show doc dependency tree          |
-| `docsync init`                          | create .docsync/ folder           |
-| `docsync --version`                     | show version                      |
+| Command                                        | Description                         |
+|------------------------------------------------|-------------------------------------|
+| `docsync check <path>`                         | validate refs exist                 |
+| `docsync cascade <path> --last <N>`            | list affected docs by last N commits|
+| `docsync cascade <path> --since-lock`          | list affected docs since lock commit|
+| `docsync cascade <path> --base-branch <branch>`| list affected docs from merge-base  |
+| `docsync prompt <path>`                        | generate prompt (ordered by deps)   |
+| `docsync prompt <path> --parallel`             | ignore deps, all at once            |
+| `docsync prompt <path> --incremental`          | only include changed docs           |
+| `docsync prompt <path> --update-lock`          | update lock.json after prompt       |
+| `docsync tree <path>`                          | show doc dependency tree            |
+| `docsync init`                                 | create .docsync/ folder             |
+| `docsync --version`                            | show version                        |
 
 </details>
 

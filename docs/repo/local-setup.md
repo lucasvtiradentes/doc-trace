@@ -48,7 +48,7 @@ After install, use the venv:
 
 ```bash
 .venv/bin/docsync check docs/
-.venv/bin/docsync cascade HEAD~1
+.venv/bin/docsync cascade docs/ --last 1
 .venv/bin/docsync tree docs/
 .venv/bin/docsync init
 ```

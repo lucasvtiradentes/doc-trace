@@ -5,15 +5,22 @@ Maps code changes to affected documentation.
 ## Usage
 
 ```bash
-docsync cascade HEAD~1
-docsync cascade abc123 --docs path/to/docs
+docsync cascade docs/ --last 1
+docsync cascade docs/ --since-lock
+docsync cascade docs/ --base-branch main
+docsync cascade docs/ --last 5 --show-changed-files
 ```
 
 ## How It Works
 
 ### Step 1: Get Changed Files
 
-Runs `git diff --name-only <commit>` to get list of changed source files.
+Resolves a comparison base from one required scope flag:
+- `--last <N>` -> `HEAD~N`
+- `--since-lock` -> `.docsync/lock.json:last_analyzed_commit`
+- `--base-branch <branch>` -> `git merge-base HEAD <branch>`
+
+Then runs `git diff --name-only <base>` to get changed source files.
 
 ### Step 2: Build Indexes
 

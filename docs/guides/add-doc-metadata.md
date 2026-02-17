@@ -93,7 +93,7 @@ In frontmatter style, list items can omit descriptions (`- path` is valid).
 
 ## Separator Behavior
 
-- Default behavior (`require_separator: true`): metadata is parsed only after the separator.
+- Default behavior (`require_separator: true`):   metadata is parsed only after the separator.
 - Optional behavior (`require_separator: false`): metadata headers can appear without a separator.
 
 ## Directory and Glob References

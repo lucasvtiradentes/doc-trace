@@ -17,8 +17,12 @@ def main():
     check_parser.add_argument("path", type=Path, help="docs directory to check")
 
     cascade_parser = subparsers.add_parser("cascade", help="list docs affected by git diff")
-    cascade_parser.add_argument("commit", help="commit ref (e.g., HEAD~1, abc123)")
-    cascade_parser.add_argument("--docs", type=Path, default=Path("docs"), help="docs directory")
+    cascade_parser.add_argument("path", type=Path, nargs="?", default=Path("docs"), help="docs directory")
+    scope_group = cascade_parser.add_mutually_exclusive_group(required=True)
+    scope_group.add_argument("--since-lock", action="store_true", help="compare from lock.json last_analyzed_commit")
+    scope_group.add_argument("--last", type=int, help="compare against HEAD~N (N must be > 0)")
+    scope_group.add_argument("--base-branch", help="compare from merge-base(HEAD, <branch>)")
+    cascade_parser.add_argument("--show-changed-files", action="store_true", help="print changed files before hits")
 
     prompt_parser = subparsers.add_parser("prompt", help="generate prompt for AI to review docs")
     prompt_parser.add_argument("path", type=Path, help="docs directory")
@@ -36,7 +40,7 @@ def main():
     if args.command == "check":
         sys.exit(check.run(args.path))
     elif args.command == "cascade":
-        sys.exit(cascade.run(args.commit, args.docs))
+        sys.exit(cascade.run(args.path, args.since_lock, args.last, args.base_branch, args.show_changed_files))
     elif args.command == "prompt":
         sys.exit(prompt.run(args.path, args.incremental, args.parallel, args.update_lock))
     elif args.command == "tree":

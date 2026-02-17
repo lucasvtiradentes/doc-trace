@@ -28,10 +28,10 @@ ruff format --check # check formatting
 
 Test framework configured via `pyproject.toml`.
 
-| Setting   | Value      |
-|-----------|------------|
-| testpaths | tests/     |
-| python_files | test.py, test_*.py  |
+| Setting     | Value             |
+|-------------|-------------------|
+| testpaths   | tests/            |
+| python_files| test.py, test_*.py|
 
 ```bash
 pytest -v           # run tests verbose
