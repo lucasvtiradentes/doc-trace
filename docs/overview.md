@@ -13,10 +13,10 @@ CLI tool that keeps documentation in sync with code changes.
 
 | Field       | Value                       |
 |-------------|:----------------------------|
-| Name        | docsync                     |
+| Name        | doctrack                     |
 | Version     | 0.1.1                       |
 | Python      | 3.9+                        |
-| Entry point | docsync.cli:main            |
+| Entry point | doctrack.cli:main            |
 | Build       | hatch (wheel packaging)     |
 
 ## Built With
@@ -35,7 +35,7 @@ CLI tool that keeps documentation in sync with code changes.
 | affected | list docs affected by git diff       |
 | preview  | interactive docs explorer in browser |
 | lock     | manage lock.json state               |
-| init     | create .docsync/ config directory    |
+| init     | create .doctrack/ config directory    |
 
 ## Doc Index
 
@@ -65,5 +65,5 @@ related docs:
 - docs/concepts.md     - key terminology
 
 related sources:
-- src/docsync/cli.py - main entry point
-- src/docsync/       - main package directory
+- src/doctrack/cli.py - main entry point
+- src/doctrack/       - main package directory

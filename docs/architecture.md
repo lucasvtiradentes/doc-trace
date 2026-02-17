@@ -23,7 +23,7 @@
 ## Module Structure
 
 ```
-src/docsync/
+src/doctrack/
 ├── cli.py              ← entry point, arg parsing
 ├── commands/
 │   ├── validate.py     ← ref validation
@@ -138,7 +138,7 @@ while current_level not empty:
 find_config(start_path):
     current = start_path
     while current != root:
-        if .docsync/config.json exists:
+        if .doctrack/config.json exists:
             return config_path
         current = parent
     return None
@@ -153,6 +153,6 @@ related docs:
 - docs/features/preview.md     - preview command details
 
 related sources:
-- src/docsync/cli.py    - entry point and dispatcher
-- src/docsync/commands/ - command implementations
-- src/docsync/core/     - core modules
+- src/doctrack/cli.py    - entry point and dispatcher
+- src/doctrack/commands/ - command implementations
+- src/doctrack/core/     - core modules

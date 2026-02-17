@@ -5,7 +5,7 @@ Read ALL source files in this repository and update documentation accordingly.
 ## Instructions
 
 1. Read ALL files from these folders (in parallel):
-   - `src/docsync/` - Python CLI source code
+   - `src/doctrack/` - Python CLI source code
    - `.github/` - Workflows and scripts
    - `tests/` - Test files
 
@@ -21,7 +21,7 @@ Read ALL source files in this repository and update documentation accordingly.
 ## Folders to Skip
 
 - `.git/`, `.claude/`, `.ignore/`, `.venv/`, `__pycache__/`
-- `.docsync/syncs/` - sync output files
+- `.doctrack/syncs/` - sync output files
 - `.pytest_cache/`
 - Binary files (images, videos)
 
@@ -44,14 +44,14 @@ Do NOT just eyeball docs and conclude "looks correct". For each doc file:
 5. Check for removed items (commands/options that no longer exist in code)
 
 Examples of things to verify field-by-field:
-- CLI commands table → compare against `src/docsync/cli.py` and `src/docsync/commands/`
-- Config options → compare against `src/docsync/core/config.py`
-- Metadata format → compare against `src/docsync/core/parser.py`
-- Lock file format → compare against `src/docsync/core/lock.py`
-- Git operations → compare against `src/docsync/core/git.py`
-- Validation rules → compare against `src/docsync/commands/validate.py`
-- Affected algorithm → compare against `src/docsync/commands/affected.py`
-- Preview features → compare against `src/docsync/commands/preview/`
+- CLI commands table → compare against `src/doctrack/cli.py` and `src/doctrack/commands/`
+- Config options → compare against `src/doctrack/core/config.py`
+- Metadata format → compare against `src/doctrack/core/parser.py`
+- Lock file format → compare against `src/doctrack/core/lock.py`
+- Git operations → compare against `src/doctrack/core/git.py`
+- Validation rules → compare against `src/doctrack/commands/validate.py`
+- Affected algorithm → compare against `src/doctrack/commands/affected.py`
+- Preview features → compare against `src/doctrack/commands/preview/`
 
 ## Style Rules
 

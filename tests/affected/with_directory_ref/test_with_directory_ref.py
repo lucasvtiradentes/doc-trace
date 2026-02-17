@@ -3,8 +3,8 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from docsync.commands.affected import find_affected_docs
-from docsync.core.config import Config
+from doctrack.commands.affected import find_affected_docs
+from doctrack.core.config import Config
 
 DOCS_DIR = Path(__file__).parent / "docs"
 
@@ -15,7 +15,7 @@ def test_find_affected_docs_with_directory_ref():
         docs_dir = tmppath / "docs"
         shutil.copytree(DOCS_DIR, docs_dir)
         config = Config({})
-        with patch("docsync.commands.affected.get_changed_files", return_value=["api/src/booking/booking.module.ts"]):
+        with patch("doctrack.commands.affected.get_changed_files", return_value=["api/src/booking/booking.module.ts"]):
             result = find_affected_docs(docs_dir, "HEAD~1", config, repo_root=tmppath)
         assert len(result.direct_hits) == 1
         assert result.direct_hits[0] == docs_dir / "bookings.md"

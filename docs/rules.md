@@ -70,7 +70,7 @@ Do not recursively follow all refs without limits. Use `affected_depth_limit`.
 
 ### Committing lock.json
 
-`lock.json` is stored in `.docsync/lock.json` and used for incremental analysis.
+`lock.json` is stored in `.doctrack/lock.json` and used for incremental analysis.
 
 ### Hardcoded Doc Paths
 
@@ -87,5 +87,5 @@ related docs:
 - docs/concepts.md     - type definitions
 
 related sources:
-- src/docsync/commands/ - command implementations
-- src/docsync/core/     - core modules
+- src/doctrack/commands/ - command implementations
+- src/doctrack/core/     - core modules

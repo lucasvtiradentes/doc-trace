@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 import pytest
 
-from docsync.commands.affected import resolve_commit_ref
-from docsync.core.lock import Lock
+from doctrack.commands.affected import resolve_commit_ref
+from doctrack.core.lock import Lock
 
 
 def test_resolve_commit_ref_with_last():
@@ -20,19 +20,19 @@ def test_resolve_commit_ref_last_must_be_positive():
 
 
 def test_resolve_commit_ref_with_since_lock():
-    with patch("docsync.commands.affected.load_lock", return_value=Lock({"last_analyzed_commit": "abc123"})):
+    with patch("doctrack.commands.affected.load_lock", return_value=Lock({"last_analyzed_commit": "abc123"})):
         commit_ref = resolve_commit_ref(Path("."), since_lock=True)
     assert commit_ref == "abc123"
 
 
 def test_resolve_commit_ref_since_lock_missing_commit():
-    with patch("docsync.commands.affected.load_lock", return_value=Lock({})):
+    with patch("doctrack.commands.affected.load_lock", return_value=Lock({})):
         with pytest.raises(ValueError, match="lock.json has no last_analyzed_commit"):
             resolve_commit_ref(Path("."), since_lock=True)
 
 
 def test_resolve_commit_ref_with_base_branch():
-    with patch("docsync.commands.affected.get_merge_base", return_value="deadbeef") as mock:
+    with patch("doctrack.commands.affected.get_merge_base", return_value="deadbeef") as mock:
         commit_ref = resolve_commit_ref(Path("/repo"), base_branch="main")
     assert commit_ref == "deadbeef"
     mock.assert_called_once()

@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from docsync.core.config import MetadataConfig
-from docsync.core.parser import parse_doc
+from doctrack.core.config import MetadataConfig
+from doctrack.core.parser import parse_doc
 
 INPUT = Path(__file__).parent / "input.md"
 

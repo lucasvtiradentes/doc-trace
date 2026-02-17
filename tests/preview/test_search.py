@@ -1,7 +1,7 @@
 import tempfile
 from pathlib import Path
 
-from docsync.commands.preview.search import search_docs
+from doctrack.commands.preview.search import search_docs
 
 
 def test_search_docs_finds_match():

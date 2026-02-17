@@ -7,7 +7,7 @@ CLI tool that keeps documentation in sync with code in large codebases. Detects 
               │
               ▼
   ┌───────────────────────────────────┐
-  │ docsync affected docs/ --last 1   │
+  │ doctrack affected docs/ --last 1   │
   └───────────────────────────────────┘
               │
               ▼
@@ -45,7 +45,7 @@ related sources:
 When `src/booking/handler.ts` changes:
 
 ```
-docsync affected docs/ --last 1
+doctrack affected docs/ --last 1
 
 Direct hits (1):
   docs/bookings.md       <- references src/booking/
@@ -87,14 +87,14 @@ In large codebases, docs get outdated because:
 1. No one remembers which docs need updating when a file changes
 2. AI agents don't know which files to read to validate each doc
 
-docsync solves this by adding "hints" to each doc - `related sources:` tells any AI exactly what to read.
+doctrack solves this by adding "hints" to each doc - `related sources:` tells any AI exactly what to read.
 
 ## Quickstart
 
 ### 1. Install
 
 ```bash
-pipx install docsync
+pipx install doctrack
 ```
 
 ### 2. Add metadata to your docs
@@ -159,7 +159,7 @@ Config required:
 ### 3. Initialize config (optional)
 
 ```bash
-docsync init    # creates .docsync/ folder
+doctrack init    # creates .doctrack/ folder
 ```
 
 <div align="center">
@@ -168,7 +168,7 @@ docsync init    # creates .docsync/ folder
 <div align="left">
 
 ```
-.docsync/
+.doctrack/
 ├── config.json   # required
 ├── lock.json     # tracks last analyzed commit
 └── syncs/        # output directory (added to .gitignore)
@@ -201,10 +201,10 @@ metadata options:
 ### 4. Use it
 
 ```bash
-docsync validate docs/                     # validate all refs exist
-docsync affected docs/ --last 5            # find docs affected by last 5 commits
-docsync affected docs/ --since v1.0.0      # find docs affected since tag/commit/branch
-docsync preview docs/                      # interactive explorer in browser
+doctrack validate docs/                     # validate all refs exist
+doctrack affected docs/ --last 5            # find docs affected by last 5 commits
+doctrack affected docs/ --since v1.0.0      # find docs affected since tag/commit/branch
+doctrack preview docs/                      # interactive explorer in browser
 ```
 
 <div align="center">
@@ -214,19 +214,19 @@ docsync preview docs/                      # interactive explorer in browser
 
 | Command                                          | Description                          |
 |--------------------------------------------------|--------------------------------------|
-| `docsync validate <path>`                        | validate refs exist                  |
-| `docsync affected <path> --last <N>`             | list affected docs by last N commits |
-| `docsync affected <path> --since <ref>`          | list affected docs since ref         |
-| `docsync affected <path> --since-lock`           | list affected docs since lock commit |
-| `docsync affected <path> --base-branch <branch>` | list affected docs from merge-base   |
-| `docsync affected <path> --verbose`              | show changed files and match details |
-| `docsync affected <path> --json`                 | output as JSON                       |
-| `docsync preview <path>`                         | interactive explorer in browser      |
-| `docsync preview <path> --port <N>`              | preview on custom port (default 8420)|
-| `docsync lock update`                            | save current commit to lock.json     |
-| `docsync lock show`                              | show lock.json state                 |
-| `docsync init`                                   | create .docsync/ folder              |
-| `docsync --version`                              | show version                         |
+| `doctrack validate <path>`                        | validate refs exist                  |
+| `doctrack affected <path> --last <N>`             | list affected docs by last N commits |
+| `doctrack affected <path> --since <ref>`          | list affected docs since ref         |
+| `doctrack affected <path> --since-lock`           | list affected docs since lock commit |
+| `doctrack affected <path> --base-branch <branch>` | list affected docs from merge-base   |
+| `doctrack affected <path> --verbose`              | show changed files and match details |
+| `doctrack affected <path> --json`                 | output as JSON                       |
+| `doctrack preview <path>`                         | interactive explorer in browser      |
+| `doctrack preview <path> --port <N>`              | preview on custom port (default 8420)|
+| `doctrack lock update`                            | save current commit to lock.json     |
+| `doctrack lock show`                              | show lock.json state                 |
+| `doctrack init`                                   | create .doctrack/ folder              |
+| `doctrack --version`                              | show version                         |
 
 </div>
 </details>
@@ -264,11 +264,11 @@ Phases show dependency order - useful for AI agents processing docs.
 make install           # create venv + install
 make check             # lint
 make test              # run tests
-docsync validate docs/ # practical test
+doctrack validate docs/ # practical test
 ```
 
 ```bash
-# dev alias (docsyncd)
-ln -s $(pwd)/.venv/bin/docsync ~/.local/bin/docsyncd   # install
-rm ~/.local/bin/docsyncd                                # remove
+# dev alias (doctrackd)
+ln -s $(pwd)/.venv/bin/doctrack ~/.local/bin/doctrackd   # install
+rm ~/.local/bin/doctrackd                                # remove
 ```
