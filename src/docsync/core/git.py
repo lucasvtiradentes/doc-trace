@@ -153,3 +153,76 @@ def get_file_at_commit(repo_root: Path, file_path: str, commit: str) -> str | No
         return None
     except Exception:
         return None
+
+
+class CommitInfo(NamedTuple):
+    hash: str
+    short: str
+    message: str
+
+
+def get_commits_in_range(commit_ref: str, repo_root: Path) -> list[CommitInfo]:
+    try:
+        result = subprocess.run(
+            ["git", "log", f"{commit_ref}..HEAD", "--pretty=format:%H|%h|%s"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        commits = []
+        for line in result.stdout.strip().splitlines():
+            if not line:
+                continue
+            parts = line.split("|", 2)
+            if len(parts) >= 3:
+                commits.append(CommitInfo(parts[0], parts[1], parts[2]))
+        return commits
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return []
+
+
+def get_tags_in_range(commit_ref: str, repo_root: Path) -> list[str]:
+    try:
+        result = subprocess.run(
+            ["git", "log", f"{commit_ref}..HEAD", "--pretty=format:%D"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        tags = []
+        for line in result.stdout.strip().splitlines():
+            if not line:
+                continue
+            for ref in line.split(", "):
+                if ref.startswith("tag: "):
+                    tags.append(ref[5:])
+        return tags
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return []
+
+
+def get_merged_branches_in_range(commit_ref: str, repo_root: Path) -> list[str]:
+    try:
+        result = subprocess.run(
+            ["git", "log", f"{commit_ref}..HEAD", "--merges", "--pretty=format:%s"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        branches = []
+        for line in result.stdout.strip().splitlines():
+            if not line:
+                continue
+            if "Merge branch '" in line:
+                start = line.find("'") + 1
+                end = line.find("'", start)
+                if start > 0 and end > start:
+                    branches.append(line[start:end])
+            elif "Merge pull request" in line:
+                branches.append(line)
+        return branches
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return []

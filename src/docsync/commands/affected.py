@@ -7,7 +7,15 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 from docsync.core.config import Config, find_repo_root
-from docsync.core.git import FileChange, get_changed_files, get_changed_files_detailed, get_merge_base
+from docsync.core.git import (
+    FileChange,
+    get_changed_files,
+    get_changed_files_detailed,
+    get_commits_in_range,
+    get_merge_base,
+    get_merged_branches_in_range,
+    get_tags_in_range,
+)
 from docsync.core.lock import load_lock
 from docsync.core.parser import parse_doc
 
@@ -195,23 +203,6 @@ def _build_levels(docs: list[dict[str, Any]], repo_root: Path) -> list[list[dict
     return [level for level in levels if level]
 
 
-def _print_default(result: AffectedResult, levels: list[list[dict[str, Any]]], repo_root: Path) -> None:
-    print(f"Direct hits ({len(result.direct_hits)}):")
-    for doc in result.direct_hits:
-        print(f"  {_rel_path(doc, repo_root)}")
-    if result.indirect_hits:
-        print(f"\nIndirect hits ({len(result.indirect_hits)}):")
-        for doc in result.indirect_hits:
-            via = result.indirect_chains.get(doc)
-            via_str = f" <- {_rel_path(via, repo_root)}" if via else ""
-            print(f"  {_rel_path(doc, repo_root)}{via_str}")
-    if result.circular_refs:
-        print("\nWarning: circular refs detected:")
-        for src, dst in result.circular_refs:
-            print(f"  {src} <-> {dst}")
-    _print_phases(levels)
-
-
 def _rel_path(path: Path, repo_root: Path) -> str:
     try:
         return str(path.relative_to(repo_root))
@@ -219,79 +210,11 @@ def _rel_path(path: Path, repo_root: Path) -> str:
         return str(path)
 
 
-def _format_stats(fc: FileChange) -> str:
-    if fc.added is None and fc.removed is None:
-        return ""
-    added = f"+{fc.added}" if fc.added else ""
-    removed = f"-{fc.removed}" if fc.removed else ""
-    if added and removed:
-        return f"({added} {removed})"
-    elif added:
-        return f"({added})"
-    elif removed:
-        return f"({removed})"
-    return ""
-
-
-def _format_file_changes(changes: list[FileChange]) -> list[str]:
-    stats_list = [_format_stats(fc) for fc in changes]
-    max_stats_width = max((len(s) for s in stats_list), default=0)
-    lines = []
-    for fc, stats in zip(changes, stats_list):
-        status = fc.status[0]
-        stats_padded = stats.ljust(max_stats_width)
-        rename = f" <- {fc.old_path}" if fc.old_path else ""
-        lines.append(f"  {status}  {stats_padded}  {fc.path}{rename}")
-    return lines
-
-
-def _print_verbose(
-    result: AffectedResult, changed_files: list[FileChange], levels: list[list[dict[str, Any]]], repo_root: Path
-) -> None:
-    print(f"Changed files ({len(changed_files)}):")
-    for line in _format_file_changes(changed_files):
-        print(line)
-
-    print(f"\nMatched ({len(result.matches)} sources -> {len(result.direct_hits)} docs):")
-    for source, docs in sorted(result.matches.items()):
-        doc_names = ", ".join(_rel_path(d, repo_root) for d in docs)
-        print(f"  {source} -> {doc_names}")
-
-    print(f"\nDirect hits ({len(result.direct_hits)}):")
-    for doc in result.direct_hits:
-        print(f"  {_rel_path(doc, repo_root)}")
-
-    if result.indirect_hits:
-        print(f"\nIndirect hits ({len(result.indirect_hits)}):")
-        for doc in result.indirect_hits:
-            via = result.indirect_chains.get(doc)
-            via_str = f" <- {_rel_path(via, repo_root)}" if via else ""
-            print(f"  {_rel_path(doc, repo_root)}{via_str}")
-
-    if result.circular_refs:
-        print("\nWarning: circular refs detected:")
-        for src, dst in result.circular_refs:
-            print(f"  {src} <-> {dst}")
-
-    _print_phases(levels)
-
-
-def _print_phases(levels: list[list[dict[str, Any]]]) -> None:
-    if not levels:
-        return
-    print(f"\nPhases ({len(levels)}):")
-    for i, level_docs in enumerate(levels):
-        if not level_docs:
-            continue
-        docs_str = ", ".join(d["path"] for d in level_docs)
-        print(f"  {i + 1}. {docs_str}")
-
-
-def _build_json(
+def _build_output_data(
     result: AffectedResult,
     levels: list[list[dict[str, Any]]],
     repo_root: Path,
-    changed_files: list[FileChange] | None = None,
+    git_data: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     data: dict[str, Any] = {
         "direct_hits": [_rel_path(d, repo_root) for d in result.direct_hits],
@@ -300,12 +223,29 @@ def _build_json(
             for d in result.indirect_hits
             if d in result.indirect_chains
         ],
-        "phases": [[d["path"] for d in level] for level in levels],
+        "phases": {str(i + 1): [d["path"] for d in level] for i, level in enumerate(levels)},
     }
     if result.circular_refs:
         data["circular_refs"] = [[str(a), str(b)] for a, b in result.circular_refs]
-    if changed_files is not None:
-        data["changed_files"] = [
+    if git_data:
+        data["git"] = git_data
+    return data
+
+
+def _build_git_data(
+    changed_files: list[FileChange],
+    result: AffectedResult,
+    commit_ref: str,
+    repo_root: Path,
+) -> dict[str, Any]:
+    commits = get_commits_in_range(commit_ref, repo_root)
+    tags = get_tags_in_range(commit_ref, repo_root)
+    merged_branches = get_merged_branches_in_range(commit_ref, repo_root)
+    return {
+        "commits": {c.short: c.message for c in commits},
+        "tags": tags,
+        "merged_branches": merged_branches,
+        "changed_files": [
             {
                 "path": fc.path,
                 "status": fc.status,
@@ -314,9 +254,76 @@ def _build_json(
                 **({"old_path": fc.old_path} if fc.old_path else {}),
             }
             for fc in changed_files
-        ]
-        data["matches"] = {src: [_rel_path(d, repo_root) for d in docs] for src, docs in result.matches.items()}
-    return data
+        ],
+        "source_to_docs": {src: [_rel_path(d, repo_root) for d in docs] for src, docs in result.matches.items()},
+    }
+
+
+def _print_from_data(data: dict[str, Any], verbose: bool = False) -> None:
+    git = data.get("git", {})
+    if verbose and git:
+        files = git.get("changed_files", [])
+        if files:
+            print(f"Changed files ({len(files)}):")
+            stats_list = []
+            for fc in files:
+                added = f"+{fc['added']}" if fc.get("added") else ""
+                removed = f"-{fc['removed']}" if fc.get("removed") else ""
+                if added and removed:
+                    stats_list.append(f"({added} {removed})")
+                elif added:
+                    stats_list.append(f"({added})")
+                elif removed:
+                    stats_list.append(f"({removed})")
+                else:
+                    stats_list.append("")
+            max_stats = max((len(s) for s in stats_list), default=0)
+            for fc, stats in zip(files, stats_list):
+                status = fc["status"][0]
+                rename = f" <- {fc['old_path']}" if fc.get("old_path") else ""
+                print(f"  {status}  {stats.ljust(max_stats)}  {fc['path']}{rename}")
+
+        commits = git.get("commits", {})
+        if commits:
+            print(f"\nCommits ({len(commits)}):")
+            for hash, message in commits.items():
+                print(f"  {hash} {message}")
+
+        tags = git.get("tags", [])
+        if tags:
+            print(f"\nTags ({len(tags)}): {', '.join(tags)}")
+
+        merged = git.get("merged_branches", [])
+        if merged:
+            print(f"\nMerged branches ({len(merged)}):")
+            for b in merged:
+                print(f"  {b}")
+
+        source_to_docs = git.get("source_to_docs", {})
+        if source_to_docs:
+            total_docs = len(data["direct_hits"])
+            print(f"\nMatched ({len(source_to_docs)} sources -> {total_docs} docs):")
+            for source, docs in sorted(source_to_docs.items()):
+                print(f"  {source} -> {', '.join(docs)}")
+
+    print(f"\nDirect hits ({len(data['direct_hits'])}):" if verbose else f"Direct hits ({len(data['direct_hits'])}):")
+    for doc in data["direct_hits"]:
+        print(f"  {doc}")
+
+    if data["indirect_hits"]:
+        print(f"\nIndirect hits ({len(data['indirect_hits'])}):")
+        for hit in data["indirect_hits"]:
+            print(f"  {hit['doc']} <- {hit['via']}")
+
+    if data.get("circular_refs"):
+        print("\nWarning: circular refs detected:")
+        for ref in data["circular_refs"]:
+            print(f"  {ref[0]} <-> {ref[1]}")
+
+    if data["phases"]:
+        print(f"\nPhases ({len(data['phases'])}):")
+        for phase_num, docs in data["phases"].items():
+            print(f"  {phase_num}. {', '.join(docs)}")
 
 
 def run(
@@ -346,18 +353,14 @@ def run(
     result = _find_affected_docs_for_changes(docs_path, changed_files, config, repo_root)
 
     if not result.affected_docs:
+        data: dict[str, Any] = {"direct_hits": [], "indirect_hits": [], "phases": []}
+        if verbose:
+            git_data = _build_git_data(changed_files_detailed, result, commit_ref, repo_root)
+            data["git"] = git_data
         if output_json:
-            data: dict[str, Any] = {"direct_hits": [], "indirect_hits": [], "phases": []}
-            if verbose:
-                data["changed_files"] = [
-                    {"path": fc.path, "status": fc.status, "added": fc.added, "removed": fc.removed}
-                    for fc in changed_files_detailed
-                ]
             print(json.dumps(data, indent=2))
         elif verbose:
-            print(f"Changed files ({len(changed_files_detailed)}):")
-            for line in _format_file_changes(changed_files_detailed):
-                print(line)
+            _print_from_data(data, verbose=True)
             print("\nNo docs affected")
         else:
             print("No docs affected")
@@ -366,12 +369,12 @@ def run(
     docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root)
     levels = _build_levels(docs_metadata, repo_root)
 
+    git_data = _build_git_data(changed_files_detailed, result, commit_ref, repo_root) if verbose else None
+    data = _build_output_data(result, levels, repo_root, git_data)
+
     if output_json:
-        data = _build_json(result, levels, repo_root, changed_files_detailed if verbose else None)
         print(json.dumps(data, indent=2))
-    elif verbose:
-        _print_verbose(result, changed_files_detailed, levels, repo_root)
     else:
-        _print_default(result, levels, repo_root)
+        _print_from_data(data, verbose=verbose)
 
     return 0
