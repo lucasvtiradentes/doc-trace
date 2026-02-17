@@ -103,6 +103,35 @@
         .doc-view.hidden { display: none; }
         .doc-edit { display: none; }
         .doc-edit.visible { display: block; }
+        .doc-wrapper { display: flex; gap: 24px; }
+        .doc-main { flex: 1; min-width: 0; }
+        .doc-history { width: 280px; flex-shrink: 0; }
+        .history-panel { background: #f8fafc; border-radius: 8px; padding: 16px; position: sticky; top: 0; }
+        .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .history-title { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .history-toggle { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #64748b; cursor: pointer; }
+        .history-toggle input { cursor: pointer; }
+        .history-list { display: flex; flex-direction: column; gap: 4px; max-height: 400px; overflow-y: auto; }
+        .history-item { padding: 10px 12px; background: #fff; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+        .history-item:hover { border-color: #e2e8f0; }
+        .history-item.active { border-color: #3b82f6; background: #eff6ff; }
+        .history-item.current { border-color: #22c55e; }
+        .history-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .history-hash { font-family: 'SF Mono', Monaco, monospace; font-size: 11px; color: #8b5cf6; background: #f3e8ff; padding: 2px 6px; border-radius: 4px; }
+        .history-date { font-size: 11px; color: #94a3b8; }
+        .history-message { font-size: 12px; color: #334155; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .history-author { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+        .history-current-badge { font-size: 10px; color: #22c55e; background: #dcfce7; padding: 2px 6px; border-radius: 4px; margin-left: auto; }
+        .diff-add { background: #dcfce7; border-left: 3px solid #22c55e; padding-left: 8px; margin-left: -11px; }
+        .diff-del { background: #fee2e2; border-left: 3px solid #ef4444; padding-left: 8px; margin-left: -11px; opacity: 0.7; }
+        .diff-section { margin-bottom: 16px; padding: 12px; border-radius: 6px; }
+        .diff-section.additions { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .diff-section.deletions { background: #fef2f2; border: 1px solid #fecaca; }
+        .diff-section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
+        .diff-section.additions .diff-section-title { color: #16a34a; }
+        .diff-section.deletions .diff-section-title { color: #dc2626; }
+        .diff-line { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
+        .doc-diff-summary { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
@@ -230,16 +259,43 @@
 
         let originalContent = '';
         let isEditing = false;
+        let docHistory = [];
+        let currentCommit = null;
+        let previousContent = null;
+        let highlightChanges = false;
+        let lastCommitDiff = '';
 
         async function loadDocContent(path) {
             const container = document.getElementById('doc-container');
             container.innerHTML = '<div style="color:#94a3b8;text-align:center;padding:40px">Loading...</div>';
             isEditing = false;
+            currentCommit = null;
+            previousContent = null;
+            lastCommitDiff = '';
             try {
-                const res = await fetch('/doc?path=' + encodeURIComponent(path));
-                if (!res.ok) throw new Error('Failed to load');
-                const md = await res.text();
+                const [docRes, historyRes] = await Promise.all([
+                    fetch('/doc?path=' + encodeURIComponent(path)),
+                    fetch('/history?path=' + encodeURIComponent(path))
+                ]);
+                if (!docRes.ok) throw new Error('Failed to load');
+                const md = await docRes.text();
                 originalContent = md;
+                docHistory = historyRes.ok ? await historyRes.json() : [];
+                if (highlightChanges && docHistory.length > 0) {
+                    const prevRes = await fetch('/doc?path=' + encodeURIComponent(path) + '&commit=' + docHistory[0].hash);
+                    previousContent = prevRes.ok ? await prevRes.text() : null;
+                    if (docHistory.length > 1) {
+                        const [commit0Res, commit1Res] = await Promise.all([
+                            fetch('/doc?path=' + encodeURIComponent(path) + '&commit=' + docHistory[0].hash),
+                            fetch('/doc?path=' + encodeURIComponent(path) + '&commit=' + docHistory[1].hash)
+                        ]);
+                        if (commit0Res.ok && commit1Res.ok) {
+                            const commit0Content = await commit0Res.text();
+                            const commit1Content = await commit1Res.text();
+                            lastCommitDiff = generateDiffSummary(commit1Content, commit0Content);
+                        }
+                    }
+                }
                 renderDocView(path, md);
                 const node = graphData.nodes.find(n => n.path === path);
                 document.getElementById('page-title').textContent = node ? node.name : path.split('/').pop();
@@ -251,23 +307,179 @@
         function renderDocView(path, md) {
             const container = document.getElementById('doc-container');
             const html = marked.parse(md);
+            const isOldVersion = currentCommit !== null;
+            let diffSummary = '';
+            if (highlightChanges && previousContent !== null) {
+                const { added, removed } = computeDiff(previousContent, md);
+                if (added.length === 0 && removed.length === 0 && !isOldVersion && docHistory.length > 0) {
+                    diffSummary = '<div style="color:#94a3b8;font-size:13px;padding:12px;text-align:center;background:#f8fafc;border-radius:6px;margin-bottom:16px">No uncommitted changes. Showing last commit changes below.</div>' + (lastCommitDiff || '');
+                } else {
+                    diffSummary = generateDiffSummary(previousContent, md);
+                }
+            }
             container.innerHTML = `
-                <div class="doc-header">
-                    <div class="doc-path">${path}</div>
-                    <div class="doc-actions">
-                        <button class="doc-btn doc-btn-edit" onclick="enterEditMode()">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            Edit
-                        </button>
+                <div class="doc-wrapper">
+                    <div class="doc-main">
+                        <div class="doc-header">
+                            <div class="doc-path">${path}${isOldVersion ? ' @ ' + currentCommit.substring(0, 7) : ''}</div>
+                            <div class="doc-actions">
+                                ${isOldVersion ? `
+                                    <button class="doc-btn doc-btn-cancel" onclick="loadCurrentVersion()">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                                        Back to current
+                                    </button>
+                                ` : `
+                                    <button class="doc-btn doc-btn-edit" onclick="enterEditMode()">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                        Edit
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+                        <div class="doc-view">
+                            ${diffSummary ? '<div class="doc-diff-summary">' + diffSummary + '</div>' : ''}
+                            <div class="doc-content">${html}</div>
+                        </div>
+                        <div class="doc-edit">
+                            <textarea class="doc-editor" id="doc-editor">${escapeHtml(md)}</textarea>
+                        </div>
+                    </div>
+                    <div class="doc-history">
+                        <div class="history-panel">
+                            <div class="history-header">
+                                <span class="history-title">History</span>
+                                <label class="history-toggle">
+                                    <input type="checkbox" id="highlight-toggle" ${highlightChanges ? 'checked' : ''} onchange="toggleHighlight()">
+                                    Show changes
+                                </label>
+                            </div>
+                            <div class="history-list" id="history-list"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="doc-view">
-                    <div class="doc-content">${html}</div>
-                </div>
-                <div class="doc-edit">
-                    <textarea class="doc-editor" id="doc-editor">${escapeHtml(md)}</textarea>
-                </div>
             `;
+            renderHistoryList();
+        }
+
+        function renderHistoryList() {
+            const list = document.getElementById('history-list');
+            if (!list) return;
+            if (docHistory.length === 0) {
+                list.innerHTML = '<div style="color:#94a3b8;font-size:12px;text-align:center;padding:16px">No history available</div>';
+                return;
+            }
+            list.innerHTML = `
+                <div class="history-item ${currentCommit === null ? 'active current' : 'current'}" onclick="loadCurrentVersion()">
+                    <div class="history-item-header">
+                        <span class="history-hash">current</span>
+                        <span class="history-current-badge">Latest</span>
+                    </div>
+                    <div class="history-message">Working copy</div>
+                </div>
+            ` + docHistory.map((commit, i) => `
+                <div class="history-item ${currentCommit === commit.hash ? 'active' : ''}" onclick="loadVersion('${commit.hash}', ${i})">
+                    <div class="history-item-header">
+                        <span class="history-hash">${commit.short}</span>
+                        <span class="history-date">${formatDate(commit.date)}</span>
+                    </div>
+                    <div class="history-message">${escapeHtml(commit.message)}</div>
+                    <div class="history-author">${escapeHtml(commit.author)}</div>
+                </div>
+            `).join('');
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            if (days === 0) return 'Today';
+            if (days === 1) return 'Yesterday';
+            if (days < 7) return days + 'd ago';
+            if (days < 30) return Math.floor(days / 7) + 'w ago';
+            return date.toLocaleDateString();
+        }
+
+        async function loadVersion(hash, index) {
+            currentCommit = hash;
+            try {
+                const res = await fetch('/doc?path=' + encodeURIComponent(currentDoc) + '&commit=' + hash);
+                if (!res.ok) throw new Error('Failed to load version');
+                const md = await res.text();
+                if (highlightChanges && index < docHistory.length - 1) {
+                    const prevRes = await fetch('/doc?path=' + encodeURIComponent(currentDoc) + '&commit=' + docHistory[index + 1].hash);
+                    previousContent = prevRes.ok ? await prevRes.text() : null;
+                } else {
+                    previousContent = null;
+                }
+                renderDocView(currentDoc, md);
+            } catch (e) {
+                alert('Failed to load version');
+            }
+        }
+
+        async function loadCurrentVersion() {
+            currentCommit = null;
+            lastCommitDiff = '';
+            if (highlightChanges && docHistory.length > 0) {
+                const prevRes = await fetch('/doc?path=' + encodeURIComponent(currentDoc) + '&commit=' + docHistory[0].hash);
+                previousContent = prevRes.ok ? await prevRes.text() : null;
+                if (docHistory.length > 1) {
+                    const [commit0Res, commit1Res] = await Promise.all([
+                        fetch('/doc?path=' + encodeURIComponent(currentDoc) + '&commit=' + docHistory[0].hash),
+                        fetch('/doc?path=' + encodeURIComponent(currentDoc) + '&commit=' + docHistory[1].hash)
+                    ]);
+                    if (commit0Res.ok && commit1Res.ok) {
+                        const commit0Content = await commit0Res.text();
+                        const commit1Content = await commit1Res.text();
+                        lastCommitDiff = generateDiffSummary(commit1Content, commit0Content);
+                    }
+                }
+            } else {
+                previousContent = null;
+            }
+            renderDocView(currentDoc, originalContent);
+        }
+
+        async function toggleHighlight() {
+            highlightChanges = document.getElementById('highlight-toggle').checked;
+            if (currentCommit) {
+                const index = docHistory.findIndex(c => c.hash === currentCommit);
+                loadVersion(currentCommit, index);
+            } else {
+                await loadCurrentVersion();
+            }
+        }
+
+        function computeDiff(oldText, newText) {
+            const oldLines = oldText.split('\n');
+            const newLines = newText.split('\n');
+            const oldSet = new Set(oldLines);
+            const newSet = new Set(newLines);
+            const added = newLines.filter(l => l.trim() && !oldSet.has(l));
+            const removed = oldLines.filter(l => l.trim() && !newSet.has(l));
+            return { added, removed };
+        }
+
+        function generateDiffSummary(oldText, newText) {
+            const { added, removed } = computeDiff(oldText, newText);
+            if (added.length === 0 && removed.length === 0) {
+                return '<div style="color:#94a3b8;font-size:13px;padding:16px;text-align:center">No changes detected</div>';
+            }
+            let html = '';
+            if (added.length > 0) {
+                html += `<div class="diff-section additions">
+                    <div class="diff-section-title">+ ${added.length} line${added.length > 1 ? 's' : ''} added</div>
+                    ${added.map(l => '<div class="diff-line">' + escapeHtml(l) + '</div>').join('')}
+                </div>`;
+            }
+            if (removed.length > 0) {
+                html += `<div class="diff-section deletions">
+                    <div class="diff-section-title">- ${removed.length} line${removed.length > 1 ? 's' : ''} removed</div>
+                    ${removed.map(l => '<div class="diff-line">' + escapeHtml(l) + '</div>').join('')}
+                </div>`;
+            }
+            return html;
         }
 
         function escapeHtml(text) {
@@ -280,6 +492,7 @@
             isEditing = true;
             document.querySelector('.doc-view').classList.add('hidden');
             document.querySelector('.doc-edit').classList.add('visible');
+            document.querySelector('.doc-history').style.display = 'none';
             document.querySelector('.doc-actions').innerHTML = `
                 <button class="doc-btn doc-btn-cancel" onclick="cancelEdit()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -295,6 +508,7 @@
         function cancelEdit() {
             isEditing = false;
             document.getElementById('doc-editor').value = originalContent;
+            document.querySelector('.doc-history').style.display = '';
             document.querySelector('.doc-view').classList.remove('hidden');
             document.querySelector('.doc-edit').classList.remove('visible');
             document.querySelector('.doc-actions').innerHTML = `

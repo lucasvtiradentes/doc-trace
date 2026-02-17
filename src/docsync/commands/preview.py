@@ -3,12 +3,56 @@ from __future__ import annotations
 import http.server
 import json
 import socketserver
+import subprocess
 import threading
 import webbrowser
 from pathlib import Path
 
 from docsync.commands.tree import build_dependency_tree
 from docsync.core.config import Config, find_repo_root, load_config
+
+
+def get_file_history(repo_root: Path, file_path: str, limit: int = 20) -> list[dict]:
+    try:
+        result = subprocess.run(
+            ["git", "log", f"-{limit}", "--pretty=format:%H|%h|%s|%ai|%an", "--", file_path],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            return []
+        commits = []
+        for line in result.stdout.strip().split("\n"):
+            if not line:
+                continue
+            parts = line.split("|", 4)
+            if len(parts) >= 5:
+                commits.append({
+                    "hash": parts[0],
+                    "short": parts[1],
+                    "message": parts[2],
+                    "date": parts[3],
+                    "author": parts[4],
+                })
+        return commits
+    except Exception:
+        return []
+
+
+def get_file_at_commit(repo_root: Path, file_path: str, commit: str) -> str | None:
+    try:
+        result = subprocess.run(
+            ["git", "show", f"{commit}:{file_path}"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            return result.stdout
+        return None
+    except Exception:
+        return None
 
 TEMPLATE_PATH = Path(__file__).parent / "preview_template.html"
 
@@ -90,15 +134,39 @@ class PreviewHandler(http.server.SimpleHTTPRequestHandler):
         elif parsed.path == "/doc":
             params = parse_qs(parsed.query)
             doc_path = params.get("path", [None])[0]
+            commit = params.get("commit", [None])[0]
             if doc_path:
                 full_path = self.repo_root / doc_path
-                if full_path.exists() and full_path.suffix == ".md":
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/plain; charset=utf-8")
-                    self.end_headers()
-                    self.wfile.write(full_path.read_text(encoding="utf-8").encode("utf-8"))
+                if full_path.suffix == ".md":
+                    if commit:
+                        content = get_file_at_commit(self.repo_root, doc_path, commit)
+                        if content is not None:
+                            self.send_response(200)
+                            self.send_header("Content-type", "text/plain; charset=utf-8")
+                            self.end_headers()
+                            self.wfile.write(content.encode("utf-8"))
+                        else:
+                            self.send_error(404, "Version not found")
+                    elif full_path.exists():
+                        self.send_response(200)
+                        self.send_header("Content-type", "text/plain; charset=utf-8")
+                        self.end_headers()
+                        self.wfile.write(full_path.read_text(encoding="utf-8").encode("utf-8"))
+                    else:
+                        self.send_error(404, "Document not found")
                 else:
                     self.send_error(404, "Document not found")
+            else:
+                self.send_error(400, "Missing path parameter")
+        elif parsed.path == "/history":
+            params = parse_qs(parsed.query)
+            doc_path = params.get("path", [None])[0]
+            if doc_path:
+                history = get_file_history(self.repo_root, doc_path)
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps(history).encode("utf-8"))
             else:
                 self.send_error(400, "Missing path parameter")
         else:
