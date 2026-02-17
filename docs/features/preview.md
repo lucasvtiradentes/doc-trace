@@ -17,7 +17,7 @@ Starts a local HTTP server serving an interactive single-page application for ex
 
 ### Dependency Graph Visualization
 
-- Interactive mermaid-based dependency diagram
+- Interactive canvas-based dependency diagram
 - Nodes colored by dependency level
 - Click to highlight node and its connections
 - Double-click to open doc in editor

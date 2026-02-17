@@ -71,7 +71,7 @@ Uses `init_docsync()` from config module:
 1. Create .docsync/ directory
 2. Write config.json with defaults
 3. Create syncs/ subdirectory
-4. Write .gitignore in syncs/
+4. Update repo root .gitignore with syncs/ entry
 
 ---
 

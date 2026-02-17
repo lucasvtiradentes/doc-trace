@@ -41,7 +41,7 @@ Installed with `.[dev]`:
 .venv/bin/docsync --version
 ```
 
-Should output the installed package version, e.g. `docsync 0.1.1`
+Should output the installed package version, e.g. `docsync 0.1.2`
 
 ## Running Commands
 

@@ -14,7 +14,7 @@ CLI tool that keeps documentation in sync with code changes.
 | Field       | Value                       |
 |-------------|:----------------------------|
 | Name        | docsync                     |
-| Version     | 0.1.1                       |
+| Version     | 0.1.2                       |
 | Python      | 3.9+                        |
 | Entry point | docsync.cli:main            |
 | Build       | hatch (wheel packaging)     |

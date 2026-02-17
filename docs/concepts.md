@@ -85,6 +85,38 @@ State tracking for incremental mode.
 | last_run             | str or None  | ISO timestamp of last run        |
 | docs_validated       | list[str]    | paths validated in last run      |
 
+### FileChange
+
+Git file change details used in verbose output.
+
+| Field    | Type       | Description                         |
+|----------|------------|-------------------------------------|
+| path     | str        | file path                           |
+| status   | str        | git status (A/M/D/R)               |
+| added    | int or None| lines added                         |
+| removed  | int or None| lines removed                       |
+| old_path | str or None| previous path (for renames)         |
+
+### CommitInfo
+
+Git commit metadata.
+
+| Field   | Type | Description          |
+|---------|------|----------------------|
+| hash    | str  | full commit hash     |
+| short   | str  | short commit hash    |
+| message | str  | commit message       |
+
+### DependencyTree
+
+Output from dependency tree analysis (used by preview).
+
+| Field    | Type                    | Description                    |
+|----------|-------------------------|--------------------------------|
+| levels   | list[list[Path]]        | docs grouped by dependency depth|
+| circular | list[tuple[Path, Path]] | detected circular dependencies |
+| doc_deps | dict[Path, list[Path]]  | doc to its dependencies        |
+
 ## Terminology
 
 ### Direct Hit
@@ -128,3 +160,4 @@ related sources:
 - src/docsync/core/config.py        - Config definition
 - src/docsync/core/lock.py          - Lock definition
 - src/docsync/core/git.py           - FileChange, CommitInfo definitions
+- src/docsync/commands/preview/tree.py - DependencyTree definition

@@ -2,12 +2,13 @@
 
 ## Pipelines
 
-| Workflow         | Trigger              | Purpose                  |
-|------------------|----------------------|--------------------------|
-| prs.yml          | pull_request         | validate PRs             |
-| push-to-main.yml | push to main         | validate main branch     |
-| callable-ci.yml  | workflow_call        | reusable CI workflow     |
-| release.yml      | workflow_dispatch    | publish to PyPI          |
+| Workflow         | Trigger                    | Purpose                  |
+|------------------|----------------------------|--------------------------|
+| prs.yml          | pull_request               | validate PRs             |
+| push-to-main.yml | push to main               | validate main branch     |
+| callable-ci.yml  | workflow_call              | reusable CI workflow     |
+| release.yml      | workflow_dispatch          | publish to PyPI          |
+| update-docs.yml  | schedule (daily) / dispatch| auto-update documentation|
 
 ## CI Jobs (callable-ci.yml)
 
@@ -77,6 +78,20 @@ Environment: `pypi`
 | major   | 0.1.0 → 1.0.0   |
 | initial | no bump         |
 
+## Update Docs Pipeline
+
+Automated documentation update workflow. Runs daily via cron or manually via dispatch.
+
+Steps:
+1. Checkout with full history
+2. Install Claude Code CLI and mdalign
+3. Run Claude Code with `/docs:update-docs` skill
+4. Commit changes if any
+5. Create or update PR (`docs: update documentation`)
+6. Auto-merge PR after 3 days
+
+Uses `.github/scripts/update-docs.sh` and `.github/scripts/run-claude.sh`.
+
 ## Branch Strategy
 
 - `main` - primary branch for push workflow
@@ -92,3 +107,5 @@ related sources:
 - .github/workflows/push-to-main.yml - main branch workflow
 - .github/workflows/callable-ci.yml  - reusable CI
 - .github/workflows/release.yml      - release workflow
+- .github/workflows/update-docs.yml  - auto-update docs workflow
+- .github/scripts/                   - CI helper scripts

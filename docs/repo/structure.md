@@ -34,11 +34,16 @@ doc-sync/
 │   ├── preview/           ← preview tests
 │   └── cli/               ← CLI argument tests
 ├── docs/                  ← documentation
-├── .github/workflows/     ← CI/CD pipelines
-│   ├── prs.yml            ← PR checks
-│   ├── push-to-main.yml   ← main branch checks
-│   ├── callable-ci.yml    ← reusable CI workflow
-│   └── release.yml        ← PyPI release workflow
+├── .github/
+│   ├── workflows/         ← CI/CD pipelines
+│   │   ├── prs.yml            ← PR checks
+│   │   ├── push-to-main.yml   ← main branch checks
+│   │   ├── callable-ci.yml    ← reusable CI workflow
+│   │   ├── release.yml        ← PyPI release workflow
+│   │   └── update-docs.yml    ← automated docs update
+│   └── scripts/           ← CI helper scripts
+│       ├── update-docs.sh     ← docs update orchestration
+│       └── run-claude.sh      ← Claude Code runner
 ├── .changelog/            ← towncrier fragments
 ├── pyproject.toml         ← project config, deps
 ├── Makefile               ← dev commands
