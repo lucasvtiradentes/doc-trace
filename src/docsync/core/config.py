@@ -116,7 +116,20 @@ def init_docsync(target_dir: Path) -> Path:
         json.dump(DEFAULT_CONFIG, f, indent=2)
     syncs_dir = docsync_dir / SYNCS_DIR
     syncs_dir.mkdir(exist_ok=True)
-    gitignore_path = syncs_dir / ".gitignore"
-    with open(gitignore_path, "w") as f:
-        f.write("*\n!.gitignore\n")
+    _add_syncs_to_gitignore(target_dir)
     return docsync_dir
+
+
+def _add_syncs_to_gitignore(target_dir: Path) -> None:
+    gitignore_path = target_dir / ".gitignore"
+    syncs_entry = ".docsync/syncs/"
+    if gitignore_path.exists():
+        content = gitignore_path.read_text()
+        if syncs_entry not in content:
+            with open(gitignore_path, "a") as f:
+                if not content.endswith("\n"):
+                    f.write("\n")
+                f.write(f"{syncs_entry}\n")
+    else:
+        with open(gitignore_path, "w") as f:
+            f.write(f"{syncs_entry}\n")

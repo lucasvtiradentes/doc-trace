@@ -147,7 +147,7 @@ docsync init    # creates .docsync/ folder
 ├── config.json   # required
 ├── prompt.md     # optional - custom prompt template
 ├── lock.json     # optional - tracks last synced commit
-└── syncs/        # ignored - AI writes sync reports here
+└── syncs/        # AI writes sync reports here (added to .gitignore)
 ```
 
 config.json:
