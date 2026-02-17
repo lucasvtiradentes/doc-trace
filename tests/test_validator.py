@@ -2,7 +2,7 @@ import tempfile
 from pathlib import Path
 
 from docsync.config import Config
-from docsync.validator import check_refs
+from docsync.validator import check_refs, generate_sync_prompt
 
 
 def test_check_refs_valid():
@@ -73,3 +73,44 @@ def test_check_refs_ignores_patterns():
         results = list(check_refs(docs_dir, config, repo_root=tmppath))
         assert len(results) == 1
         assert results[0].doc_path.name == "test.md"
+
+
+def test_sync_prompt_ordered():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+        (tmppath / ".git").mkdir()
+        docs_dir = tmppath / "docs"
+        docs_dir.mkdir()
+        (docs_dir / "base.md").write_text("# Base\n\nrelated sources:\n- src/base.py - base")
+        (docs_dir / "child.md").write_text("# Child\n\nrelated docs:\n- docs/base.md - base")
+        config = Config({})
+        prompt = generate_sync_prompt(docs_dir, config, incremental=False, parallel=False)
+        assert "Phase 1" in prompt
+        assert "Phase 2" in prompt
+        assert "base.md" in prompt
+        assert "child.md" in prompt
+
+
+def test_sync_prompt_parallel():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+        (tmppath / ".git").mkdir()
+        docs_dir = tmppath / "docs"
+        docs_dir.mkdir()
+        (docs_dir / "a.md").write_text("# A\n\nrelated sources:\n- src/a.py - a")
+        (docs_dir / "b.md").write_text("# B\n\nrelated sources:\n- src/b.py - b")
+        config = Config({})
+        prompt = generate_sync_prompt(docs_dir, config, incremental=False, parallel=True)
+        assert "PARALLEL" in prompt
+        assert "Phase" not in prompt
+
+
+def test_sync_prompt_no_docs():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+        (tmppath / ".git").mkdir()
+        docs_dir = tmppath / "docs"
+        docs_dir.mkdir()
+        config = Config({})
+        prompt = generate_sync_prompt(docs_dir, config)
+        assert "No docs to sync" in prompt

@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from docsync.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DOCSYNC_DIR
+from docsync.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DOCSYNC_DIR, SYNCS_DIR
 
 
 class Config:
@@ -46,4 +46,9 @@ def init_docsync(target_dir: Path) -> Path:
     config_path = docsync_dir / CONFIG_FILENAME
     with open(config_path, "w") as f:
         json.dump(DEFAULT_CONFIG, f, indent=2)
+    syncs_dir = docsync_dir / SYNCS_DIR
+    syncs_dir.mkdir(exist_ok=True)
+    gitignore_path = syncs_dir / ".gitignore"
+    with open(gitignore_path, "w") as f:
+        f.write("*\n!.gitignore\n")
     return docsync_dir

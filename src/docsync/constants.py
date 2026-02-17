@@ -7,7 +7,8 @@ LIST_ITEM_PATTERN = re.compile(r"^-\s+(\S+)\s+-\s+(.+)$")
 DOCSYNC_DIR = ".docsync"
 CONFIG_FILENAME = "config.json"
 LOCK_FILENAME = "lock.json"
-PROMPT_FILENAME = "prompt.md"
+SYNC_FILENAME = "sync.md"
+SYNCS_DIR = "syncs"
 
 DEFAULT_CONFIG = {
     "ignored_paths": [],
@@ -16,16 +17,42 @@ DEFAULT_CONFIG = {
 
 DEFAULT_LOCK = {"last_analyzed_commit": None, "last_run": None, "docs_validated": []}
 
-DEFAULT_PROMPT = """Validate {count} docs by launching PARALLEL agents (one per doc).
+DEFAULT_SYNC_PROMPT = """Sync {count} docs by launching agents in phases (respecting dependencies).
 
-For each doc, launch a subagent that will:
-1. Read the doc file
-2. Read all its related sources
-3. Check if the doc content accurately describes the source code
-4. Report any outdated, incorrect, or missing information
+Each agent will:
+1. Read the doc + all related sources
+2. Fix any outdated/incorrect content directly in the doc
+3. Write a report to {syncs_dir}
+
+Report format ({syncs_dir}/{{doc-name}}.md):
+```markdown
+## Changes made
+- what was fixed
+
+## Why it was wrong
+- explanation referencing the source code
+```
+
+{phases}"""
+
+DEFAULT_SYNC_PROMPT_PARALLEL = """Sync {count} docs by launching PARALLEL agents (one per doc).
+
+Each agent will:
+1. Read the doc + all related sources
+2. Fix any outdated/incorrect content directly in the doc
+3. Write a report to {syncs_dir}
+
+Report format ({syncs_dir}/{{doc-name}}.md):
+```markdown
+## Changes made
+- what was fixed
+
+## Why it was wrong
+- explanation referencing the source code
+```
 
 IMPORTANT: Launch ALL agents in a SINGLE message for parallel execution.
 
-Docs to validate:
+Docs to sync:
 
 {docs_list}"""

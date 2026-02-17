@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from docsync.config import Config
-from docsync.constants import DEFAULT_PROMPT, DOCSYNC_DIR, PROMPT_FILENAME
+from docsync.constants import DEFAULT_SYNC_PROMPT, DEFAULT_SYNC_PROMPT_PARALLEL, DOCSYNC_DIR, SYNC_FILENAME, SYNCS_DIR
 from docsync.parser import RefEntry, parse_doc
 
 
@@ -127,11 +127,11 @@ def print_validation_report(docs_path: Path, config: Config, incremental: bool =
     return json.dumps(report, indent=2)
 
 
-def _load_prompt_template(repo_root: Path) -> str:
-    prompt_path = repo_root / DOCSYNC_DIR / PROMPT_FILENAME
+def _load_prompt_template(repo_root: Path, parallel: bool) -> str:
+    prompt_path = repo_root / DOCSYNC_DIR / SYNC_FILENAME
     if prompt_path.exists():
         return prompt_path.read_text()
-    return DEFAULT_PROMPT
+    return DEFAULT_SYNC_PROMPT_PARALLEL if parallel else DEFAULT_SYNC_PROMPT
 
 
 def _format_docs_list(docs: list[dict[str, Any]]) -> str:
@@ -148,12 +148,83 @@ def _format_docs_list(docs: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def generate_validation_prompt(docs_path: Path, config: Config, incremental: bool = False) -> str:
+def _format_phases(levels: list[list[dict[str, Any]]]) -> str:
+    lines = []
+    for i, level_docs in enumerate(levels):
+        if not level_docs:
+            continue
+        if i == 0:
+            lines.append("Phase 1 - Independent (launch parallel):")
+        else:
+            lines.append(f"\nPhase {i + 1} - Level {i} (after phase {i} completes):")
+        for doc in level_docs:
+            lines.append(f"  {doc['path']}")
+            if doc["related_sources"]:
+                sources = ", ".join(doc["related_sources"])
+                lines.append(f"    sources: {sources}")
+        lines.append("")
+    return "\n".join(lines)
+
+
+def _get_syncs_dir(repo_root: Path) -> str:
+    from datetime import datetime
+
+    timestamp = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+    return f".docsync/{SYNCS_DIR}/{timestamp}"
+
+
+def _build_sync_levels(docs: list[dict[str, Any]], repo_root: Path) -> list[list[dict[str, Any]]]:
+    doc_paths = {repo_root / d["path"] for d in docs}
+    doc_by_path = {repo_root / d["path"]: d for d in docs}
+    deps: dict[Path, list[Path]] = {}
+    for d in docs:
+        path = repo_root / d["path"]
+        deps[path] = [repo_root / rd for rd in d["related_docs"] if (repo_root / rd) in doc_paths]
+    assigned: dict[Path, int] = {}
+
+    def get_level(doc: Path, visiting: set[Path]) -> int:
+        if doc in assigned:
+            return assigned[doc]
+        if doc in visiting:
+            return 0
+        if not deps.get(doc):
+            assigned[doc] = 0
+            return 0
+        visiting.add(doc)
+        max_dep = max((get_level(dep, visiting) for dep in deps[doc]), default=-1)
+        visiting.remove(doc)
+        level = max_dep + 1
+        assigned[doc] = level
+        return level
+
+    for path in doc_paths:
+        get_level(path, set())
+    max_level = max(assigned.values()) if assigned else 0
+    levels: list[list[dict[str, Any]]] = [[] for _ in range(max_level + 1)]
+    for path, level in assigned.items():
+        levels[level].append(doc_by_path[path])
+    return [level for level in levels if level]
+
+
+def generate_sync_prompt(docs_path: Path, config: Config, incremental: bool = False, parallel: bool = False) -> str:
     report = generate_validation_report(docs_path, config, incremental)
     docs = report["docs"]
     if not docs:
-        return "No docs to validate."
+        return "No docs to sync."
     repo_root = Path(report["repo_root"])
-    template = _load_prompt_template(repo_root)
-    docs_list = _format_docs_list(docs)
-    return template.format(count=len(docs), docs_list=docs_list)
+    syncs_dir = _get_syncs_dir(repo_root)
+    template = _load_prompt_template(repo_root, parallel)
+
+    if parallel:
+        docs_list = _format_docs_list(docs)
+        return template.format(count=len(docs), docs_list=docs_list, syncs_dir=syncs_dir)
+    else:
+        levels = _build_sync_levels(docs, repo_root)
+        phases = _format_phases(levels)
+        return template.format(count=len(docs), phases=phases, syncs_dir=syncs_dir)
+
+
+def generate_validation_prompt(
+    docs_path: Path, config: Config, incremental: bool = False, parallel: bool = False
+) -> str:
+    return generate_sync_prompt(docs_path, config, incremental, parallel)

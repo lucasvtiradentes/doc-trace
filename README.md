@@ -71,8 +71,8 @@ docsync solves this by adding "hints" to each doc - `related sources:` tells any
 
 - check   - validates all referenced paths exist
 - cascade - finds docs affected by code changes (with directory matching)
-- prompt  - generates prompt for parallel AI validation (provider-agnostic)
-- report  - generates JSON with docs + sources
+- sync    - generates prompt for AI to fix docs (ordered by deps)
+- tree    - shows doc dependency tree
 
 ## Quickstart
 
@@ -113,8 +113,9 @@ docsync init    # creates .docsync/ folder
 ```
 .docsync/
 ├── config.json   # required
-├── prompt.md     # optional - custom prompt template
-└── lock.json     # optional - created by --incremental
+├── sync.md       # optional - custom prompt template
+├── lock.json     # optional - created by --incremental
+└── syncs/        # ignored - AI writes sync reports here
 ```
 
 config.json:
@@ -125,14 +126,14 @@ config.json:
 }
 ```
 
-prompt.md (custom template):
+sync.md (custom template):
 ```markdown
-Validate {count} docs in PORTUGUESE.
+Sync {count} docs. Write reports to .docsync/syncs/{datetime}/
 
 {docs_list}
 ```
 
-Placeholders: `{count}`, `{docs_list}`
+Placeholders: `{count}`, `{docs_list}`, `{datetime}`
 
 </details>
 
@@ -146,8 +147,8 @@ docsync check docs/    # ensures all paths exist
 
 ```bash
 docsync cascade HEAD~5 --docs docs/    # docs affected by last 5 commits
-docsync prompt docs/ | pbcopy          # generate AI prompt
-claude "$(docsync prompt docs/)"       # or pipe directly to AI
+docsync sync docs/ | pbcopy            # generate AI prompt
+claude "$(docsync sync docs/)"         # or pipe directly to AI
 ```
 
 ## Commands
@@ -155,34 +156,40 @@ claude "$(docsync prompt docs/)"       # or pipe directly to AI
 ```bash
 docsync check <path>                   # validate refs exist
 docsync cascade <commit> --docs <dir>  # list affected docs
-docsync prompt <path>                  # generate prompt for AI validation
-docsync prompt <path> --incremental    # only include changed docs
-docsync prompt <path> --json           # output as JSON for scripts
+docsync sync <path>                    # generate prompt (ordered by deps)
+docsync sync <path> --parallel         # ignore deps, all at once
+docsync sync <path> --incremental      # only include changed docs
+docsync sync <path> --json             # output as JSON for scripts
+docsync tree <path>                    # show doc dependency tree
 docsync init                           # create .docsync/ folder
 ```
 
-### AI Validation
+### AI Sync
 
-The `prompt` command generates a prompt that tells the AI to launch parallel agents:
+The `sync` command generates a prompt for AI to fix docs in phases (respecting dependencies):
 
 ```
-Validate 5 docs by launching PARALLEL agents (one per doc).
+Sync 5 docs by launching agents in phases (respecting dependencies).
 
-For each doc, launch a subagent that will:
-1. Read the doc file
-2. Read all its related sources
-3. Check if the doc content accurately describes the source code
-4. Report any outdated, incorrect, or missing information
+Each agent will:
+1. Read the doc + all related sources
+2. Fix any outdated/incorrect content directly in the doc
+3. Write a report to .docsync/syncs/2024-01-15T10-30-00/
 
-IMPORTANT: Launch ALL agents in a SINGLE message for parallel execution.
+Phase 1 - Independent (launch parallel):
+  docs/utils.md
+  docs/config.md
 
-Docs to validate:
+Phase 2 - Level 1 (after phase 1 completes):
+  docs/auth.md
+    sources: src/auth/
 
-1. docs/bookings.md
-   sources: src/booking/, src/booking/commands/
-   related docs: docs/payments.md
-...
+Phase 3 - Level 2 (after phase 2 completes):
+  docs/login.md
+    sources: src/login/
 ```
+
+Use `--parallel` to ignore dependencies and sync all at once.
 
 ## Development
 
