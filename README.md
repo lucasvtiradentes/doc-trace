@@ -1,6 +1,8 @@
-# Overview
+# doctrace
 
-CLI tool that keeps documentation in sync with code in large codebases. Detects which docs are affected by code changes.
+Trace documentation dependencies in large codebases. When code changes, know exactly which docs need review - and in what order.
+
+Add metadata hints to your docs, and doctrace builds a dependency graph that maps code→docs and docs→docs relationships. AI agents use these hints to know exactly what to read when validating or updating documentation.
 
 ```
   src/booking/handler.ts changed
