@@ -228,3 +228,9 @@ make check             # lint
 make test              # run tests
 docsync validate docs/ # practical test
 ```
+
+```bash
+# dev alias (docsyncd)
+ln -s $(pwd)/.venv/bin/docsync ~/.local/bin/docsyncd   # install
+rm ~/.local/bin/docsyncd                                # remove
+```
