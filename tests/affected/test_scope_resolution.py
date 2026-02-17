@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
@@ -33,13 +32,10 @@ def test_resolve_commit_ref_since_lock_missing_commit():
 
 
 def test_resolve_commit_ref_with_base_branch():
-    completed = subprocess.CompletedProcess(
-        args=["git", "merge-base", "HEAD", "main"], returncode=0, stdout="deadbeef\n", stderr=""
-    )
-    with patch("docsync.commands.affected.subprocess.run", return_value=completed) as run_mock:
+    with patch("docsync.commands.affected.get_merge_base", return_value="deadbeef") as mock:
         commit_ref = resolve_commit_ref(Path("/repo"), base_branch="main")
     assert commit_ref == "deadbeef"
-    run_mock.assert_called_once()
+    mock.assert_called_once()
 
 
 def test_resolve_commit_ref_requires_exactly_one_option():

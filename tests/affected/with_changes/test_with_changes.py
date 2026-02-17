@@ -15,7 +15,7 @@ def test_find_affected_docs_with_changes():
         docs_dir = tmppath / "docs"
         shutil.copytree(DOCS_DIR, docs_dir)
         config = Config({})
-        with patch("docsync.commands.affected._get_changed_files", return_value=["src/changed.py"]):
+        with patch("docsync.commands.affected.get_changed_files", return_value=["src/changed.py"]):
             result = find_affected_docs(docs_dir, "HEAD~1", config, repo_root=tmppath)
         assert len(result.direct_hits) == 1
         assert result.direct_hits[0] == docs_dir / "test.md"

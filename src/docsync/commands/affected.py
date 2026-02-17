@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, NamedTuple
 
 from docsync.core.config import Config, find_repo_root
+from docsync.core.git import get_changed_files, get_merge_base
 from docsync.core.lock import load_lock
 from docsync.core.parser import parse_doc
 
@@ -34,17 +34,10 @@ def resolve_commit_ref(
             raise ValueError("--last must be greater than 0")
         return f"HEAD~{last}"
     assert base_branch is not None
-    try:
-        result = subprocess.run(
-            ["git", "merge-base", "HEAD", base_branch], capture_output=True, text=True, check=True, cwd=repo_root
-        )
-        commit = result.stdout.strip()
-        if not commit:
-            raise ValueError(f"could not resolve merge-base with branch '{base_branch}'")
-        return commit
-    except subprocess.CalledProcessError as e:
-        msg = e.stderr.strip() if e.stderr else f"could not resolve merge-base with branch '{base_branch}'"
-        raise ValueError(msg) from e
+    commit = get_merge_base(base_branch, repo_root)
+    if not commit:
+        raise ValueError(f"could not resolve merge-base with branch '{base_branch}'")
+    return commit
 
 
 def find_affected_docs(
@@ -52,7 +45,7 @@ def find_affected_docs(
 ) -> AffectedResult:
     if repo_root is None:
         repo_root = find_repo_root(docs_path)
-    changed_files = _get_changed_files(commit_ref, repo_root)
+    changed_files = get_changed_files(commit_ref, repo_root)
     return _find_affected_docs_for_changes(docs_path, changed_files, config, repo_root)
 
 
@@ -68,16 +61,6 @@ def _find_affected_docs_for_changes(
     return AffectedResult(
         affected_docs=all_affected, direct_hits=direct_hits, indirect_hits=indirect_hits, circular_refs=circular_refs
     )
-
-
-def _get_changed_files(commit_ref: str, repo_root: Path) -> list[str]:
-    try:
-        result = subprocess.run(
-            ["git", "diff", "--name-only", commit_ref], capture_output=True, text=True, check=True, cwd=repo_root
-        )
-        return [f.strip() for f in result.stdout.splitlines() if f.strip()]
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return []
 
 
 def _build_indexes(
@@ -237,7 +220,7 @@ def run(
         print(f"Scope error: {e}", file=sys.stderr)
         return 2
 
-    changed_files = _get_changed_files(commit_ref, repo_root)
+    changed_files = get_changed_files(commit_ref, repo_root)
     if show_changed_files:
         print(f"Changed files ({len(changed_files)}):")
         for changed_file in changed_files:

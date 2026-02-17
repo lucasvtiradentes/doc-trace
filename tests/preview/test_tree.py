@@ -1,12 +1,7 @@
 import tempfile
 from pathlib import Path
 
-from docsync.commands.preview.tree import (
-    DependencyTree,
-    _build_doc_dependencies,
-    _compute_levels,
-    build_dependency_tree,
-)
+from docsync.commands.preview.tree import _compute_levels, build_dependency_tree
 from docsync.core.config import Config
 
 

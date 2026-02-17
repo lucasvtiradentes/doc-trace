@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import json
-import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from docsync.core.constants import DOCSYNC_DIR, LOCK_FILENAME
+from docsync.core.git import get_current_commit
 
 
 class Lock:
@@ -52,9 +52,4 @@ def save_lock(lock: Lock, repo_root: Path) -> Path:
     return lock_path
 
 
-def get_current_commit() -> str | None:
-    try:
-        result = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True)
-        return result.stdout.strip()
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return None
+__all__ = ["Lock", "load_lock", "find_lock", "save_lock", "get_current_commit"]

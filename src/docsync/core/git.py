@@ -4,6 +4,49 @@ import subprocess
 from pathlib import Path
 
 
+def get_current_commit(cwd: Path | None = None) -> str | None:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=cwd,
+        )
+        return result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+
+
+def get_merge_base(branch: str, repo_root: Path) -> str | None:
+    try:
+        result = subprocess.run(
+            ["git", "merge-base", "HEAD", branch],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=repo_root,
+        )
+        commit = result.stdout.strip()
+        return commit if commit else None
+    except subprocess.CalledProcessError:
+        return None
+
+
+def get_changed_files(commit_ref: str, repo_root: Path) -> list[str]:
+    try:
+        result = subprocess.run(
+            ["git", "diff", "--name-only", commit_ref],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=repo_root,
+        )
+        return [f.strip() for f in result.stdout.splitlines() if f.strip()]
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return []
+
+
 def get_file_history(repo_root: Path, file_path: str, limit: int = 20) -> list[dict]:
     try:
         result = subprocess.run(

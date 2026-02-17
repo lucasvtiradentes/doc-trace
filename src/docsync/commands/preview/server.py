@@ -7,10 +7,10 @@ import threading
 import webbrowser
 from pathlib import Path
 
-from docsync.commands.preview.git import get_file_at_commit, get_file_history
 from docsync.commands.preview.graph import build_graph_data, generate_html
 from docsync.commands.preview.search import search_docs
 from docsync.core.config import find_repo_root, load_config
+from docsync.core.git import get_file_at_commit, get_file_history
 
 
 class PreviewHandler(http.server.SimpleHTTPRequestHandler):
@@ -117,7 +117,10 @@ def run(docs_path: Path, port: int = 8420) -> int:
     graph_data = build_graph_data(docs_path, config, repo_root)
     html_content = generate_html(graph_data)
 
-    handler = lambda *args, **kwargs: PreviewHandler(*args, html_content=html_content, repo_root=repo_root, docs_path=docs_path, **kwargs)
+    def handler(*args, **kwargs):
+        return PreviewHandler(
+            *args, html_content=html_content, repo_root=repo_root, docs_path=docs_path, **kwargs
+        )
 
     class ReuseAddrTCPServer(socketserver.TCPServer):
         allow_reuse_address = True

@@ -14,7 +14,6 @@ doc-sync/
 │   │   │   ├── server.py  ← HTTP server + run()
 │   │   │   ├── tree.py    ← dependency tree logic
 │   │   │   ├── graph.py   ← graph data building
-│   │   │   ├── git.py     ← git history operations
 │   │   │   ├── search.py  ← doc content search
 │   │   │   └── template.html ← HTML/JS template
 │   │   ├── lock.py        ← lock state management
@@ -24,6 +23,7 @@ doc-sync/
 │       ├── parser.py      ← metadata extraction
 │       ├── config.py      ← config loading/validation
 │       ├── lock.py        ← state persistence
+│       ├── git.py         ← git operations
 │       └── constants.py   ← shared constants
 ├── tests/                 ← pytest test suite
 │   ├── __init__.py

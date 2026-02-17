@@ -35,6 +35,7 @@ src/docsync/
 │   ├── parser.py       ← doc metadata extraction
 │   ├── config.py       ← runtime configuration
 │   ├── lock.py         ← lock state persistence
+│   ├── git.py          ← git operations
 │   └── constants.py    ← shared constants
 ```
 
