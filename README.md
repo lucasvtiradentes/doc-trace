@@ -74,6 +74,82 @@ docsync solves this by adding "hints" to each doc - `related sources:` tells any
 - prompt  - generates prompt for parallel AI validation (provider-agnostic)
 - report  - generates JSON with docs + sources
 
+## Quickstart
+
+### 1. Install
+
+```bash
+pipx install docsync
+```
+
+### 2. Add metadata to your docs
+
+Each doc needs two sections at the end (after a `---` separator):
+
+```markdown
+# My Feature
+
+Documentation content here...
+
+---
+
+related docs:
+- docs/other-feature.md - brief description
+
+related sources:
+- src/feature/           - main module
+- src/feature/utils.ts   - helper functions
+```
+
+### 3. Initialize config (optional)
+
+```bash
+docsync init    # creates .docsync/ folder
+```
+
+<details>
+<summary>Config options</summary>
+
+```
+.docsync/
+├── config.json   # required
+├── prompt.md     # optional - custom prompt template
+└── lock.json     # optional - created by --incremental
+```
+
+config.json:
+```json
+{
+  "ignored_paths": ["**/migrations/**", "**/*.test.ts"],
+  "cascade_depth_limit": null
+}
+```
+
+prompt.md (custom template):
+```markdown
+Validate {count} docs in PORTUGUESE.
+
+{docs_list}
+```
+
+Placeholders: `{count}`, `{docs_list}`
+
+</details>
+
+### 4. Validate your setup
+
+```bash
+docsync check docs/    # ensures all paths exist
+```
+
+### 5. Use it
+
+```bash
+docsync cascade HEAD~5 --docs docs/    # docs affected by last 5 commits
+docsync prompt docs/ | pbcopy          # generate AI prompt
+claude "$(docsync prompt docs/)"       # or pipe directly to AI
+```
+
 ## Commands
 
 ```bash
@@ -83,14 +159,6 @@ docsync prompt <path>                  # generate prompt for AI validation
 docsync prompt <path> --incremental    # only include changed docs
 docsync prompt <path> --json           # output as JSON for scripts
 docsync init                           # create .docsync/ folder
-```
-
-### Examples
-
-```bash
-docsync check docs/                    # check all docs in docs/
-docsync cascade HEAD~5 --docs docs/    # docs affected by last 5 commits
-docsync prompt docs/ | pbcopy          # copy prompt to clipboard
 ```
 
 ### AI Validation
@@ -114,65 +182,6 @@ Docs to validate:
    sources: src/booking/, src/booking/commands/
    related docs: docs/payments.md
 ...
-```
-
-Use with any AI:
-```bash
-docsync prompt docs/ | pbcopy          # paste into any AI chat
-claude "$(docsync prompt docs/)"       # direct to Claude Code
-```
-
-Exit codes: 0 = ok, 1 = issues found.
-
-## Configuration
-
-Run `docsync init` to create the `.docsync/` folder:
-
-```
-.docsync/
-├── config.json   # required
-├── prompt.md     # optional - custom prompt template
-└── lock.json     # optional - created by --incremental
-```
-
-### config.json
-
-```json
-{
-  "ignored_paths": [
-    "**/migrations/**",
-    "**/*.test.ts"
-  ],
-  "cascade_depth_limit": null
-}
-```
-
-### prompt.md (optional)
-
-Custom prompt template with placeholders:
-
-```markdown
-Validate {count} docs in PORTUGUESE.
-
-Launch parallel agents (one per doc).
-
-Each agent should:
-1. Read the doc
-2. Read related sources
-3. Report issues in Portuguese
-
-{docs_list}
-```
-
-Placeholders:
-- `{count}` - number of docs
-- `{docs_list}` - formatted list of docs with sources
-
-## Install
-
-```bash
-pipx install docsync
-# pip install docsync
 ```
 
 ## Development
