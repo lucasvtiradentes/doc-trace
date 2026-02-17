@@ -144,11 +144,13 @@ def _get_doc_metadata(docs: list[Path], config: Config, repo_root: Path) -> list
             abs_path = doc_file if doc_file.is_absolute() else repo_root / doc_file
             parsed = parse_doc(abs_path, config.metadata)
             rel_path = str(abs_path.relative_to(repo_root))
-            result.append({
-                "path": rel_path,
-                "related_docs": [ref.path for ref in parsed.related_docs],
-                "related_sources": [ref.path for ref in parsed.related_sources],
-            })
+            result.append(
+                {
+                    "path": rel_path,
+                    "related_docs": [ref.path for ref in parsed.related_docs],
+                    "related_sources": [ref.path for ref in parsed.related_sources],
+                }
+            )
         except Exception:
             continue
     return result

@@ -40,10 +40,9 @@ def main():
     if args.command == "validate":
         sys.exit(validate.run(args.path))
     elif args.command == "affected":
-        sys.exit(affected.run(
-            args.path, args.since_lock, args.last, args.base_branch,
-            args.show_changed_files, args.ordered
-        ))
+        sys.exit(
+            affected.run(args.path, args.since_lock, args.last, args.base_branch, args.show_changed_files, args.ordered)
+        )
     elif args.command == "tree":
         sys.exit(tree.run(args.path))
     elif args.command == "lock":

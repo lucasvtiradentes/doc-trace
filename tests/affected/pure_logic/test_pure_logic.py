@@ -2,7 +2,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from docsync.commands.affected import _propagate, _find_direct_hits, find_affected_docs
+from docsync.commands.affected import _find_direct_hits, _propagate, find_affected_docs
 from docsync.core.config import Config
 
 
