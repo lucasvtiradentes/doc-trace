@@ -6,9 +6,9 @@ CLI tool that keeps documentation in sync with code in large codebases. Detects 
   src/booking/handler.ts changed
             │
             v
-  ┌─────────────────────────────┐
+  ┌─────────────────────────────────┐
   │ docsync affected docs/ --last 1 │
-  └───────────┬─────────────────┘
+  └───────────┬─────────────────────┘
               │
               v
   ┌─────────────────────────┐      ┌─────────────────────────┐
@@ -183,19 +183,19 @@ docsync preview docs/                      # interactive explorer in browser
 <details>
 <summary>All commands</summary>
 
-| Command                                          | Description                         |
-|--------------------------------------------------|-------------------------------------|
-| `docsync validate <path>`                        | validate refs exist                 |
-| `docsync affected <path> --last <N>`             | list affected docs by last N commits|
-| `docsync affected <path> --since-lock`           | list affected docs since lock commit|
-| `docsync affected <path> --base-branch <branch>` | list affected docs from merge-base  |
-| `docsync affected <path> --ordered`              | group output by dependency phases   |
-| `docsync preview <path>`                         | interactive explorer in browser     |
+| Command                                          | Description                          |
+|--------------------------------------------------|--------------------------------------|
+| `docsync validate <path>`                        | validate refs exist                  |
+| `docsync affected <path> --last <N>`             | list affected docs by last N commits |
+| `docsync affected <path> --since-lock`           | list affected docs since lock commit |
+| `docsync affected <path> --base-branch <branch>` | list affected docs from merge-base   |
+| `docsync affected <path> --ordered`              | group output by dependency phases    |
+| `docsync preview <path>`                         | interactive explorer in browser      |
 | `docsync preview <path> --port <N>`              | preview on custom port (default 8420)|
-| `docsync lock update`                            | save current commit to lock.json    |
-| `docsync lock show`                              | show lock.json state                |
-| `docsync init`                                   | create .docsync/ folder             |
-| `docsync --version`                              | show version                        |
+| `docsync lock update`                            | save current commit to lock.json     |
+| `docsync lock show`                              | show lock.json state                 |
+| `docsync init`                                   | create .docsync/ folder              |
+| `docsync --version`                              | show version                         |
 
 </details>
 

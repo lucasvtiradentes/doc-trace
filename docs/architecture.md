@@ -10,13 +10,13 @@
 ├─────────────────────────────────────────────────────────────┤
 │  argparse → subcommand dispatcher                           │
 │                                                             │
-│  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────┐ ┌──────┐           │
-│  │ validate │ │ affected │ │ preview │ │ lock │ │ init │           │
-│  └────┬─────┘ └────┬─────┘ └────┬────┘ └──┬───┘ └──┬───┘           │
-│       │            │            │         │        │               │
-│       v            v            v         v        v               │
-│  commands/    commands/    commands/  commands/ commands/          │
-│  validate.py  affected.py  preview.py lock.py   init.py           │
+│  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────┐ ┌──────┐    │
+│  │ validate │ │ affected │ │ preview │ │ lock │ │ init │    │
+│  └────┬─────┘ └────┬─────┘ └────┬────┘ └──┬───┘ └──┬───┘    │
+│       │            │            │         │        │        │
+│       v            v            v         v        v        │
+│  commands/    commands/    commands/  commands/ commands/   │
+│  validate.py  affected.py  preview.py lock.py   init.py     │
 └─────────────────────────────────────────────────────────────┘
 ```
 

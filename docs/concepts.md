@@ -36,11 +36,11 @@ Output from affected analysis.
 
 Runtime configuration loaded from .docsync/config.json.
 
-| Field               | Type           | Default | Description                        |
-|---------------------|----------------|---------|----------------------------------- |
-| ignored_paths       | list[str]      | []      | fnmatch patterns to skip           |
+| Field               | Type           | Default | Description                           |
+|---------------------|----------------|---------|---------------------------------------|
+| ignored_paths       | list[str]      | []      | fnmatch patterns to skip              |
 | affected_depth_limit| int or None    | None    | max propagation depth (None=unlimited)|
-| metadata            | MetadataConfig | defaults| metadata parsing settings          |
+| metadata            | MetadataConfig | defaults| metadata parsing settings             |
 
 ### MetadataConfig
 

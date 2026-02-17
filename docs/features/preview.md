@@ -40,13 +40,13 @@ Starts a local HTTP server serving an interactive single-page application for ex
 
 ## Server Endpoints
 
-| Endpoint | Method | Description                      |
-|----------|--------|----------------------------------|
-| /        | GET    | main HTML application            |
+| Endpoint | Method | Description                          |
+|----------|--------|--------------------------------------|
+| /        | GET    | main HTML application                |
 | /doc     | GET    | fetch doc content (supports ?commit=)|
-| /doc     | POST   | save doc content                 |
-| /history | GET    | get git commit history for doc   |
-| /search  | GET    | search docs by content           |
+| /doc     | POST   | save doc content                     |
+| /history | GET    | get git commit history for doc       |
+| /search  | GET    | search docs by content               |
 
 ## Configuration
 
