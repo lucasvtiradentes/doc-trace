@@ -192,14 +192,20 @@
             btn.addEventListener('click', () => switchMainView(btn.dataset.mainView));
         });
 
-        function selectDoc(path) {
-            currentDoc = path;
+        function updateSidebarSelection(path) {
             document.querySelectorAll('.tree-item, .level-item').forEach(el => {
                 el.classList.toggle('active', el.dataset.path === path);
             });
+            const activeItem = document.querySelector('.tree-item.active, .level-item.active');
+            if (activeItem) activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+
+        function selectDoc(path) {
+            currentDoc = path;
+            updateSidebarSelection(path);
             if (currentMainView === 'diagram') {
                 const node = graphData.nodes.find(n => n.path === path);
-                if (node) highlightNode(node.id);
+                if (node) highlightNode(node.id, true);
             } else {
                 loadDocContent(path);
             }
@@ -388,17 +394,34 @@
             return indices;
         }
 
-        function highlightNode(nodeId) {
+        function highlightNode(nodeId, fromSidebar = false) {
             if (selectedNode === nodeId) {
                 resetHighlight();
                 return;
             }
             selectedNode = nodeId;
+            if (!fromSidebar) {
+                const node = graphData.nodes.find(n => n.id === nodeId);
+                if (node) {
+                    currentDoc = node.path;
+                    updateSidebarSelection(node.path);
+                }
+            }
             const connected = getConnectedNodes(nodeId);
             const connectedEdgeIndices = new Set(getConnectedEdgeIndices(nodeId));
             document.querySelectorAll('.node').forEach(el => {
                 const id = el.id.split('-')[1];
                 el.style.opacity = connected.has(id) ? '1' : '0.06';
+                const rect = el.querySelector('rect, polygon, circle, ellipse');
+                if (rect) {
+                    if (id === nodeId) {
+                        rect.style.stroke = '#1e293b';
+                        rect.style.strokeWidth = '3px';
+                    } else {
+                        rect.style.stroke = '';
+                        rect.style.strokeWidth = '';
+                    }
+                }
             });
             edgeElements.forEach((el, i) => {
                 el.style.opacity = connectedEdgeIndices.has(i) ? '1' : '0';
@@ -410,7 +433,16 @@
 
         function resetHighlight() {
             selectedNode = null;
-            document.querySelectorAll('.node').forEach(el => el.style.opacity = '1');
+            currentDoc = null;
+            updateSidebarSelection(null);
+            document.querySelectorAll('.node').forEach(el => {
+                el.style.opacity = '1';
+                const rect = el.querySelector('rect, polygon, circle, ellipse');
+                if (rect) {
+                    rect.style.stroke = '';
+                    rect.style.strokeWidth = '';
+                }
+            });
             edgeElements.forEach(el => el.style.opacity = '1');
             document.querySelectorAll('.edgeLabel').forEach(el => el.style.opacity = '1');
         }
