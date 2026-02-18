@@ -90,7 +90,7 @@ def _build_indexes(
 ) -> tuple[dict[str, list[Path]], dict[Path, list[Path]]]:
     source_to_docs: dict[str, list[Path]] = defaultdict(list)
     doc_to_docs: dict[Path, list[Path]] = defaultdict(list)
-    doc_files = list(docs_path.rglob("*.md"))
+    doc_files = [f.resolve() for f in docs_path.rglob("*.md")]
     for doc_file in doc_files:
         try:
             parsed = parse_doc(doc_file, config.metadata)
