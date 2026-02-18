@@ -6,29 +6,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  update-docs:
-    name: Update documentation
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Install tools
-        run: |
-          npm install -g @anthropic-ai/claude-code
-          pip install mdalign
-
-      - name: Update docs
-        env:
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: .github/scripts/update-docs.sh
+  update:
+    uses: lucasvtiradentes/doc-updater/.github/workflows/update-docs.yml@main
+    with:
+      docs_path: docs/
+      mode: smart
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
