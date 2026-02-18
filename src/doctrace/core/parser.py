@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, NamedTuple
 if TYPE_CHECKING:
     from doctrace.core.config import MetadataConfig
 
-LIST_ITEM = re.compile(r"^-\s+(\S+(?:\s+\S+)*?)\s+-\s+(.+)$")
-LIST_ITEM_SIMPLE = re.compile(r"^\s*-\s+(\S+)(?:\s+-\s+(.+))?$")
+LIST_ITEM_CUSTOM = re.compile(r"^-\s+(\S+(?:\s+\S+)*?)\s+-\s+(.+)$")
+LIST_ITEM_YAML = re.compile(r"^\s*-\s+([^:]+?):\s*(.*)$")
 
 
 class RefEntry(NamedTuple):
@@ -91,7 +91,7 @@ def _filter_code_blocks(lines: list[str]) -> list[tuple[int, str]]:
 def _extract_section(lines: list[tuple[int, str]], header_pattern: re.Pattern, style: str) -> list[RefEntry]:
     entries = []
     in_section = False
-    item_pattern = LIST_ITEM_SIMPLE if style == "frontmatter" else LIST_ITEM
+    item_pattern = LIST_ITEM_YAML if style == "frontmatter" else LIST_ITEM_CUSTOM
     for line_num, line in lines:
         if header_pattern.match(line):
             in_section = True
