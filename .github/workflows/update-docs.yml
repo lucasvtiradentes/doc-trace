@@ -14,7 +14,5 @@ jobs:
     uses: lucasvtiradentes/doc-updater/.github/workflows/update-docs.yml@main
     with:
       docs_path: docs/
-      mode: custom
-      custom_skill: .claude/commands/update-docs.md
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
