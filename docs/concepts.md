@@ -36,7 +36,7 @@ Output from affected analysis.
 
 ### Config
 
-Runtime configuration loaded from .docsync/config.json.
+Runtime configuration loaded from .doctrace/config.json.
 
 | Field               | Type           | Default | Description                           |
 |---------------------|----------------|---------|---------------------------------------|
@@ -133,7 +133,7 @@ Occurs when docs reference each other in a cycle. Commands detect this and conti
 
 ### Metadata Section
 
-By default (`metadata.style = "custom"`), metadata is parsed after the last `---` separator and contains `related docs:` / `related sources:` lists. This is configurable via `.docsync/config.json` (`metadata.style`, keys, separator requirement).
+By default (`metadata.style = "custom"`), metadata is parsed after the last `---` separator and contains `related docs:` / `related sources:` lists. This is configurable via `.doctrace/config.json` (`metadata.style`, keys, separator requirement).
 
 ```
 # Doc Title
@@ -154,10 +154,9 @@ related sources:
 related docs:
 
 related sources:
-- src/docsync/core/parser.py        - RefEntry, ParsedDoc definitions
-- src/docsync/commands/affected.py  - AffectedResult definition
-- src/docsync/commands/validate.py  - ValidateResult, RefError definitions
-- src/docsync/core/config.py        - Config definition
-- src/docsync/core/lock.py          - Lock definition
-- src/docsync/core/git.py           - FileChange, CommitInfo definitions
-- src/docsync/commands/preview/tree.py - DependencyTree definition
+- src/doctrace/core/parser.py        - RefEntry, ParsedDoc definitions
+- src/doctrace/commands/affected.py  - AffectedResult definition
+- src/doctrace/commands/validate.py  - ValidateResult, RefError definitions
+- src/doctrace/core/config.py        - Config definition
+- src/doctrace/core/lock.py          - Lock definition
+- src/doctrace/core/git.py           - FileChange, CommitInfo definitions

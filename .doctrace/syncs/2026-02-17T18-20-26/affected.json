@@ -1,0 +1,476 @@
+{
+  "direct_hits": [
+    "docs/features/affected.md",
+    "docs/features/preview.md",
+    "docs/repo/structure.md",
+    "docs/guides/setup-project.md",
+    "docs/rules.md",
+    "docs/testing.md",
+    "docs/architecture.md",
+    "docs/repo/local-setup.md",
+    "docs/concepts.md",
+    "docs/repo/tooling.md",
+    "docs/overview.md"
+  ],
+  "indirect_hits": [],
+  "phases": {
+    "1": [
+      "docs/repo/tooling.md",
+      "docs/concepts.md"
+    ],
+    "2": [
+      "docs/repo/local-setup.md",
+      "docs/features/preview.md",
+      "docs/features/affected.md",
+      "docs/testing.md"
+    ],
+    "3": [
+      "docs/guides/setup-project.md",
+      "docs/architecture.md",
+      "docs/repo/structure.md"
+    ],
+    "4": [
+      "docs/overview.md",
+      "docs/rules.md"
+    ]
+  },
+  "git": {
+    "commits": {
+      "2774ef6": "docs: enforce subagent-per-doc sync workflow",
+      "84eec72": "chore(skills): add update-docs codex skill",
+      "4ceaa88": "chore: release v0.1.2",
+      "d688de2": "docs: center details sections, add preview caption",
+      "1f36818": "refactor: improve data structure handling in graph module",
+      "71ca0c5": "docs: simplify readme diagram, add preview screenshot",
+      "c0f7e95": "docs: update affected docs",
+      "6523c8b": "docs: update documentation with metadata changes",
+      "85c606f": "chore: add cc command",
+      "b7fe847": "feat: add git info to verbose, refactor to data-first architecture",
+      "e9407ea": "feat: always show phases, add --json flag, remove --ordered",
+      "89a299a": "feat: show file status and line stats in --verbose",
+      "3fb4765": "feat: replace --show-changed-files with --verbose flag",
+      "a0a8a2d": "fix: show help when no command provided",
+      "566ce5c": "docs: add docsyncd symlink instructions",
+      "d8d3a36": "feat: add --since flag for arbitrary git ref",
+      "1fb88a6": "chore: align docs",
+      "aa94b0a": "refactor: consolidate git operations into core/git.py",
+      "f04e6fa": "refactor: preview command",
+      "e2e746b": "refactor: remove tree command",
+      "2f36fdd": "docs: update docs",
+      "958f72c": "fix: edit button",
+      "e1b57fd": "feat: add doc stats (versions, updated, created, lines) in editor view",
+      "6250d2c": "refactor: remove header stats",
+      "efe79ab": "refactor: change history panel from sidebar to slide-out drawer",
+      "dd8fc03": "feat: auto-select first doc when switching to editor with no selection",
+      "74378b0": "feat: add SVG export button for dependency graph",
+      "6c4eaa4": "feat: add full-text search across all docs",
+      "52fe7e9": "feat: add keyboard shortcuts for view navigation",
+      "9094eb1": "feat: add git history panel with version comparison",
+      "51a7b34": "feat: add markdown editing with save/cancel in preview",
+      "b172f98": "feat: add bidirectional selection sync between sidebar and graph",
+      "eca5a11": "refactor: extract preview template and redesign UI",
+      "b35fffa": "feat: add markdown preview tab to preview command",
+      "0d014e7": "feat: add preview command"
+    },
+    "tags": [
+      "v0.1.2"
+    ],
+    "merged_branches": [],
+    "changed_files": [
+      {
+        "path": ".agents/skills/update-docs/SKILL.md",
+        "status": "A",
+        "added": 170,
+        "removed": 0
+      },
+      {
+        "path": ".bumpversion.cfg",
+        "status": "M",
+        "added": 1,
+        "removed": 1
+      },
+      {
+        "path": ".claude/commands/update-docs.md",
+        "status": "A",
+        "added": 162,
+        "removed": 0
+      },
+      {
+        "path": ".docsync/lock.json",
+        "status": "A",
+        "added": 5,
+        "removed": 0
+      },
+      {
+        "path": ".github/images/preview.png",
+        "status": "A",
+        "added": null,
+        "removed": null
+      },
+      {
+        "path": "CHANGELOG.md",
+        "status": "M",
+        "added": 5,
+        "removed": 0
+      },
+      {
+        "path": "README.md",
+        "status": "M",
+        "added": 98,
+        "removed": 50
+      },
+      {
+        "path": "docs/architecture.md",
+        "status": "M",
+        "added": 19,
+        "removed": 40
+      },
+      {
+        "path": "docs/concepts.md",
+        "status": "M",
+        "added": 24,
+        "removed": 28
+      },
+      {
+        "path": "docs/features/affected.md",
+        "status": "M",
+        "added": 17,
+        "removed": 14
+      },
+      {
+        "path": "docs/features/dependency-tree.md",
+        "status": "D",
+        "added": 0,
+        "removed": 90
+      },
+      {
+        "path": "docs/features/initialization.md",
+        "status": "M",
+        "added": 15,
+        "removed": 5
+      },
+      {
+        "path": "docs/features/preview.md",
+        "status": "A",
+        "added": 89,
+        "removed": 0
+      },
+      {
+        "path": "docs/features/validation.md",
+        "status": "M",
+        "added": 1,
+        "removed": 2
+      },
+      {
+        "path": "docs/guides/add-doc-metadata.md",
+        "status": "M",
+        "added": 1,
+        "removed": 2
+      },
+      {
+        "path": "docs/guides/setup-project.md",
+        "status": "M",
+        "added": 3,
+        "removed": 4
+      },
+      {
+        "path": "docs/guides/validate-docs.md",
+        "status": "M",
+        "added": 1,
+        "removed": 2
+      },
+      {
+        "path": "docs/overview.md",
+        "status": "M",
+        "added": 4,
+        "removed": 4
+      },
+      {
+        "path": "docs/repo/cicd.md",
+        "status": "M",
+        "added": 1,
+        "removed": 2
+      },
+      {
+        "path": "docs/repo/local-setup.md",
+        "status": "M",
+        "added": 2,
+        "removed": 3
+      },
+      {
+        "path": "docs/repo/structure.md",
+        "status": "M",
+        "added": 10,
+        "removed": 2
+      },
+      {
+        "path": "docs/repo/tooling.md",
+        "status": "M",
+        "added": 0,
+        "removed": 2
+      },
+      {
+        "path": "docs/rules.md",
+        "status": "M",
+        "added": 2,
+        "removed": 2
+      },
+      {
+        "path": "docs/testing.md",
+        "status": "M",
+        "added": 4,
+        "removed": 4
+      },
+      {
+        "path": "pyproject.toml",
+        "status": "M",
+        "added": 1,
+        "removed": 1
+      },
+      {
+        "path": "src/docsync/cli.py",
+        "status": "M",
+        "added": 23,
+        "removed": 9
+      },
+      {
+        "path": "src/docsync/commands/affected.py",
+        "status": "M",
+        "added": 195,
+        "removed": 74
+      },
+      {
+        "path": "src/docsync/commands/preview/__init__.py",
+        "status": "A",
+        "added": 3,
+        "removed": 0
+      },
+      {
+        "path": "src/docsync/commands/preview/graph.py",
+        "status": "A",
+        "added": 77,
+        "removed": 0
+      },
+      {
+        "path": "src/docsync/commands/preview/search.py",
+        "status": "A",
+        "added": 25,
+        "removed": 0
+      },
+      {
+        "path": "src/docsync/commands/preview/server.py",
+        "status": "A",
+        "added": 137,
+        "removed": 0
+      },
+      {
+        "path": "src/docsync/commands/preview/template.html",
+        "status": "A",
+        "added": 922,
+        "removed": 0
+      },
+      {
+        "path": "src/docsync/commands/preview/tree.py",
+        "status": "R",
+        "added": null,
+        "removed": null,
+        "old_path": "src/docsync/commands/tree.py"
+      },
+      {
+        "path": "src/docsync/core/git.py",
+        "status": "A",
+        "added": 230,
+        "removed": 0
+      },
+      {
+        "path": "src/docsync/core/lock.py",
+        "status": "M",
+        "added": 2,
+        "removed": 7
+      },
+      {
+        "path": "tests/affected/pure_logic/test_pure_logic.py",
+        "status": "M",
+        "added": 8,
+        "removed": 8
+      },
+      {
+        "path": "tests/affected/test_scope_resolution.py",
+        "status": "M",
+        "added": 17,
+        "removed": 6
+      },
+      {
+        "path": "tests/affected/with_changes/test_with_changes.py",
+        "status": "M",
+        "added": 1,
+        "removed": 1
+      },
+      {
+        "path": "tests/affected/with_directory_ref/test_with_directory_ref.py",
+        "status": "M",
+        "added": 1,
+        "removed": 1
+      },
+      {
+        "path": "tests/cli/test_affected_flags.py",
+        "status": "M",
+        "added": 14,
+        "removed": 5
+      },
+      {
+        "path": "tests/preview/__init__.py",
+        "status": "A",
+        "added": 0,
+        "removed": 0
+      },
+      {
+        "path": "tests/preview/test_graph.py",
+        "status": "A",
+        "added": 77,
+        "removed": 0
+      },
+      {
+        "path": "tests/preview/test_search.py",
+        "status": "A",
+        "added": 62,
+        "removed": 0
+      },
+      {
+        "path": "tests/preview/test_tree.py",
+        "status": "A",
+        "added": 85,
+        "removed": 0
+      },
+      {
+        "path": "tests/tree/circular/docs/a.md",
+        "status": "D",
+        "added": 0,
+        "removed": 6
+      },
+      {
+        "path": "tests/tree/circular/docs/b.md",
+        "status": "D",
+        "added": 0,
+        "removed": 6
+      },
+      {
+        "path": "tests/tree/circular/test_circular.py",
+        "status": "D",
+        "added": 0,
+        "removed": 18
+      },
+      {
+        "path": "tests/tree/independent/docs/a.md",
+        "status": "D",
+        "added": 0,
+        "removed": 6
+      },
+      {
+        "path": "tests/tree/independent/docs/b.md",
+        "status": "D",
+        "added": 0,
+        "removed": 6
+      },
+      {
+        "path": "tests/tree/independent/test_independent.py",
+        "status": "D",
+        "added": 0,
+        "removed": 20
+      },
+      {
+        "path": "tests/tree/multi_level/docs/l0.md",
+        "status": "D",
+        "added": 0,
+        "removed": 6
+      },
+      {
+        "path": "tests/tree/multi_level/docs/l1.md",
+        "status": "D",
+        "added": 0,
+        "removed": 6
+      },
+      {
+        "path": "tests/tree/multi_level/docs/l2.md",
+        "status": "D",
+        "added": 0,
+        "removed": 6
+      },
+      {
+        "path": "tests/tree/multi_level/test_multi_level.py",
+        "status": "D",
+        "added": 0,
+        "removed": 18
+      },
+      {
+        "path": "tests/tree/with_deps/docs/base.md",
+        "status": "D",
+        "added": 0,
+        "removed": 6
+      },
+      {
+        "path": "tests/tree/with_deps/docs/child.md",
+        "status": "D",
+        "added": 0,
+        "removed": 6
+      },
+      {
+        "path": "tests/tree/with_deps/test_with_deps.py",
+        "status": "D",
+        "added": 0,
+        "removed": 35
+      }
+    ],
+    "source_to_docs": {
+      "pyproject.toml": [
+        "docs/guides/setup-project.md",
+        "docs/repo/tooling.md",
+        "docs/repo/local-setup.md"
+      ],
+      "src/docsync/cli.py": [
+        "docs/features/affected.md",
+        "docs/architecture.md",
+        "docs/overview.md"
+      ],
+      "src/docsync/": [
+        "docs/repo/structure.md",
+        "docs/overview.md"
+      ],
+      "src/docsync/commands/affected.py": [
+        "docs/features/affected.md",
+        "docs/concepts.md"
+      ],
+      "src/docsync/commands/": [
+        "docs/architecture.md",
+        "docs/rules.md"
+      ],
+      "src/docsync/commands/preview/": [
+        "docs/features/preview.md"
+      ],
+      "src/docsync/core/git.py": [
+        "docs/features/affected.md",
+        "docs/features/preview.md",
+        "docs/concepts.md"
+      ],
+      "src/docsync/core/": [
+        "docs/architecture.md",
+        "docs/rules.md"
+      ],
+      "src/docsync/core/lock.py": [
+        "docs/concepts.md"
+      ],
+      "tests/affected/": [
+        "docs/testing.md"
+      ],
+      "tests/": [
+        "docs/repo/structure.md"
+      ],
+      "tests/cli/": [
+        "docs/testing.md"
+      ],
+      "tests/preview/": [
+        "docs/testing.md"
+      ]
+    }
+  }
+}

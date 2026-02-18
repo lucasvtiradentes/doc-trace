@@ -40,12 +40,12 @@ steps:
 
 ### practical-test
 
-Runs docsync against its own docs.
+Runs doctrace against its own docs.
 
 ```yaml
 steps:
   - pip install -e ".[dev]"
-  - docsync validate docs/
+  - doctrace validate docs/
 ```
 
 ## Release Pipeline

@@ -2,8 +2,8 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from docsync.commands.validate import validate_refs
-from docsync.core.config import Config
+from doctrace.commands.validate import validate_refs
+from doctrace.core.config import Config
 
 DOCS_DIR = Path(__file__).parent / "docs"
 

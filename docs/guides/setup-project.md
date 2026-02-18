@@ -1,6 +1,6 @@
 # Setup Project
 
-Guide to setting up docsync development environment.
+Guide to setting up doctrace development environment.
 
 ## Requirements
 
@@ -38,10 +38,10 @@ Installed with `.[dev]`:
 ## Verify Installation
 
 ```bash
-.venv/bin/docsync --version
+.venv/bin/doctrace --version
 ```
 
-Should output the installed package version, e.g. `docsync 0.1.2`
+Should output the installed package version, e.g. `doctrace 0.1.1`
 
 ## Running Commands
 
@@ -49,17 +49,17 @@ Should output the installed package version, e.g. `docsync 0.1.2`
 
 ```bash
 source .venv/bin/activate
-docsync validate docs/
-docsync affected docs/ --last 1
-docsync preview docs/
+doctrace validate docs/
+doctrace affected docs/ --last 1
+doctrace preview docs/
 ```
 
 ### Without Activation
 
 ```bash
-.venv/bin/docsync validate docs/
-.venv/bin/docsync affected docs/ --last 1
-.venv/bin/docsync preview docs/
+.venv/bin/doctrace validate docs/
+.venv/bin/doctrace affected docs/ --last 1
+.venv/bin/doctrace preview docs/
 ```
 
 ## Available Make Commands
@@ -69,7 +69,7 @@ docsync preview docs/
 | make install         | setup venv + deps            |
 | make check           | lint + format check          |
 | make test            | run pytest                   |
-| make practical-test  | run docsync validate docs/   |
+| make practical-test  | run doctrace validate docs/   |
 | make changelog       | build CHANGELOG.md           |
 | make changelog-draft | preview changelog            |
 
@@ -78,10 +78,10 @@ docsync preview docs/
 After installation:
 
 ```bash
-docsync init
+doctrace init
 ```
 
-Creates `.docsync/` with default config.
+Creates `.doctrace/` with default config.
 
 ---
 

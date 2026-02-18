@@ -1,4 +1,4 @@
-from docsync.core.config import validate_config
+from doctrace.core.config import validate_config
 
 
 def test_validate_config_valid():

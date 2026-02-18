@@ -45,7 +45,7 @@ Build backend for wheel packaging.
 
 ```toml
 [tool.hatch.build.targets.wheel]
-packages = ["src/docsync"]
+packages = ["src/doctrace"]
 ```
 
 ## Changelog

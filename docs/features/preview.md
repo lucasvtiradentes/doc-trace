@@ -5,8 +5,8 @@ Interactive documentation explorer in the browser.
 ## Usage
 
 ```bash
-docsync preview docs/
-docsync preview docs/ --port 8080
+doctrace preview docs/
+doctrace preview docs/ --port 8080
 ```
 
 ## What It Does
@@ -56,7 +56,7 @@ Starts a local HTTP server serving an interactive single-page application for ex
 Change the server port (default: 8420).
 
 ```bash
-docsync preview docs/ --port 3000
+doctrace preview docs/ --port 3000
 ```
 
 ## Implementation
@@ -85,5 +85,5 @@ related docs:
 - docs/concepts.md - core types
 
 related sources:
-- src/docsync/commands/preview/ - preview module
-- src/docsync/core/git.py       - get_file_history, get_file_at_commit
+- src/doctrace/commands/preview/ - preview module
+- src/doctrace/core/git.py       - get_file_history, get_file_at_commit

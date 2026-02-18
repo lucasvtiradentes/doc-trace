@@ -1,8 +1,8 @@
 import tempfile
 from pathlib import Path
 
-from docsync.commands.preview.tree import _compute_levels, build_dependency_tree
-from docsync.core.config import Config
+from doctrace.commands.preview.tree import _compute_levels, build_dependency_tree
+from doctrace.core.config import Config
 
 
 def _create_doc(path: Path, related_docs: list[str] = None, related_sources: list[str] = None):

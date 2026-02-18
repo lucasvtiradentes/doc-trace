@@ -2,7 +2,7 @@
 
 ```
 doc-sync/
-├── src/docsync/           ← main package
+├── src/doctrace/           ← main package
 │   ├── __init__.py
 │   ├── cli.py             ← entry point, argparse setup
 │   ├── commands/          ← subcommand implementations
@@ -52,14 +52,14 @@ doc-sync/
 
 ## Key Directories
 
-### src/docsync/commands/
+### src/doctrace/commands/
 
 Each file implements one CLI subcommand. All follow the same pattern:
 - Define command-specific types
 - Implement core logic
 - Export `run()` function called by cli.py
 
-### src/docsync/core/
+### src/doctrace/core/
 
 Shared modules used across commands:
 - `parser.py`    - extracts metadata from markdown
@@ -79,6 +79,6 @@ related docs:
 - docs/testing.md      - test patterns and coverage
 
 related sources:
-- src/docsync/       - main package
+- src/doctrace/       - main package
 - tests/             - test suite
 - .github/workflows/ - CI pipelines

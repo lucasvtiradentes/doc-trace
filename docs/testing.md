@@ -49,7 +49,7 @@ Local equivalents of CI jobs:
 ```bash
 make check          # ruff check + ruff format --check
 make test           # pytest -v
-make practical-test # docsync validate docs/
+make practical-test # doctrace validate docs/
 ```
 
 ---
