@@ -226,7 +226,7 @@ def _build_output_data(
         "phases": {str(i + 1): [d["path"] for d in level] for i, level in enumerate(levels)},
     }
     if result.circular_refs:
-        data["circular_refs"] = [[str(a), str(b)] for a, b in result.circular_refs]
+        data["circular_refs"] = [[_rel_path(a, repo_root), _rel_path(b, repo_root)] for a, b in result.circular_refs]
     if git_data:
         data["git"] = git_data
     return data
