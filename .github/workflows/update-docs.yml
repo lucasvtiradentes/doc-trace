@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   update:
-    uses: lucasvtiradentes/doc-updater/.github/workflows/update-docs.yml@main
+    uses: lucasvtiradentes/doc-update/.github/workflows/update-docs.yml@main
     with:
       docs_path: docs/
     secrets:
