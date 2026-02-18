@@ -41,7 +41,7 @@ Installed with `.[dev]`:
 .venv/bin/doctrace --version
 ```
 
-Should output the installed package version, e.g. `doctrace 0.1.1`
+Should output the installed package version, e.g. `doctrace 0.2.0`
 
 ## Running Commands
 

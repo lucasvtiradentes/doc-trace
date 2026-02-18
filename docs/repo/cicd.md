@@ -73,7 +73,7 @@ Environment: `pypi`
 
 | Option  | Example         |
 |---------|-----------------|
-| patch   | 0.1.0 → 0.1.1   |
+| patch   | 0.2.0 → 0.2.1   |
 | minor   | 0.1.0 → 0.2.0   |
 | major   | 0.1.0 → 1.0.0   |
 | initial | no bump         |
@@ -90,7 +90,7 @@ Steps:
 5. Create or update PR (`docs: update documentation`)
 6. Auto-merge PR after 3 days
 
-Uses `.github/scripts/update-docs.sh` and `.github/scripts/run-claude.sh`.
+Uses a reusable workflow from the `lucasvtiradentes/doc-updater` repository.
 
 ## Branch Strategy
 
@@ -108,4 +108,3 @@ related sources:
 - .github/workflows/callable-ci.yml  - reusable CI
 - .github/workflows/release.yml      - release workflow
 - .github/workflows/update-docs.yml  - auto-update docs workflow
-- .github/scripts/                   - CI helper scripts

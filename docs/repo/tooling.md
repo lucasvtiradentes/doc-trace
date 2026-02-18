@@ -77,7 +77,7 @@ towncrier build --draft --version X.Y.Z  # preview
 Version bumping tool included in `dev` optional dependencies.
 
 ```bash
-bump2version patch  # 0.1.0 → 0.1.1
+bump2version patch  # 0.2.0 → 0.2.1
 bump2version minor  # 0.1.0 → 0.2.0
 bump2version major  # 0.1.0 → 1.0.0
 ```
