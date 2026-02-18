@@ -127,7 +127,6 @@ def _propagate(
     initial_docs: list[Path], doc_to_docs: dict[Path, list[Path]], depth_limit: int | None
 ) -> tuple[list[Path], list[tuple[Path, Path]], dict[Path, Path]]:
     indirect_hits = []
-    circular_refs = []
     indirect_chains: dict[Path, Path] = {}
     visited = set(initial_docs)
     current_level = set(initial_docs)
@@ -139,8 +138,6 @@ def _propagate(
         for doc in current_level:
             for referencing_doc in doc_to_docs.get(doc, []):
                 if referencing_doc in visited:
-                    if referencing_doc not in initial_docs:
-                        circular_refs.append((doc, referencing_doc))
                     continue
                 visited.add(referencing_doc)
                 indirect_hits.append(referencing_doc)
@@ -148,7 +145,25 @@ def _propagate(
                 next_level.add(referencing_doc)
         current_level = next_level
         depth += 1
+    circular_refs = _find_circular_refs(visited, doc_to_docs)
     return indirect_hits, circular_refs, indirect_chains
+
+
+def _find_circular_refs(
+    affected_docs: set[Path], doc_to_docs: dict[Path, list[Path]]
+) -> list[tuple[Path, Path]]:
+    circular = []
+    seen_pairs: set[tuple[Path, Path]] = set()
+    for doc_a in affected_docs:
+        for doc_b in doc_to_docs.get(doc_a, []):
+            if doc_b not in affected_docs:
+                continue
+            if doc_a in doc_to_docs.get(doc_b, []):
+                pair = (min(doc_a, doc_b), max(doc_a, doc_b))
+                if pair not in seen_pairs:
+                    seen_pairs.add(pair)
+                    circular.append((doc_a, doc_b))
+    return circular
 
 
 def _get_doc_metadata(docs: list[Path], config: Config, repo_root: Path) -> list[dict[str, Any]]:
