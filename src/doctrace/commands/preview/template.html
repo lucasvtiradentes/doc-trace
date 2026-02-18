@@ -58,8 +58,7 @@
         .main-toggle-btn.active { background: #fff; color: #1e293b; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
         .main-toggle-btn svg { width: 14px; height: 14px; }
         .main-content { flex: 1; overflow: auto; padding: 24px; background: #f1f5f9; }
-        .graph-container { background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-height: 100%; }
-        .graph-container svg { max-width: 100%; height: auto; }
+        .graph-inner svg { max-width: none; height: auto; }
         .doc-container { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 48px; max-width: 900px; margin: 0 auto; display: none; }
         .doc-container.visible { display: block; }
         .doc-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; color: #94a3b8; }
@@ -145,10 +144,17 @@
         .search-result-name { font-size: 13px; font-weight: 500; color: #1e293b; margin-bottom: 2px; }
         .search-result-path { font-size: 11px; color: #94a3b8; margin-bottom: 6px; }
         .search-result-match { font-size: 11px; color: #64748b; font-family: 'SF Mono', Monaco, monospace; background: #f8fafc; padding: 4px 8px; border-radius: 4px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .graph-wrapper { position: relative; min-height: 100%; }
+        .graph-wrapper { position: relative; min-height: 100%; overflow: hidden; }
         .graph-export-btn { position: absolute; top: 12px; right: 12px; padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; color: #64748b; z-index: 10; }
         .graph-export-btn:hover { background: #f1f5f9; color: #3b82f6; border-color: #3b82f6; }
         .graph-export-btn svg { width: 16px; height: 16px; display: block; }
+        .graph-zoom-controls { position: absolute; top: 12px; right: 56px; display: flex; gap: 4px; z-index: 10; }
+        .graph-zoom-btn { padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; color: #64748b; font-size: 14px; font-weight: 600; line-height: 1; min-width: 32px; }
+        .graph-zoom-btn:hover { background: #f1f5f9; color: #3b82f6; border-color: #3b82f6; }
+        .graph-zoom-level { padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; color: #64748b; font-size: 12px; min-width: 50px; text-align: center; }
+        .graph-container { background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-height: 100%; cursor: grab; overflow: hidden; }
+        .graph-container.dragging { cursor: grabbing; }
+        .graph-inner { transform-origin: 0 0; transition: transform 0.1s ease-out; }
     </style>
 </head>
 <body>
@@ -195,10 +201,18 @@
                                             </div>
             <div class="main-content">
                 <div class="graph-wrapper" id="graph-wrapper">
+                    <div class="graph-zoom-controls">
+                        <button class="graph-zoom-btn" onclick="zoomIn()" title="Zoom in">+</button>
+                        <span class="graph-zoom-level" id="zoom-level">100%</span>
+                        <button class="graph-zoom-btn" onclick="zoomOut()" title="Zoom out">−</button>
+                        <button class="graph-zoom-btn" onclick="zoomReset()" title="Reset zoom">⟲</button>
+                    </div>
                     <button class="graph-export-btn" onclick="exportSVG()" title="Download SVG">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     </button>
-                    <div class="graph-container" id="graph"></div>
+                    <div class="graph-container" id="graph-container">
+                        <div class="graph-inner" id="graph"></div>
+                    </div>
                 </div>
                 <div class="doc-container" id="doc-container"></div>
             </div>
@@ -881,7 +895,7 @@
                     if (node) selectDoc(node.path);
                 });
             });
-            document.querySelector('.graph-container').addEventListener('click', (e) => {
+            document.getElementById('graph-container').addEventListener('click', (e) => {
                 if (!e.target.closest('.node')) resetHighlight();
             });
         }
@@ -902,11 +916,87 @@
             URL.revokeObjectURL(url);
         }
 
+        let zoomLevel = 1;
+        let panX = 0;
+        let panY = 0;
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let dragStartPanX = 0;
+        let dragStartPanY = 0;
+        const MIN_ZOOM = 0.25;
+        const MAX_ZOOM = 3;
+        const ZOOM_STEP = 0.25;
+
+        function updateTransform() {
+            const graph = document.getElementById('graph');
+            graph.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+            document.getElementById('zoom-level').textContent = Math.round(zoomLevel * 100) + '%';
+        }
+
+        function zoomIn() {
+            zoomLevel = Math.min(MAX_ZOOM, zoomLevel + ZOOM_STEP);
+            updateTransform();
+        }
+
+        function zoomOut() {
+            zoomLevel = Math.max(MIN_ZOOM, zoomLevel - ZOOM_STEP);
+            updateTransform();
+        }
+
+        function zoomReset() {
+            zoomLevel = 1;
+            panX = 0;
+            panY = 0;
+            updateTransform();
+        }
+
+        const graphContainer = document.getElementById('graph-container');
+        graphContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+            const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomLevel + delta));
+            const rect = graphContainer.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const zoomRatio = newZoom / zoomLevel;
+            panX = mouseX - (mouseX - panX) * zoomRatio;
+            panY = mouseY - (mouseY - panY) * zoomRatio;
+            zoomLevel = newZoom;
+            updateTransform();
+        }, { passive: false });
+
+        graphContainer.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.node')) return;
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            dragStartPanX = panX;
+            dragStartPanY = panY;
+            graphContainer.classList.add('dragging');
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            panX = dragStartPanX + (e.clientX - dragStartX);
+            panY = dragStartPanY + (e.clientY - dragStartY);
+            updateTransform();
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            graphContainer.classList.remove('dragging');
+        });
+
         const keyboardShortcuts = {
             'ArrowLeft': () => switchMainView('diagram'),
             'ArrowRight': () => switchMainView('editor'),
             'l': () => switchListView('levels'),
             't': () => switchListView('tree'),
+            '+': () => zoomIn(),
+            '=': () => zoomIn(),
+            '-': () => zoomOut(),
+            '0': () => zoomReset(),
         };
 
         document.addEventListener('keydown', (e) => {
