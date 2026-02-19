@@ -821,7 +821,8 @@
                 lines.push('    subgraph L' + level + '[' + label + ']');
                 lines.push('        style L' + level + ' fill:#fff,stroke:' + color + ',stroke-width:2px');
                 nodes.forEach(n => {
-                    lines.push('        ' + n.id + '["' + n.name + '"]');
+                    const displayPath = n.path.replace(/^[^/]+\//, '');
+                    lines.push('        ' + n.id + '["' + displayPath + '"]');
                 });
                 lines.push('    end');
             });
