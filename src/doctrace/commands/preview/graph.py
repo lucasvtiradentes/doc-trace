@@ -4,8 +4,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from doctrace.commands.preview.tree import build_dependency_tree
 from doctrace.core.config import Config
+from doctrace.core.docs import build_dependency_tree
 
 TEMPLATE_PATH = Path(__file__).parent / "template.html"
 

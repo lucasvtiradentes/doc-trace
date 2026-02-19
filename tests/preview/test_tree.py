@@ -1,8 +1,8 @@
 import tempfile
 from pathlib import Path
 
-from doctrace.commands.preview.tree import _compute_levels, build_dependency_tree
 from doctrace.core.config import Config
+from doctrace.core.docs import build_dependency_tree, compute_levels
 
 
 def _create_doc(path: Path, required_docs: list[str] = None, sources: list[str] = None):
@@ -72,14 +72,14 @@ def test_build_dependency_tree_circular():
 
 
 def test_compute_levels_empty():
-    levels, circular = _compute_levels({})
-    assert levels == [[]]
-    assert circular == []
+    result = compute_levels({})
+    assert result.levels == [[]]
+    assert result.circular == []
 
 
 def test_compute_levels_single_doc():
     doc = Path("/docs/a.md")
-    levels, circular = _compute_levels({doc: []})
-    assert len(levels) == 1
-    assert doc in levels[0]
-    assert circular == []
+    result = compute_levels({doc: []})
+    assert len(result.levels) == 1
+    assert doc in result.levels[0]
+    assert result.circular == []

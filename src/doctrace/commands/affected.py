@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 from doctrace.core.config import Config, find_repo_root, load_config
-from doctrace.core.constants import MARKDOWN_GLOB
+from doctrace.core.docs import build_doc_index, compute_levels
 from doctrace.core.git import (
     FileChange,
     get_changed_files,
@@ -17,7 +17,7 @@ from doctrace.core.git import (
     get_merged_branches_in_range,
     get_tags_in_range,
 )
-from doctrace.core.parser import parse_doc
+from doctrace.core.parser import ParsedDoc, parse_doc
 
 
 class AffectedResult(NamedTuple):
@@ -27,6 +27,7 @@ class AffectedResult(NamedTuple):
     circular_refs: list[tuple[Path, Path]]
     matches: dict[str, list[Path]]
     indirect_chains: dict[Path, Path]
+    parsed_cache: dict[Path, ParsedDoc]
 
 
 def resolve_commit_ref(
@@ -72,10 +73,10 @@ def _find_affected_docs_for_changes(
     docs_path: Path, changed_files: list[str], config: Config, repo_root: Path
 ) -> AffectedResult:
     if not changed_files:
-        return AffectedResult([], [], [], [], {}, {})
-    source_to_docs, doc_to_docs = _build_indexes(docs_path, repo_root, config)
-    direct_hits, matches = _find_direct_hits(changed_files, source_to_docs)
-    indirect_hits, circular_refs, indirect_chains = _propagate(direct_hits, doc_to_docs)
+        return AffectedResult([], [], [], [], {}, {}, {})
+    index = build_doc_index(docs_path, config, repo_root)
+    direct_hits, matches = _find_direct_hits(changed_files, index.source_to_docs)
+    indirect_hits, circular_refs, indirect_chains = _propagate(direct_hits, index.reverse_deps)
     all_affected = list(set(direct_hits) | set(indirect_hits))
     return AffectedResult(
         affected_docs=all_affected,
@@ -84,27 +85,8 @@ def _find_affected_docs_for_changes(
         circular_refs=circular_refs,
         matches=matches,
         indirect_chains=indirect_chains,
+        parsed_cache=index.parsed_cache,
     )
-
-
-def _build_indexes(
-    docs_path: Path, repo_root: Path, config: Config
-) -> tuple[dict[str, list[Path]], dict[Path, list[Path]]]:
-    source_to_docs: dict[str, list[Path]] = defaultdict(list)
-    doc_to_docs: dict[Path, list[Path]] = defaultdict(list)
-    doc_files = [f.resolve() for f in docs_path.rglob(MARKDOWN_GLOB)]
-    for doc_file in doc_files:
-        try:
-            parsed = parse_doc(doc_file, config.metadata)
-        except (OSError, UnicodeDecodeError, ValueError):
-            continue
-        for ref in parsed.sources:
-            source_to_docs[ref.path].append(doc_file)
-        for ref in parsed.required_docs:
-            ref_path = repo_root / ref.path
-            if ref_path.exists():
-                doc_to_docs[ref_path].append(doc_file)
-    return source_to_docs, doc_to_docs
 
 
 def _find_direct_hits(
@@ -162,12 +144,20 @@ def _find_circular_refs(affected_docs: set[Path], doc_to_docs: dict[Path, list[P
     return circular
 
 
-def _get_doc_metadata(docs: list[Path], config: Config, repo_root: Path) -> list[dict[str, Any]]:
+def _get_doc_metadata(
+    docs: list[Path],
+    config: Config,
+    repo_root: Path,
+    parsed_cache: dict[Path, ParsedDoc] | None = None,
+) -> list[dict[str, Any]]:
     result = []
     for doc_file in docs:
         try:
             abs_path = doc_file if doc_file.is_absolute() else repo_root / doc_file
-            parsed = parse_doc(abs_path, config.metadata)
+            if parsed_cache and abs_path in parsed_cache:
+                parsed = parsed_cache[abs_path]
+            else:
+                parsed = parse_doc(abs_path, config.metadata)
             rel_path = str(abs_path.relative_to(repo_root))
             result.append(
                 {
@@ -189,30 +179,8 @@ def _build_levels(docs: list[dict[str, Any]], repo_root: Path) -> list[list[dict
     for d in docs:
         path = repo_root / d["path"]
         deps[path] = [repo_root / rd for rd in d["required_docs"] if (repo_root / rd) in doc_paths]
-    assigned: dict[Path, int] = {}
-
-    def get_level(doc: Path, visiting: set[Path]) -> int:
-        if doc in assigned:
-            return assigned[doc]
-        if doc in visiting:
-            return 0
-        if not deps.get(doc):
-            assigned[doc] = 0
-            return 0
-        visiting.add(doc)
-        max_dep = max((get_level(dep, visiting) for dep in deps[doc]), default=-1)
-        visiting.remove(doc)
-        level = max_dep + 1
-        assigned[doc] = level
-        return level
-
-    for path in doc_paths:
-        get_level(path, set())
-    max_level = max(assigned.values()) if assigned else 0
-    levels: list[list[dict[str, Any]]] = [[] for _ in range(max_level + 1)]
-    for path, level in assigned.items():
-        levels[level].append(doc_by_path[path])
-    return [level for level in levels if level]
+    level_result = compute_levels(deps)
+    return [[doc_by_path[p] for p in level_paths] for level_paths in level_result.levels if level_paths]
 
 
 def _rel_path(path: Path, repo_root: Path) -> str:
@@ -377,7 +345,7 @@ def run(
             print("No docs affected")
         return 0
 
-    docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root)
+    docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root, result.parsed_cache)
     levels = _build_levels(docs_metadata, repo_root)
 
     git_data = _build_git_data(changed_files_detailed, result, commit_ref, repo_root) if verbose else None
