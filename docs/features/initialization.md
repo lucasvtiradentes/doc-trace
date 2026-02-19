@@ -12,7 +12,7 @@ sources:
 
 # Initialization (init command)
 
-Creates the doctrace.json configuration file at repo root.
+Creates the `doctrace.json` configuration file at repo root.
 
 ## Usage
 

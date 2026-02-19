@@ -8,9 +8,9 @@ sources:
   - src/doctrace/core/docs.py: metadata extraction
 ---
 
-# Validation (validate command)
+# Validation (info command)
 
-Validates that all doc references point to existing files.
+Validates that all doc references point to existing files and shows dependency phases.
 
 ## Usage
 
@@ -20,27 +20,36 @@ doctrace info docs/
 
 ## What It Checks
 
+### Required Docs
+
+Verifies each path in `required_docs:` section exists as a file.
+
+```
+required_docs:
+  - docs/other.md: description    ← must exist
+```
+
 ### Related Docs
 
-Verifies each path in `related docs:` section exists as a file.
+Verifies each path in `related_docs:` section exists as a file.
 
 ```
-related docs:
-- docs/other.md - description    ← must exist
+related_docs:
+  - docs/other.md: description    ← must exist
 ```
 
-### Related Sources
+### Sources
 
-Verifies each path in `related sources:` section exists. Supports:
+Verifies each path in `sources:` section exists. Supports:
 - Exact file paths
 - Directory paths
 - Glob patterns (*, ?)
 
 ```
-related sources:
-- src/module.py - exact file     ← must exist
-- src/utils/    - directory      ← must exist
-- src/*.py      - glob pattern   ← must match at least one file
+sources:
+  - src/module.py: exact file     ← must exist
+  - src/utils/: directory         ← must exist
+  - src/*.py: glob pattern        ← must match at least one file
 ```
 
 ## Error Output
@@ -48,8 +57,9 @@ related sources:
 Reports errors with file path and line number:
 
 ```
-docs/api.md:15: related doc not found: docs/missing.md
-docs/api.md:18: related source not found: src/deleted.py
+Warnings (2):
+  docs/api.md:15: required doc not found: docs/missing.md
+  docs/api.md:18: source not found: src/deleted.py
 ```
 
 ## Exit Codes
@@ -59,22 +69,21 @@ docs/api.md:18: related source not found: src/deleted.py
 | 0    | all refs valid             |
 | 1    | one or more refs invalid   |
 
-## Configuration
+## Output Format
 
-### ignored_paths
+Shows dependency phases followed by any validation warnings:
 
-Skip validation for matching docs.
-
-```json
-{
-  "ignored_paths": [
-    "docs/drafts/*.md",
-    "docs/archive/*"
-  ]
-}
 ```
+Independent (2):
+  docs/concepts.md
+  docs/utils.md
 
-Patterns use fnmatch syntax.
+Phase 1 (1):
+  docs/api.md
+
+Warnings (1):
+  docs/api.md:15: source not found: src/deleted.py
+```
 
 ## Behavior
 
@@ -90,5 +99,5 @@ Patterns use fnmatch syntax.
 | validate_refs()      | iterate docs, yield ValidateResults|
 | _check_single_doc()  | validate one doc                   |
 | _glob_matches()      | check if pattern has matches       |
-| _is_ignored()        | check against ignored_paths        |
+| build_dependency_tree() | build doc dependency tree       |
 

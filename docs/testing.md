@@ -11,6 +11,7 @@ sources:
   - tests/validate/: validation tests
   - tests/config/: config tests
   - tests/cli/: CLI tests
+  - tests/core/: core module tests
 ---
 
 # Testing
@@ -36,12 +37,13 @@ Tests are organized by feature area:
 
 | Directory / File   | Coverage                                                         |
 |--------------------|------------------------------------------------------------------|
-| `tests/affected/`  | index building, direct hits, propagation, depth limits, scope resolution |
+| `tests/affected/`  | index building, direct hits, propagation, scope resolution       |
 | `tests/validate/`  | valid refs, missing docs, missing sources                        |
 | `tests/config/`    | config validation (valid + invalid)                              |
-| `tests/parser/`    | custom/frontmatter parsing, code blocks, line numbers            |
-| `tests/preview/`   | dependency tree, search, graph building                          |
+| `tests/parser/`    | frontmatter parsing, code blocks, line numbers                   |
+| `tests/preview/`   | search, graph building                                           |
 | `tests/cli/`       | CLI argument parsing and command dispatch                        |
+| `tests/core/`      | dependency tree building, level computation                      |
 
 ## Common Patterns
 

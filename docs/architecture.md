@@ -26,12 +26,12 @@ sources:
 │  argparse → subcommand dispatcher                           │
 │                                                             │
 │  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────┐ ┌──────┐    │
-│  │   info   │ │ affected │ │ preview │ │ lock │ │ init │    │
+│  │   info   │ │ affected │ │ preview │ │ base │ │ init │    │
 │  └────┬─────┘ └────┬─────┘ └────┬────┘ └──┬───┘ └──┬───┘    │
 │       │            │            │         │        │        │
 │       v            v            v         v        v        │
 │  commands/    commands/    commands/  commands/ commands/   │
-│  info.py     affected.py  preview.py lock.py   init.py      │
+│  info.py     affected.py  preview.py base.py   init.py      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -44,12 +44,11 @@ src/doctrace/
 │   ├── info.py         ← info command (phases + validation)
 │   ├── affected.py     ← change detection + output formatting
 │   ├── preview/        ← interactive browser UI module
-│   ├── lock.py         ← lock state management
+│   ├── base.py         ← base commit state management
 │   └── init.py         ← project setup
 ├── core/
 │   ├── docs.py         ← doc parsing + indexing
-│   ├── config.py       ← runtime configuration
-│   ├── lock.py         ← lock state persistence
+│   ├── config.py       ← runtime configuration + base state
 │   ├── git.py          ← git operations
 │   └── constants.py    ← shared constants
 ```
@@ -153,7 +152,7 @@ while current_level not empty:
 find_config(start_path):
     current = start_path
     while current != root:
-        if .doctrace/config.json exists:
+        if doctrace.json exists:
             return config_path
         current = parent
     return None

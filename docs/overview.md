@@ -18,7 +18,7 @@ CLI tool that keeps documentation in sync with code changes.
 - Detects docs affected by code changes via git diff
 - Validates all doc references point to existing files
 - Tracks doc-to-doc relationships for cascading updates
-- Manages lock state for incremental analysis
+- Manages base commit state for incremental analysis
 
 ## Package Info
 
@@ -42,30 +42,8 @@ CLI tool that keeps documentation in sync with code changes.
 
 | Command  | Description                          |
 |----------|:-------------------------------------|
-| validate | validate all doc refs exist          |
+| info     | show phases + validate all doc refs  |
 | affected | list docs affected by git diff       |
 | preview  | interactive docs explorer in browser |
-| lock     | manage lock.json state               |
-| init     | create .doctrace/ config directory    |
-
-## Doc Index
-
-| File                             | Description                              |
-|----------------------------------|------------------------------------------|
-| docs/overview.md                 | project summary and doc index            |
-| docs/architecture.md             | system design, data flow, diagrams       |
-| docs/concepts.md                 | key types and terminology                |
-| docs/repo/structure.md           | directory layout and file organization   |
-| docs/repo/tooling.md             | dev tools and configurations             |
-| docs/repo/local-setup.md         | local development setup                  |
-| docs/repo/cicd.md                | CI/CD pipelines and deployment           |
-| docs/features/validation.md      | validate command reference validation    |
-| docs/features/affected.md        | affected command change detection        |
-| docs/features/initialization.md  | init command project setup               |
-| docs/features/preview.md         | preview command interactive explorer     |
-| docs/rules.md                    | coding principles and conventions        |
-| docs/testing.md                  | testing strategy and patterns            |
-| docs/guides/setup-project.md     | how to set up dev environment            |
-| docs/guides/add-doc-metadata.md  | how to add metadata to docs              |
-| docs/guides/validate-docs.md     | how to validate doc references           |
-
+| base     | manage base commit state             |
+| init     | create doctrace.json config file     |

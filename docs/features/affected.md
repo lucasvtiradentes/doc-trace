@@ -17,7 +17,7 @@ Maps code changes to affected documentation.
 
 ```bash
 doctrace affected docs/ --last 1
-doctrace affected docs/ --since-lock
+doctrace affected docs/ --since-base
 doctrace affected docs/ --base-branch main
 doctrace affected docs/ --since v0.1.0
 doctrace affected docs/ --last 5 --verbose
@@ -57,7 +57,7 @@ Outputs the full result as JSON instead of text.
 
 Resolves a comparison base from one required scope flag:
 - `--last <N>` -> `HEAD~N`
-- `--since-lock` -> `.doctrace/lock.json:last_analyzed_commit`
+- `--since-base` -> `doctrace.json:base.commit_hash`
 - `--base-branch <branch>` -> `git merge-base HEAD <branch>`
 - `--since <ref>` -> uses the ref directly (commit, tag, or branch)
 
@@ -82,24 +82,6 @@ BFS traversal from direct hits through doc_to_docs:
 - Level 1: docs that reference level 0 docs
 - Level N: docs that reference level N-1 docs
 
-## Configuration
-
-### affected_depth_limit
-
-Limit how deep propagation goes.
-
-```json
-{
-  "affected_depth_limit": 2
-}
-```
-
-| Value | Behavior                      |
-|-------|-------------------------------|
-| null  | unlimited depth               |
-| 0     | direct hits only              |
-| N     | up to N levels of propagation |
-
 ## Circular Reference Detection
 
 Detects revisits during propagation traversal.
@@ -116,7 +98,7 @@ Detects revisits during propagation traversal.
 └────────────────┘     └────────┬────────┘
                                 │
 ┌────────────────┐              v
-│ docs/*.md      │────→ _build_indexes()
+│ docs/*.md      │────→ build_doc_index()
 └────────────────┘              │
                                 v
                        _find_direct_hits()

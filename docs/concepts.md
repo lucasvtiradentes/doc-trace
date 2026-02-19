@@ -2,11 +2,11 @@
 title: Concepts
 description: Core types and terminology
 sources:
-  - src/doctrace/core/docs.py: RefEntry, ParsedDoc definitions
+  - src/doctrace/core/docs.py: RefEntry, ParsedDoc, DocIndex, DependencyTree definitions
   - src/doctrace/commands/affected.py: AffectedResult definition
   - src/doctrace/commands/info.py: ValidateResult, RefError definitions
-  - src/doctrace/core/config.py: Config, Base definitions
-  - src/doctrace/core/git.py: FileChange, CommitInfo definitions
+  - src/doctrace/core/config.py: Config, MetadataConfig, Base definitions
+  - src/doctrace/core/git.py: FileChange, CommitInfo, CurrentCommitInfo definitions
 ---
 
 # Concepts
@@ -33,6 +33,28 @@ Container for extracted references from a markdown file.
 | related_docs  | list[RefEntry] | soft refs, informational only            |
 | sources       | list[RefEntry] | code references                          |
 
+### DocIndex
+
+Index structure built from scanning docs.
+
+| Field          | Type                    | Description                           |
+|----------------|-------------------------|---------------------------------------|
+| parsed_cache   | dict[Path, ParsedDoc]   | parsed docs by path                   |
+| source_to_docs | dict[str, list[Path]]   | source paths to docs that reference them |
+| forward_deps   | dict[Path, list[Path]]  | doc to docs it requires               |
+| reverse_deps   | dict[Path, list[Path]]  | doc to docs that require it           |
+
+### DependencyTree
+
+Dependency tree with levels and circular detection.
+
+| Field    | Type                      | Description                         |
+|----------|---------------------------|-------------------------------------|
+| levels   | list[list[Path]]          | docs grouped by dependency level    |
+| circular | list[tuple[Path, Path]]   | detected circular dependencies      |
+| doc_deps | dict[Path, list[Path]]    | forward dependencies                |
+| index    | DocIndex                  | underlying doc index                |
+
 ### AffectedResult
 
 Output from affected analysis.
@@ -45,6 +67,7 @@ Output from affected analysis.
 | circular_refs    | list[tuple[Path, Path]]   | detected circular dependencies           |
 | matches          | dict[str, list[Path]]     | changed source paths to affected docs    |
 | indirect_chains  | dict[Path, Path]          | indirect hit doc to doc it was reached through |
+| parsed_cache     | dict[Path, ParsedDoc]     | parsed docs cache for efficiency               |
 
 ### Config
 

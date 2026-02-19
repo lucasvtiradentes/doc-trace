@@ -15,7 +15,7 @@ Add metadata hints to your docs, and doctrace builds a dependency graph that map
               v
   ┌───────────────────────────────────┐
   │ Direct hits:                      │
-  │   docs/bookings.md                │  ← has "related sources: src/booking/"
+  │   docs/bookings.md                │  ← has "sources: src/booking/"
   │                                   │
   │ Indirect hits:                    │
   │   docs/payments.md                │  ← referenced BY docs/bookings.md
@@ -27,21 +27,21 @@ Add metadata hints to your docs, and doctrace builds a dependency graph that map
 <summary>How it works</summary>
 <div align="left">
 
-Each doc ends with metadata sections:
+Each doc has YAML frontmatter with metadata sections:
 
 ```markdown
+---
+required_docs:
+  - docs/payments.md: payment integration
+
+sources:
+  - src/booking/: booking module
+  - src/booking/commands/: command handlers
+---
+
 # Booking System
 
 How bookings work...
-
----
-
-related docs:
-- docs/payments.md - payment integration
-
-related sources:
-- src/booking/           - booking module
-- src/booking/commands/  - command handlers
 ```
 
 When `src/booking/handler.ts` changes:
@@ -89,7 +89,7 @@ In large codebases, docs get outdated because:
 1. No one remembers which docs need updating when a file changes
 2. AI agents don't know which files to read to understand each doc
 
-doctrace solves this by adding "hints" to each doc - `related sources:` tells any AI exactly what to read.
+doctrace solves this by adding "hints" to each doc - `sources:` tells any AI exactly what to read.
 
 ## Quickstart
 
@@ -101,67 +101,30 @@ pipx install doctrace
 
 ### 2. Add metadata to your docs
 
-<div align="center">
-<details>
-<summary>Custom style (default) - metadata at bottom</summary>
-<div align="left">
-
-```markdown
-# My Feature
-
-Documentation content here...
-
----
-
-related docs:
-- docs/other-feature.md - brief description
-
-related sources:
-- src/feature/           - main module
-- src/feature/utils.ts   - helper functions
-```
-
-</div>
-</details>
-</div>
-
-<div align="center">
-<details>
-<summary>Frontmatter style - metadata at top</summary>
-<div align="left">
+Add YAML frontmatter at the top of your docs:
 
 ```markdown
 ---
-related docs:
-  - docs/other-feature.md - brief description
+required_docs:
+  - docs/other-feature.md: hard dependency
 
-related sources:
-  - src/feature/         - main module
-  - src/feature/utils.ts - helper functions
+related_docs:
+  - docs/related.md: soft reference
+
+sources:
+  - src/feature/: main module
+  - src/feature/utils.ts: helper functions
 ---
 
 # My Feature
 
 Documentation content here...
 ```
-
-Config required:
-```json
-{
-  "metadata": {
-    "style": "frontmatter"
-  }
-}
-```
-
-</div>
-</details>
-</div>
 
 ### 3. Initialize config (optional)
 
 ```bash
-doctrace init    # creates .doctrace/ folder
+doctrace init    # creates doctrace.json
 ```
 
 <div align="center">
@@ -223,7 +186,7 @@ doctrace preview docs/                      # interactive explorer in browser
 | `doctrace preview <path> --port <N>`             | preview on custom port (default 8420)|
 | `doctrace base update`                           | save current commit as base          |
 | `doctrace base show`                             | show base state                      |
-| `doctrace init`                                  | create .doctrace/ folder             |
+| `doctrace init`                                  | create doctrace.json                 |
 | `doctrace --version`                             | show version                         |
 
 </div>

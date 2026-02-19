@@ -18,8 +18,9 @@ doctrace info docs/
 ```
 
 Scans all `*.md` files in `docs/` recursively and validates:
-- `related docs:` paths exist
-- `related sources:` paths exist (or glob pattern matches)
+- `required_docs:` paths exist
+- `related_docs:` paths exist
+- `sources:` paths exist (or glob pattern matches)
 
 ## Success Output
 
@@ -38,22 +39,19 @@ docs/api.md:18: related source not found: src/deleted.py
 
 Exit code: 1
 
-## Ignoring Paths
+## Configuration
 
-Create `.doctrace/config.json` to skip certain docs:
+Create `doctrace.json` at repo root to customize metadata keys:
 
 ```json
 {
-  "ignored_paths": [
-    "docs/drafts/*.md",
-    "docs/archive/*",
-    "docs/wip.md"
-  ]
+  "metadata": {
+    "required_docs_key": "required_docs",
+    "related_docs_key": "related_docs",
+    "sources_key": "sources"
+  }
 }
 ```
-
-Patterns use fnmatch syntax:
-- `*` and `?` are supported
 
 ## Common Issues
 

@@ -13,7 +13,7 @@ sources:
 # Repository Structure
 
 ```
-doc-sync/
+doc-trace/
 ├── src/doctrace/           ← main package
 │   ├── __init__.py
 │   ├── cli.py             ← entry point, argparse setup
@@ -24,17 +24,15 @@ doc-sync/
 │   │   ├── preview/       ← interactive browser UI module
 │   │   │   ├── __init__.py
 │   │   │   ├── server.py  ← HTTP server + run()
-│   │   │   ├── tree.py    ← dependency tree logic
 │   │   │   ├── graph.py   ← graph data building
 │   │   │   ├── search.py  ← doc content search
 │   │   │   └── template.html ← HTML/JS template
-│   │   ├── lock.py        ← lock state management
+│   │   ├── base.py        ← base commit state management
 │   │   └── init.py        ← project initialization
 │   └── core/              ← shared logic
 │       ├── __init__.py
 │       ├── docs.py        ← doc parsing + indexing
-│       ├── config.py      ← config loading/validation
-│       ├── lock.py        ← state persistence
+│       ├── config.py      ← config loading/validation + base state
 │       ├── git.py         ← git operations
 │       └── constants.py   ← shared constants
 ├── tests/                 ← pytest test suite
@@ -70,8 +68,7 @@ Each file implements one CLI subcommand. All follow the same pattern:
 
 Shared modules used across commands:
 - `docs.py`      - doc parsing, indexing, dependency tree
-- `config.py`    - loads and validates config.json
-- `lock.py`      - manages lock.json state
+- `config.py`    - loads and validates doctrace.json, manages base state
 - `git.py`       - git operations, change detection
 - `constants.py` - file/dir names, default values
 

@@ -16,10 +16,10 @@ sources:
 ### Single-Responsibility Commands
 
 Each command does one thing:
-- `validate` - validates refs
+- `info`     - shows phases + validates refs
 - `affected` - finds affected docs
 - `preview`  - interactive explorer
-- `lock`     - manages state
+- `base`     - manages base commit state
 - `init`     - creates config
 
 ### Explicit Paths from Repo Root
@@ -79,9 +79,9 @@ Return types are NamedTuples for clear structure:
 
 Do not recursively follow all refs without limits. Use `affected_depth_limit`.
 
-### Committing lock.json
+### Base Commit State
 
-`lock.json` is stored in `.doctrace/lock.json` and used for incremental analysis.
+Base commit is stored in `doctrace.json` under the `base` key and used for incremental analysis with `--since-base`.
 
 ### Hardcoded Doc Paths
 

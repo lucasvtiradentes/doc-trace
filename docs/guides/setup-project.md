@@ -91,5 +91,5 @@ After installation:
 doctrace init
 ```
 
-Creates `.doctrace/` with default config.
+Creates `doctrace.json` with default config.
 
