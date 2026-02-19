@@ -41,19 +41,7 @@
         .tree-filter-btn:hover { background: #e2e8f0; color: #3b82f6; }
         .tree-filter-btn.active { opacity: 1; color: #3b82f6; background: #dbeafe; }
         .tree-filter-btn svg { width: 14px; height: 14px; display: block; }
-        .level-item { padding: 8px 12px 8px 24px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; }
-        .level-item:hover { background: #f1f5f9; }
-        .level-item.active { background: #dbeafe; }
-        .level-item-name { font-size: 13px; font-weight: 500; color: #1e293b; margin-bottom: 2px; }
-        .level-item-path { font-size: 11px; color: #94a3b8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .level-group { margin-bottom: 12px; }
-        .level-title { font-size: 11px; font-weight: 600; color: #94a3b8; padding: 4px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; border-radius: 4px; }
-        .level-title:hover { background: #f1f5f9; }
-        .level-title .level-chevron { width: 12px; height: 12px; color: #94a3b8; transition: transform 0.15s; flex-shrink: 0; }
-        .level-title.collapsed .level-chevron { transform: rotate(-90deg); }
-        .level-items { display: block; }
-        .level-items.collapsed { display: none; }
-        .level-dot { width: 8px; height: 8px; border-radius: 2px; }
+        .level-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
         .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
         .main-header { padding: 12px 24px; background: #fff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
         .main-header h2 { font-size: 15px; font-weight: 600; color: #1e293b; }
@@ -304,10 +292,10 @@
         });
 
         function updateSidebarSelection(path) {
-            document.querySelectorAll('.tree-item, .level-item').forEach(el => {
+            document.querySelectorAll('.tree-item').forEach(el => {
                 el.classList.toggle('active', el.dataset.path === path);
             });
-            const activeItem = document.querySelector('.tree-item.active, .level-item.active');
+            const activeItem = document.querySelector('.tree-item.active');
             if (activeItem) activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         }
 
@@ -695,32 +683,31 @@
                 if (!levelGroups[n.level]) levelGroups[n.level] = [];
                 levelGroups[n.level].push(n);
             });
+            const chevronSvg = '<svg class="tree-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+            const folderIcon = '<svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
+            const fileIcon = '<svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
             Object.keys(levelGroups).sort((a, b) => a - b).forEach(level => {
-                const group = document.createElement('div');
-                group.className = 'level-group';
-                const title = document.createElement('div');
-                title.className = 'level-title';
                 const color = levelColors[level % levelColors.length];
                 const label = level == 0 ? 'Independent' : 'Level ' + level;
-                const chevron = '<svg class="level-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
-                title.innerHTML = chevron + '<span class="level-dot" style="background:' + color + '"></span>' + label + ' (' + levelGroups[level].length + ')';
-                group.appendChild(title);
-                const items = document.createElement('div');
-                items.className = 'level-items';
+                const folder = document.createElement('div');
+                folder.className = 'tree-item folder';
+                folder.innerHTML = chevronSvg + folderIcon + '<span class="tree-name">' + label + ' <span style="color:#94a3b8;font-weight:400">(' + levelGroups[level].length + ')</span></span>' + '<span class="level-dot" style="background:' + color + ';margin-left:auto"></span>';
+                container.appendChild(folder);
+                const children = document.createElement('div');
+                children.className = 'tree-children';
                 levelGroups[level].sort((a, b) => a.name.localeCompare(b.name)).forEach(n => {
                     const item = document.createElement('div');
-                    item.className = 'level-item';
+                    item.className = 'tree-item';
                     item.dataset.path = n.path;
-                    item.innerHTML = '<div class="level-item-name">' + n.name + '</div><div class="level-item-path">' + n.path + '</div>';
+                    item.innerHTML = '<span class="tree-indent"></span>' + fileIcon + '<span class="tree-name">' + n.name + '</span>';
                     item.addEventListener('click', () => selectDoc(n.path));
-                    items.appendChild(item);
+                    children.appendChild(item);
                 });
-                group.appendChild(items);
-                title.addEventListener('click', () => {
-                    title.classList.toggle('collapsed');
-                    items.classList.toggle('collapsed');
+                container.appendChild(children);
+                folder.addEventListener('click', () => {
+                    folder.classList.toggle('collapsed');
+                    children.classList.toggle('collapsed');
                 });
-                container.appendChild(group);
             });
         }
 
@@ -745,12 +732,9 @@
                 document.getElementById('folder-tree').style.display = currentListView === 'tree' ? '' : 'none';
                 document.getElementById('level-list').style.display = currentListView === 'levels' ? '' : 'none';
                 const qLower = q.toLowerCase();
-                document.querySelectorAll('.tree-item:not(.folder)').forEach(item => {
+                const activeList = currentListView === 'tree' ? 'folder-tree' : 'level-list';
+                document.querySelectorAll('#' + activeList + ' .tree-item:not(.folder)').forEach(item => {
                     const name = item.querySelector('.tree-name').textContent.toLowerCase();
-                    item.style.display = name.includes(qLower) ? '' : 'none';
-                });
-                document.querySelectorAll('.level-item').forEach(item => {
-                    const name = item.querySelector('.level-item-name').textContent.toLowerCase();
                     item.style.display = name.includes(qLower) ? '' : 'none';
                 });
                 return;
