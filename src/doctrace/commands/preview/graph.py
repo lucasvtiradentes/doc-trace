@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import json
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
 from doctrace.core.config import Config
 from doctrace.core.docs import build_dependency_tree
 
-TEMPLATE_PATH = Path(__file__).parent / "template.html"
+TEMPLATE_PATH = files("doctrace.commands.preview").joinpath("template.html")
 
 
 def build_graph_data(docs_path: Path, config: Config, repo_root: Path) -> dict[str, Any]:
