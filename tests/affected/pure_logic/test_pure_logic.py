@@ -6,7 +6,7 @@ from doctrace.commands.affected import _find_direct_hits, _propagate, find_affec
 from doctrace.core.config import Config
 
 
-def test_propagate_no_depth_limit():
+def test_propagate():
     doc1 = Path("/docs/doc1.md")
     doc2 = Path("/docs/doc2.md")
     doc3 = Path("/docs/doc3.md")
@@ -14,22 +14,9 @@ def test_propagate_no_depth_limit():
         doc1: [doc2],
         doc2: [doc3],
     }
-    cascade_hits, circular, chains = _propagate([doc1], doc_to_docs, depth_limit=None)
+    cascade_hits, circular, chains = _propagate([doc1], doc_to_docs)
     assert doc2 in cascade_hits
     assert doc3 in cascade_hits
-
-
-def test_propagate_with_depth_limit():
-    doc1 = Path("/docs/doc1.md")
-    doc2 = Path("/docs/doc2.md")
-    doc3 = Path("/docs/doc3.md")
-    doc_to_docs = {
-        doc1: [doc2],
-        doc2: [doc3],
-    }
-    cascade_hits, circular, chains = _propagate([doc1], doc_to_docs, depth_limit=1)
-    assert doc2 in cascade_hits
-    assert doc3 not in cascade_hits
 
 
 def test_propagate_detects_circular():
@@ -41,7 +28,7 @@ def test_propagate_detects_circular():
         doc2: [doc3],
         doc3: [doc2],
     }
-    cascade_hits, circular, chains = _propagate([doc1], doc_to_docs, depth_limit=None)
+    cascade_hits, circular, chains = _propagate([doc1], doc_to_docs)
     assert len(circular) > 0
     assert (doc2, doc3) in circular or (doc3, doc2) in circular
 

@@ -5,8 +5,7 @@ sources:
   - src/doctrace/core/parser.py: RefEntry, ParsedDoc definitions
   - src/doctrace/commands/affected.py: AffectedResult definition
   - src/doctrace/commands/validate.py: ValidateResult, RefError definitions
-  - src/doctrace/core/config.py: Config definition
-  - src/doctrace/core/lock.py: Lock definition
+  - src/doctrace/core/config.py: Config, Base definitions
   - src/doctrace/core/git.py: FileChange, CommitInfo definitions
 ---
 
@@ -49,13 +48,12 @@ Output from affected analysis.
 
 ### Config
 
-Runtime configuration loaded from .doctrace/config.json.
+Runtime configuration loaded from doctrace.json.
 
-| Field               | Type           | Default | Description                           |
-|---------------------|----------------|---------|---------------------------------------|
-| ignored_paths       | list[str]      | []      | fnmatch patterns to skip              |
-| affected_depth_limit| int or None    | None    | max propagation depth (None=unlimited)|
-| metadata            | MetadataConfig | defaults| metadata parsing settings             |
+| Field    | Type           | Description               |
+|----------|----------------|---------------------------|
+| metadata | MetadataConfig | metadata parsing settings |
+| base     | Base           | base commit state         |
 
 ### MetadataConfig
 
@@ -66,6 +64,17 @@ Settings for how doc metadata is parsed.
 | required_docs_key | str  | "required_docs" | header for required doc refs section |
 | related_docs_key  | str  | "related_docs"  | header for related doc refs section  |
 | sources_key       | str  | "sources"       | header for source references section |
+
+### Base
+
+State tracking for incremental analysis.
+
+| Field          | Type        | Description                |
+|----------------|-------------|----------------------------|
+| commit_hash    | str or None | commit hash of base        |
+| commit_message | str or None | commit message             |
+| commit_date    | str or None | ISO timestamp of commit    |
+| analyzed_at    | str or None | ISO timestamp of update    |
 
 ### ValidateResult
 
@@ -86,16 +95,6 @@ Single validation error.
 | doc_path | Path     | doc containing the bad ref     |
 | ref      | RefEntry | the problematic reference      |
 | message  | str      | error description              |
-
-### Lock
-
-State tracking for incremental mode.
-
-| Field                | Type         | Description                      |
-|----------------------|--------------|----------------------------------|
-| last_analyzed_commit | str or None  | commit hash from last run        |
-| last_run             | str or None  | ISO timestamp of last run        |
-| docs_validated       | list[str]    | paths validated in last run      |
 
 ## Terminology
 
@@ -131,4 +130,3 @@ sources:
 
 Content here...
 ```
-
