@@ -1,3 +1,15 @@
+---
+title: Concepts
+description: Core types and terminology
+sources:
+  - src/doctrace/core/parser.py: RefEntry, ParsedDoc definitions
+  - src/doctrace/commands/affected.py: AffectedResult definition
+  - src/doctrace/commands/validate.py: ValidateResult, RefError definitions
+  - src/doctrace/core/config.py: Config definition
+  - src/doctrace/core/lock.py: Lock definition
+  - src/doctrace/core/git.py: FileChange, CommitInfo definitions
+---
+
 # Concepts
 
 ## Core Types
@@ -117,14 +129,3 @@ related sources:
 - src/module.py - description
 ```
 
----
-
-related docs:
-
-related sources:
-- src/doctrace/core/parser.py        - RefEntry, ParsedDoc definitions
-- src/doctrace/commands/affected.py  - AffectedResult definition
-- src/doctrace/commands/validate.py  - ValidateResult, RefError definitions
-- src/doctrace/core/config.py        - Config definition
-- src/doctrace/core/lock.py          - Lock definition
-- src/doctrace/core/git.py           - FileChange, CommitInfo definitions

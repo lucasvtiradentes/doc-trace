@@ -1,3 +1,13 @@
+---
+title: Validation
+description: Validates that all doc references point to existing files
+required_docs:
+  - docs/concepts.md: ValidateResult, RefError types
+sources:
+  - src/doctrace/commands/validate.py: validation implementation
+  - src/doctrace/core/parser.py: metadata extraction
+---
+
 # Validation (validate command)
 
 Validates that all doc references point to existing files.
@@ -82,11 +92,3 @@ Patterns use fnmatch syntax.
 | _glob_matches()      | check if pattern has matches       |
 | _is_ignored()        | check against ignored_paths        |
 
----
-
-related docs:
-- docs/concepts.md - ValidateResult, RefError types
-
-related sources:
-- src/doctrace/commands/validate.py - validation implementation
-- src/doctrace/core/parser.py       - metadata extraction

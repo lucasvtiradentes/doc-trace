@@ -1,3 +1,11 @@
+---
+title: Tooling
+description: Dev tools and configurations
+sources:
+  - pyproject.toml: tool configurations
+  - Makefile: tool commands
+---
+
 # Tooling
 
 ## Linting and Formatting
@@ -82,10 +90,3 @@ bump2version minor  # 0.1.0 → 0.2.0
 bump2version major  # 0.1.0 → 1.0.0
 ```
 
----
-
-related docs:
-
-related sources:
-- pyproject.toml - tool configurations
-- Makefile       - tool commands

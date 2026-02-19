@@ -1,3 +1,18 @@
+---
+title: Testing
+description: Testing strategy and patterns
+related_docs:
+  - docs/repo/tooling.md: pytest configuration
+  - docs/repo/cicd.md: CI test jobs
+sources:
+  - tests/affected/: affected tests
+  - tests/parser/: parser tests
+  - tests/preview/: preview tests
+  - tests/validate/: validation tests
+  - tests/config/: config tests
+  - tests/cli/: CLI tests
+---
+
 # Testing
 
 ## Framework
@@ -52,16 +67,3 @@ make test           # pytest -v
 make practical-test # doctrace validate docs/
 ```
 
----
-
-related docs:
-- docs/repo/tooling.md - pytest configuration
-- docs/repo/cicd.md    - CI test jobs
-
-related sources:
-- tests/affected/ - affected tests
-- tests/parser/   - parser tests
-- tests/preview/  - preview tests
-- tests/validate/ - validation tests
-- tests/config/   - config tests
-- tests/cli/      - CLI tests

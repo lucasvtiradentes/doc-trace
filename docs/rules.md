@@ -1,3 +1,14 @@
+---
+title: Rules
+description: Coding principles and conventions
+related_docs:
+  - docs/architecture.md: system design context
+  - docs/concepts.md: type definitions
+sources:
+  - src/doctrace/commands/: command implementations
+  - src/doctrace/core/: core modules
+---
+
 # Rules
 
 ## Design Principles
@@ -80,12 +91,3 @@ Pass paths as arguments. Do not assume `docs/` location.
 
 Do not abort the whole scan on first parse error; accumulate errors and fail at the end with exit code `1`.
 
----
-
-related docs:
-- docs/architecture.md - system design context
-- docs/concepts.md     - type definitions
-
-related sources:
-- src/doctrace/commands/ - command implementations
-- src/doctrace/core/     - core modules

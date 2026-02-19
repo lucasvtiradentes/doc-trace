@@ -1,3 +1,14 @@
+---
+title: Overview
+description: CLI tool that keeps documentation in sync with code changes
+related_docs:
+  - docs/architecture.md: system design details
+  - docs/concepts.md: key terminology
+sources:
+  - src/doctrace/cli.py: main entry point
+  - src/doctrace/: main package directory
+---
+
 # Docsync Overview
 
 CLI tool that keeps documentation in sync with code changes.
@@ -58,12 +69,3 @@ CLI tool that keeps documentation in sync with code changes.
 | docs/guides/add-doc-metadata.md  | how to add metadata to docs              |
 | docs/guides/validate-docs.md     | how to validate doc references           |
 
----
-
-related docs:
-- docs/architecture.md - system design details
-- docs/concepts.md     - key terminology
-
-related sources:
-- src/doctrace/cli.py - main entry point
-- src/doctrace/       - main package directory

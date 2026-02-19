@@ -1,3 +1,15 @@
+---
+title: Repository Structure
+description: Directory layout and file organization
+related_docs:
+  - docs/repo/tooling.md: dev tools configuration
+  - docs/testing.md: test patterns and coverage
+sources:
+  - src/doctrace/: main package
+  - tests/: test suite
+  - .github/workflows/: CI pipelines
+---
+
 # Repository Structure
 
 ```
@@ -67,13 +79,3 @@ Shared modules used across commands:
 
 Pytest tests grouped by feature area. Most tests use temporary directories and fixture docs copied from local test fixtures.
 
----
-
-related docs:
-- docs/repo/tooling.md - dev tools configuration
-- docs/testing.md      - test patterns and coverage
-
-related sources:
-- src/doctrace/       - main package
-- tests/             - test suite
-- .github/workflows/ - CI pipelines

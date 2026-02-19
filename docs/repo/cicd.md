@@ -1,3 +1,15 @@
+---
+title: CI/CD
+description: CI/CD pipelines and deployment
+related_docs:
+  - docs/repo/tooling.md: tool configurations
+sources:
+  - .github/workflows/prs.yml: PR workflow
+  - .github/workflows/push-to-main.yml: main branch workflow
+  - .github/workflows/callable-ci.yml: reusable CI
+  - .github/workflows/release.yml: release workflow
+---
+
 # CI/CD
 
 ## Pipelines
@@ -82,13 +94,3 @@ Environment: `pypi`
 - `main` - primary branch for push workflow
 - Tagged releases: `v0.1.0`, `v0.2.0`, etc.
 
----
-
-related docs:
-- docs/repo/tooling.md - tool configurations
-
-related sources:
-- .github/workflows/prs.yml          - PR workflow
-- .github/workflows/push-to-main.yml - main branch workflow
-- .github/workflows/callable-ci.yml  - reusable CI
-- .github/workflows/release.yml      - release workflow

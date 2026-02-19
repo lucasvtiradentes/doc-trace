@@ -1,3 +1,13 @@
+---
+title: Setup Project
+description: Guide to setting up doctrace development environment
+related_docs:
+  - docs/repo/local-setup.md: quick reference
+sources:
+  - Makefile: make command definitions
+  - pyproject.toml: dependency definitions
+---
+
 # Setup Project
 
 Guide to setting up doctrace development environment.
@@ -83,11 +93,3 @@ doctrace init
 
 Creates `.doctrace/` with default config.
 
----
-
-related docs:
-- docs/repo/local-setup.md - quick reference
-
-related sources:
-- Makefile       - make command definitions
-- pyproject.toml - dependency definitions

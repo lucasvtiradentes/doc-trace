@@ -1,3 +1,18 @@
+---
+title: Architecture
+description: System design, data flow, and module structure
+required_docs:
+  - docs/concepts.md: key types used in data flow
+related_docs:
+  - docs/features/affected.md: affected algorithm details
+  - docs/features/validation.md: validate command details
+  - docs/features/preview.md: preview command details
+sources:
+  - src/doctrace/cli.py: entry point and dispatcher
+  - src/doctrace/commands/: command implementations
+  - src/doctrace/core/: core modules
+---
+
 # Architecture
 
 ## Entry Point
@@ -144,15 +159,3 @@ find_config(start_path):
     return None
 ```
 
----
-
-related docs:
-- docs/concepts.md             - key types used in data flow
-- docs/features/affected.md    - affected algorithm details
-- docs/features/validation.md  - validate command details
-- docs/features/preview.md     - preview command details
-
-related sources:
-- src/doctrace/cli.py    - entry point and dispatcher
-- src/doctrace/commands/ - command implementations
-- src/doctrace/core/     - core modules

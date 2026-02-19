@@ -1,3 +1,12 @@
+---
+title: Add Doc Metadata
+description: Guide to adding metadata sections to documentation files
+required_docs:
+  - docs/concepts.md: RefEntry, ParsedDoc types
+sources:
+  - src/doctrace/core/parser.py: metadata parsing logic
+---
+
 # Add Doc Metadata
 
 Guide to adding metadata sections to documentation files.
@@ -143,10 +152,3 @@ Errors show file path and line number:
 docs/api.md:25: related doc not found: docs/missing.md
 ```
 
----
-
-related docs:
-- docs/concepts.md - RefEntry, ParsedDoc types
-
-related sources:
-- src/doctrace/core/parser.py - metadata parsing logic

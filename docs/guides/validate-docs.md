@@ -1,3 +1,12 @@
+---
+title: Validate Docs
+description: Guide to validating documentation references
+required_docs:
+  - docs/features/validation.md: validate command details
+sources:
+  - src/doctrace/commands/validate.py: validation implementation
+---
+
 # Validate Docs
 
 Guide to validating documentation references.
@@ -99,10 +108,3 @@ Validation continues for other docs, but command exits with code `1` if any pars
 3. Fix any reported errors
 4. Commit changes
 
----
-
-related docs:
-- docs/features/validation.md - validate command details
-
-related sources:
-- src/doctrace/commands/validate.py - validation implementation

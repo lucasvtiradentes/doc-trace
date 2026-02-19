@@ -1,3 +1,13 @@
+---
+title: Local Setup
+description: Quick reference for local development setup
+related_docs:
+  - docs/repo/tooling.md: tool configurations
+sources:
+  - Makefile: command definitions
+  - pyproject.toml: project dependencies
+---
+
 # Local Setup
 
 ## Requirements
@@ -60,11 +70,3 @@ source .venv/bin/activate
 doctrace validate docs/
 ```
 
----
-
-related docs:
-- docs/repo/tooling.md - tool configurations
-
-related sources:
-- Makefile       - command definitions
-- pyproject.toml - project dependencies

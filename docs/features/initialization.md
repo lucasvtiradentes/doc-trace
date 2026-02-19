@@ -1,3 +1,15 @@
+---
+title: Initialization
+description: Creates the .doctrace/ configuration directory
+related_docs:
+  - docs/concepts.md: Config type
+  - docs/guides/setup-project.md: project setup guide
+sources:
+  - src/doctrace/commands/init.py: init command
+  - src/doctrace/core/config.py: init_doctrace function
+  - src/doctrace/core/constants.py: default config values
+---
+
 # Initialization (init command)
 
 Creates the .doctrace/ configuration directory.
@@ -73,13 +85,3 @@ Uses `init_doctrace()` from config module:
 3. Create syncs/ subdirectory
 4. Write .gitignore in syncs/
 
----
-
-related docs:
-- docs/concepts.md             - Config type
-- docs/guides/setup-project.md - project setup guide
-
-related sources:
-- src/doctrace/commands/init.py  - init command
-- src/doctrace/core/config.py    - init_doctrace function
-- src/doctrace/core/constants.py - default config values

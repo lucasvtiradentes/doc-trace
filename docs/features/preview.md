@@ -1,3 +1,13 @@
+---
+title: Preview
+description: Interactive documentation explorer in the browser
+related_docs:
+  - docs/concepts.md: core types
+sources:
+  - src/doctrace/commands/preview/: preview module
+  - src/doctrace/core/git.py: get_file_history, get_file_at_commit
+---
+
 # Preview (preview command)
 
 Interactive documentation explorer in the browser.
@@ -79,11 +89,3 @@ Press Ctrl+C to stop
 
 Opens browser automatically.
 
----
-
-related docs:
-- docs/concepts.md - core types
-
-related sources:
-- src/doctrace/commands/preview/ - preview module
-- src/doctrace/core/git.py       - get_file_history, get_file_at_commit

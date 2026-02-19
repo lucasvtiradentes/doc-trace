@@ -1,3 +1,14 @@
+---
+title: Affected
+description: Maps code changes to affected documentation
+required_docs:
+  - docs/concepts.md: AffectedResult type
+sources:
+  - src/doctrace/commands/affected.py: affected implementation
+  - src/doctrace/core/git.py: git helpers used by affected (FileChange, commits, tags)
+  - src/doctrace/cli.py: CLI flag definitions for affected command
+---
+
 # Affected (affected command)
 
 Maps code changes to affected documentation.
@@ -118,12 +129,3 @@ Detects revisits during propagation traversal.
                        AffectedResult
 ```
 
----
-
-related docs:
-- docs/concepts.md - AffectedResult type
-
-related sources:
-- src/doctrace/commands/affected.py - affected implementation
-- src/doctrace/core/git.py - git helpers used by affected (FileChange, commits, tags)
-- src/doctrace/cli.py - CLI flag definitions for affected command
