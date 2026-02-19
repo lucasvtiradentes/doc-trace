@@ -3,7 +3,7 @@ import sys
 from importlib.metadata import version
 from pathlib import Path
 
-from doctrace.commands import affected, base, init, preview, validate
+from doctrace.commands import affected, base, info, init, preview
 from doctrace.core.constants import DEFAULT_PREVIEW_PORT
 
 VERSION = version("doctrace")
@@ -14,9 +14,8 @@ def main():
     parser.add_argument("-v", "--version", action="version", version=f"doctrace {VERSION}")
     subparsers = parser.add_subparsers(dest="command")
 
-    validate_parser = subparsers.add_parser("validate", help="validate all refs exist")
-    validate_parser.add_argument("path", type=Path, help="docs directory to validate")
-    validate_parser.add_argument("--phases", action="store_true", help="show docs organized by dependency phases")
+    info_parser = subparsers.add_parser("info", help="show docs phases and warnings")
+    info_parser.add_argument("path", type=Path, help="docs directory")
 
     affected_parser = subparsers.add_parser("affected", help="list docs affected by git diff")
     affected_parser.add_argument("path", type=Path, help="docs directory")
@@ -45,8 +44,8 @@ def main():
         parser.print_help()
         sys.exit(0)
 
-    if args.command == "validate":
-        sys.exit(validate.run(args.path, args.phases))
+    if args.command == "info":
+        sys.exit(info.run(args.path))
     elif args.command == "affected":
         sys.exit(
             affected.run(

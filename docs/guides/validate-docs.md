@@ -4,7 +4,7 @@ description: Guide to validating documentation references
 required_docs:
   - docs/features/validation.md: validate command details
 sources:
-  - src/doctrace/commands/validate.py: validation implementation
+  - src/doctrace/commands/info.py: info command implementation
 ---
 
 # Validate Docs
@@ -14,7 +14,7 @@ Guide to validating documentation references.
 ## Basic Validation
 
 ```bash
-doctrace validate docs/
+doctrace info docs/
 ```
 
 Scans all `*.md` files in `docs/` recursively and validates:
@@ -86,7 +86,7 @@ Fix: Check glob pattern matches at least one file.
 Add to your workflow:
 
 ```yaml
-- run: doctrace validate docs/
+- run: doctrace info docs/
 ```
 
 Fails build if any refs are invalid.
@@ -104,7 +104,7 @@ Validation continues for other docs, but command exits with code `1` if any pars
 ## Workflow
 
 1. Add/edit metadata in docs
-2. Run `doctrace validate docs/`
+2. Run `doctrace info docs/`
 3. Fix any reported errors
 4. Commit changes
 

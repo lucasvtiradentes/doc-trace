@@ -4,7 +4,7 @@ description: Core types and terminology
 sources:
   - src/doctrace/core/parser.py: RefEntry, ParsedDoc definitions
   - src/doctrace/commands/affected.py: AffectedResult definition
-  - src/doctrace/commands/validate.py: ValidateResult, RefError definitions
+  - src/doctrace/commands/info.py: ValidateResult, RefError definitions
   - src/doctrace/core/config.py: Config, Base definitions
   - src/doctrace/core/git.py: FileChange, CommitInfo definitions
 ---

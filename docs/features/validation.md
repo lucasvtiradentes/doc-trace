@@ -4,7 +4,7 @@ description: Validates that all doc references point to existing files
 required_docs:
   - docs/concepts.md: ValidateResult, RefError types
 sources:
-  - src/doctrace/commands/validate.py: validation implementation
+  - src/doctrace/commands/info.py: validation implementation
   - src/doctrace/core/parser.py: metadata extraction
 ---
 
@@ -15,7 +15,7 @@ Validates that all doc references point to existing files.
 ## Usage
 
 ```bash
-doctrace validate docs/
+doctrace info docs/
 ```
 
 ## What It Checks

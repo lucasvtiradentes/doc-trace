@@ -78,7 +78,7 @@ The propagation: if `bookings.md` might be outdated, then `payments.md` (which r
 
 ## Features
 
-- validate - validates all referenced paths exist
+- info     - shows doc phases and validates refs
 - affected - finds docs affected by code changes (with dependency ordering)
 - preview  - interactive docs explorer in browser
 - base     - manages base commit for incremental analysis
@@ -87,7 +87,7 @@ The propagation: if `bookings.md` might be outdated, then `payments.md` (which r
 
 In large codebases, docs get outdated because:
 1. No one remembers which docs need updating when a file changes
-2. AI agents don't know which files to read to validate each doc
+2. AI agents don't know which files to read to understand each doc
 
 doctrace solves this by adding "hints" to each doc - `related sources:` tells any AI exactly what to read.
 
@@ -199,7 +199,7 @@ options:
 ### 4. Use it
 
 ```bash
-doctrace validate docs/                     # validate all refs exist
+doctrace info docs/                         # show phases + validate refs
 doctrace affected docs/ --last 5            # find docs affected by last 5 commits
 doctrace affected docs/ --since v1.0.0      # find docs affected since tag/commit/branch
 doctrace preview docs/                      # interactive explorer in browser
@@ -212,7 +212,7 @@ doctrace preview docs/                      # interactive explorer in browser
 
 | Command                                          | Description                          |
 |--------------------------------------------------|--------------------------------------|
-| `doctrace validate <path>`                        | validate refs exist                  |
+| `doctrace info <path>`                            | show phases + validate refs          |
 | `doctrace affected <path> --last <N>`             | list affected docs by last N commits |
 | `doctrace affected <path> --since <ref>`          | list affected docs since ref         |
 | `doctrace affected <path> --since-base`           | list affected docs since base commit |
@@ -262,7 +262,7 @@ Phases show dependency order - useful for AI agents processing docs.
 make install           # create venv + install
 make check             # lint
 make test              # run tests
-doctrace validate docs/ # practical test
+doctrace info docs/    # practical test
 ```
 
 ```bash

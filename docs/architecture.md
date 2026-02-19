@@ -26,12 +26,12 @@ sources:
 │  argparse → subcommand dispatcher                           │
 │                                                             │
 │  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────┐ ┌──────┐    │
-│  │ validate │ │ affected │ │ preview │ │ lock │ │ init │    │
+│  │   info   │ │ affected │ │ preview │ │ lock │ │ init │    │
 │  └────┬─────┘ └────┬─────┘ └────┬────┘ └──┬───┘ └──┬───┘    │
 │       │            │            │         │        │        │
 │       v            v            v         v        v        │
 │  commands/    commands/    commands/  commands/ commands/   │
-│  validate.py  affected.py  preview.py lock.py   init.py     │
+│  info.py     affected.py  preview.py lock.py   init.py      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -41,7 +41,7 @@ sources:
 src/doctrace/
 ├── cli.py              ← entry point, arg parsing
 ├── commands/
-│   ├── validate.py     ← ref validation
+│   ├── info.py         ← info command (phases + validation)
 │   ├── affected.py     ← change detection + output formatting
 │   ├── preview/        ← interactive browser UI module
 │   ├── lock.py         ← lock state management
@@ -54,7 +54,7 @@ src/doctrace/
 │   └── constants.py    ← shared constants
 ```
 
-## Data Flow - Validate Command
+## Data Flow - Info Command
 
 ```
 docs/*.md → parse_doc() → RefEntry list (path, line)

@@ -59,7 +59,7 @@ Should output the installed package version, e.g. `doctrace 0.1.1`
 
 ```bash
 source .venv/bin/activate
-doctrace validate docs/
+doctrace info docs/
 doctrace affected docs/ --last 1
 doctrace preview docs/
 ```
@@ -67,7 +67,7 @@ doctrace preview docs/
 ### Without Activation
 
 ```bash
-.venv/bin/doctrace validate docs/
+.venv/bin/doctrace info docs/
 .venv/bin/doctrace affected docs/ --last 1
 .venv/bin/doctrace preview docs/
 ```
@@ -79,7 +79,7 @@ doctrace preview docs/
 | make install         | setup venv + deps            |
 | make check           | lint + format check          |
 | make test            | run pytest                   |
-| make practical-test  | run doctrace validate docs/   |
+| make practical-test  | run doctrace info docs/   |
 | make changelog       | build CHANGELOG.md           |
 | make changelog-draft | preview changelog            |
 

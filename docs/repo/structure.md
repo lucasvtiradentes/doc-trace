@@ -19,7 +19,7 @@ doc-sync/
 │   ├── cli.py             ← entry point, argparse setup
 │   ├── commands/          ← subcommand implementations
 │   │   ├── __init__.py
-│   │   ├── validate.py    ← ref validation
+│   │   ├── info.py        ← info command (phases + validation)
 │   │   ├── affected.py    ← change detection + output formatting
 │   │   ├── preview/       ← interactive browser UI module
 │   │   │   ├── __init__.py

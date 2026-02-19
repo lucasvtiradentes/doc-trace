@@ -39,7 +39,7 @@ This creates `.venv/` and installs package with dev dependencies.
 | make install         | create venv, install deps         |
 | make check           | ruff lint + format check          |
 | make test            | pytest -v                         |
-| make practical-test  | doctrace validate docs/            |
+| make practical-test  | doctrace info docs/            |
 | make changelog       | build CHANGELOG.md                |
 | make changelog-draft | preview changelog                 |
 
@@ -57,7 +57,7 @@ python3 -m venv .venv
 After install, use the venv:
 
 ```bash
-.venv/bin/doctrace validate docs/
+.venv/bin/doctrace info docs/
 .venv/bin/doctrace affected docs/ --last 1
 .venv/bin/doctrace preview docs/
 .venv/bin/doctrace init
@@ -67,6 +67,6 @@ Or activate the venv:
 
 ```bash
 source .venv/bin/activate
-doctrace validate docs/
+doctrace info docs/
 ```
 

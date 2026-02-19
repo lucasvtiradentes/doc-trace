@@ -56,13 +56,18 @@ def _glob_matches(pattern: str, repo_root: Path) -> bool:
     return False
 
 
-def _print_phases(docs_path: Path, config: Config, repo_root: Path) -> None:
+def run(docs_path: Path) -> int:
+    config = load_config()
+    repo_root = find_repo_root(docs_path)
+    docs_path = docs_path.resolve()
     tree = build_dependency_tree(docs_path, config, repo_root)
+
     if tree.circular:
-        print("Warning: circular refs detected:")
+        print("Circular refs:")
         for a, b in tree.circular:
             print(f"  {a.relative_to(repo_root)} <-> {b.relative_to(repo_root)}")
         print()
+
     for i, level_docs in enumerate(tree.levels):
         if not level_docs:
             continue
@@ -71,22 +76,17 @@ def _print_phases(docs_path: Path, config: Config, repo_root: Path) -> None:
         for doc in sorted(level_docs):
             print(f"  {doc.relative_to(repo_root)}")
 
+    errors: list[tuple[Path, RefError]] = []
+    for doc_path in tree.index.parsed_cache.keys():
+        result = _check_single_doc(doc_path, repo_root, tree.index.parsed_cache[doc_path], config)
+        for error in result.errors:
+            errors.append((doc_path, error))
 
-def run(docs_path: Path, show_phases: bool = False) -> int:
-    config = load_config()
-    repo_root = find_repo_root(docs_path)
-
-    if show_phases:
-        _print_phases(docs_path, config, repo_root)
-        return 0
-
-    has_errors = False
-    for result in validate_refs(docs_path, config, repo_root):
-        if not result.ok:
-            has_errors = True
-            for error in result.errors:
-                print(f"{result.doc_path}:{error.ref.line_number}: {error.message}")
-    if has_errors:
+    if errors:
+        print()
+        print(f"Warnings ({len(errors)}):")
+        for doc_path, error in errors:
+            print(f"  {doc_path.relative_to(repo_root)}:{error.ref.line_number}: {error.message}")
         return 1
-    print("All refs valid")
+
     return 0

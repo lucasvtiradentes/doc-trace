@@ -56,7 +56,7 @@ Runs doctrace against its own docs.
 ```yaml
 steps:
   - pip install -e ".[dev]"
-  - doctrace validate docs/
+  - doctrace info docs/
 ```
 
 ## Release Pipeline

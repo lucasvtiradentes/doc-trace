@@ -141,7 +141,7 @@ This doc covers the API endpoints.
 After adding metadata, validate:
 
 ```bash
-doctrace validate docs/
+doctrace info docs/
 ```
 
 Errors show file path and line number:
