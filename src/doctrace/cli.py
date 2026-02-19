@@ -29,7 +29,7 @@ def main():
 
     preview_parser = subparsers.add_parser("preview", help="interactive docs explorer in browser")
     preview_parser.add_argument("path", type=Path, help="docs directory")
-    preview_parser.add_argument("--port", type=int, default=DEFAULT_PREVIEW_PORT, help=f"server port (default: {DEFAULT_PREVIEW_PORT})")
+    preview_parser.add_argument("--port", type=int, default=DEFAULT_PREVIEW_PORT, help="server port")
 
     base_parser = subparsers.add_parser("base", help="manage base commit state")
     base_subparsers = base_parser.add_subparsers(dest="base_command", required=True)

@@ -6,6 +6,10 @@ check:
 	.venv/bin/ruff check .
 	.venv/bin/ruff format --check .
 
+fix:
+	.venv/bin/ruff check --fix .
+	.venv/bin/ruff format .
+
 test:
 	.venv/bin/pytest -v
 

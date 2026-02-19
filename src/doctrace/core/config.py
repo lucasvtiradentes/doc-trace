@@ -139,12 +139,14 @@ def update_base(repo_root: Path) -> tuple[Path, Base]:
     commit_info = get_current_commit_info(repo_root)
     if commit_info is None:
         raise ConfigError("Could not get current commit info")
-    config.base = Base({
-        "commit_hash": commit_info.hash,
-        "commit_message": commit_info.message,
-        "commit_date": commit_info.date,
-        "analyzed_at": datetime.now(timezone.utc).isoformat(),
-    })
+    config.base = Base(
+        {
+            "commit_hash": commit_info.hash,
+            "commit_message": commit_info.message,
+            "commit_date": commit_info.date,
+            "analyzed_at": datetime.now(timezone.utc).isoformat(),
+        }
+    )
     config_path = save_config(config, repo_root)
     return config_path, config.base
 

@@ -145,9 +145,7 @@ def _propagate(
     return indirect_hits, circular_refs, indirect_chains
 
 
-def _find_circular_refs(
-    affected_docs: set[Path], doc_to_docs: dict[Path, list[Path]]
-) -> list[tuple[Path, Path]]:
+def _find_circular_refs(affected_docs: set[Path], doc_to_docs: dict[Path, list[Path]]) -> list[tuple[Path, Path]]:
     circular = []
     seen_pairs: set[tuple[Path, Path]] = set()
     for doc_a in affected_docs:
