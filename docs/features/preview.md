@@ -8,8 +8,6 @@ sources:
   - src/doctrace/core/git.py: get_file_history, get_file_at_commit
 ---
 
-# Preview (preview command)
-
 Interactive documentation explorer in the browser.
 
 ## Usage

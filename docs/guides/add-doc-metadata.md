@@ -7,8 +7,6 @@ sources:
   - src/doctrace/core/docs.py: metadata parsing logic
 ---
 
-# Add Doc Metadata
-
 Guide to adding metadata sections to documentation files.
 
 ## Format

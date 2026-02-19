@@ -9,8 +9,6 @@ sources:
   - src/doctrace/cli.py: CLI flag definitions for affected command
 ---
 
-# Affected (affected command)
-
 Maps code changes to affected documentation.
 
 ## Usage

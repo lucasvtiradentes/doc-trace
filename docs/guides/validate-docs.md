@@ -7,8 +7,6 @@ sources:
   - src/doctrace/commands/info.py: info command implementation
 ---
 
-# Validate Docs
-
 Guide to validating documentation references.
 
 ## Basic Validation

@@ -13,8 +13,6 @@ sources:
   - src/doctrace/core/: core modules
 ---
 
-# Architecture
-
 ## Entry Point
 
 `cli.py:main()` parses arguments and dispatches to subcommand handlers.

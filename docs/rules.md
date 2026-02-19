@@ -9,8 +9,6 @@ sources:
   - src/doctrace/core/: core modules
 ---
 
-# Rules
-
 ## Design Principles
 
 ### Single-Responsibility Commands

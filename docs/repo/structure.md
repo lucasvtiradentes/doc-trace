@@ -10,8 +10,6 @@ sources:
   - .github/workflows/: CI pipelines
 ---
 
-# Repository Structure
-
 ```
 doc-trace/
 ├── src/doctrace/           ← main package

@@ -9,8 +9,6 @@ sources:
   - src/doctrace/: main package directory
 ---
 
-# Doctrace Overview
-
 CLI tool that keeps documentation in sync with code changes.
 
 ## What It Does

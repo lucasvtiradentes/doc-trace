@@ -10,8 +10,6 @@ sources:
   - src/doctrace/core/constants.py: default config values
 ---
 
-# Initialization (init command)
-
 Creates the `doctrace.json` configuration file at repo root.
 
 ## Usage

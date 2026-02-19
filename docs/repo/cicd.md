@@ -10,8 +10,6 @@ sources:
   - .github/workflows/release.yml: release workflow
 ---
 
-# CI/CD
-
 ## Pipelines
 
 | Workflow         | Trigger              | Purpose                  |

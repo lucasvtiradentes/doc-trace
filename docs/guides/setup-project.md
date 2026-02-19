@@ -8,8 +8,6 @@ sources:
   - pyproject.toml: dependency definitions
 ---
 
-# Setup Project
-
 Guide to setting up doctrace development environment.
 
 ## Requirements

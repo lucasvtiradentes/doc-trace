@@ -8,8 +8,6 @@ sources:
   - pyproject.toml: project dependencies
 ---
 
-# Local Setup
-
 ## Requirements
 
 - Python 3.9+

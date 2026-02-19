@@ -8,8 +8,6 @@ sources:
   - src/doctrace/core/docs.py: metadata extraction
 ---
 
-# Validation (info command)
-
 Validates that all doc references point to existing files and shows dependency phases.
 
 ## Usage

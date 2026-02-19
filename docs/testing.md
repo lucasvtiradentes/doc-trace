@@ -14,8 +14,6 @@ sources:
   - tests/core/: core module tests
 ---
 
-# Testing
-
 ## Framework
 
 Pytest configured in `pyproject.toml`:

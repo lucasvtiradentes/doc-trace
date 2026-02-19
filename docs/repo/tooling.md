@@ -6,8 +6,6 @@ sources:
   - Makefile: tool commands
 ---
 
-# Tooling
-
 ## Linting and Formatting
 
 ### Ruff

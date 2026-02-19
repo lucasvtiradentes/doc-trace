@@ -9,8 +9,6 @@ sources:
   - src/doctrace/core/git.py: FileChange, CommitInfo, CurrentCommitInfo definitions
 ---
 
-# Concepts
-
 ## Core Types
 
 ### RefEntry
