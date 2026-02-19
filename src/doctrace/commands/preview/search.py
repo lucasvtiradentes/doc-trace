@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from doctrace.core.constants import MARKDOWN_GLOB
+
 
 def search_docs(repo_root: Path, docs_path: Path, query: str) -> list[dict]:
     results = []
     query_lower = query.lower()
-    for md_file in docs_path.rglob("*.md"):
+    for md_file in docs_path.rglob(MARKDOWN_GLOB):
         try:
             content = md_file.read_text(encoding="utf-8")
             content_lower = content.lower()

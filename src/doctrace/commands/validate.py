@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Iterator
 
 from doctrace.core.config import Config, find_repo_root
+from doctrace.core.constants import MARKDOWN_GLOB
 from doctrace.core.parser import RefEntry, parse_doc
 
 
@@ -30,7 +31,7 @@ def validate_refs(docs_path: Path, config: Config, repo_root: Path | None = None
     docs_path = docs_path.resolve()
     if repo_root is None:
         repo_root = find_repo_root(docs_path)
-    doc_files = list(docs_path.rglob("*.md"))
+    doc_files = list(docs_path.rglob(MARKDOWN_GLOB))
     for doc_file in doc_files:
         if _is_ignored(doc_file, config.ignored_paths, repo_root):
             continue

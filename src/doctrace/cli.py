@@ -4,6 +4,7 @@ from importlib.metadata import version
 from pathlib import Path
 
 from doctrace.commands import affected, init, lock, preview, validate
+from doctrace.core.constants import DEFAULT_DOCS_PATH, DEFAULT_PREVIEW_PORT
 
 VERSION = version("doctrace")
 
@@ -17,7 +18,7 @@ def main():
     validate_parser.add_argument("path", type=Path, help="docs directory to validate")
 
     affected_parser = subparsers.add_parser("affected", help="list docs affected by git diff")
-    affected_parser.add_argument("path", type=Path, nargs="?", default=Path("docs"), help="docs directory")
+    affected_parser.add_argument("path", type=Path, nargs="?", default=Path(DEFAULT_DOCS_PATH), help="docs directory")
     scope_group = affected_parser.add_mutually_exclusive_group(required=True)
     scope_group.add_argument("--since-lock", action="store_true", help="compare from lock.json last_analyzed_commit")
     scope_group.add_argument("--last", type=int, help="compare against HEAD~N (N must be > 0)")
@@ -27,8 +28,8 @@ def main():
     affected_parser.add_argument("--json", action="store_true", help="output as JSON")
 
     preview_parser = subparsers.add_parser("preview", help="interactive docs explorer in browser")
-    preview_parser.add_argument("path", type=Path, nargs="?", default=Path("docs"), help="docs directory")
-    preview_parser.add_argument("--port", type=int, default=8420, help="server port (default: 8420)")
+    preview_parser.add_argument("path", type=Path, nargs="?", default=Path(DEFAULT_DOCS_PATH), help="docs directory")
+    preview_parser.add_argument("--port", type=int, default=DEFAULT_PREVIEW_PORT, help=f"server port (default: {DEFAULT_PREVIEW_PORT})")
 
     lock_parser = subparsers.add_parser("lock", help="manage lock.json state")
     lock_subparsers = lock_parser.add_subparsers(dest="lock_command", required=True)

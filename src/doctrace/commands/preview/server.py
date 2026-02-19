@@ -10,6 +10,7 @@ from pathlib import Path
 from doctrace.commands.preview.graph import build_graph_data, generate_html
 from doctrace.commands.preview.search import search_docs
 from doctrace.core.config import find_repo_root, load_config
+from doctrace.core.constants import DEFAULT_PREVIEW_PORT
 from doctrace.core.git import get_file_at_commit, get_file_history
 
 
@@ -112,7 +113,7 @@ class PreviewHandler(http.server.SimpleHTTPRequestHandler):
         pass
 
 
-def run(docs_path: Path, port: int = 8420) -> int:
+def run(docs_path: Path, port: int = DEFAULT_PREVIEW_PORT) -> int:
     config = load_config()
     docs_path = docs_path.resolve()
     repo_root = find_repo_root(docs_path)

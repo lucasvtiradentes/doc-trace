@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from doctrace.core.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DEFAULT_METADATA, DOCSYNC_DIR, SYNCS_DIR
+from doctrace.core.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DEFAULT_METADATA, DOCTRACE_DIR, GIT_DIR, SYNCS_DIR
 
 
 class ConfigError(Exception):
@@ -78,7 +78,7 @@ def load_config(start_path: Path | None = None, validate: bool = True) -> Config
 def find_config(start_path: Path) -> Path | None:
     current = start_path.resolve()
     while current != current.parent:
-        config_path = current / DOCSYNC_DIR / CONFIG_FILENAME
+        config_path = current / DOCTRACE_DIR / CONFIG_FILENAME
         if config_path.exists():
             return config_path
         current = current.parent
@@ -88,7 +88,7 @@ def find_config(start_path: Path) -> Path | None:
 def find_doctrace_dir(start_path: Path) -> Path | None:
     current = start_path.resolve()
     while current != current.parent:
-        doctrace_dir = current / DOCSYNC_DIR
+        doctrace_dir = current / DOCTRACE_DIR
         if doctrace_dir.exists():
             return doctrace_dir
         current = current.parent
@@ -98,14 +98,14 @@ def find_doctrace_dir(start_path: Path) -> Path | None:
 def find_repo_root(start_path: Path) -> Path:
     current = start_path.resolve()
     while current != current.parent:
-        if (current / ".git").exists():
+        if (current / GIT_DIR).exists():
             return current
         current = current.parent
     return start_path.resolve()
 
 
 def init_doctrace(target_dir: Path) -> Path:
-    doctrace_dir = target_dir / DOCSYNC_DIR
+    doctrace_dir = target_dir / DOCTRACE_DIR
     doctrace_dir.mkdir(exist_ok=True)
     config_path = doctrace_dir / CONFIG_FILENAME
     with open(config_path, "w") as f:
@@ -118,7 +118,7 @@ def init_doctrace(target_dir: Path) -> Path:
 
 def _add_syncs_to_gitignore(target_dir: Path) -> None:
     gitignore_path = target_dir / ".gitignore"
-    syncs_entry = ".doctrace/syncs/"
+    syncs_entry = f"{DOCTRACE_DIR}/{SYNCS_DIR}/"
     if gitignore_path.exists():
         content = gitignore_path.read_text()
         if syncs_entry not in content:

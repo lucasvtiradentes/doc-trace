@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import NamedTuple
 
 from doctrace.core.config import Config, find_repo_root
+from doctrace.core.constants import MARKDOWN_GLOB
 from doctrace.core.parser import parse_doc
 
 
@@ -24,7 +25,7 @@ def build_dependency_tree(docs_path: Path, config: Config, repo_root: Path | Non
 
 def _build_doc_dependencies(docs_path: Path, repo_root: Path, config: Config) -> dict[Path, list[Path]]:
     doc_deps: dict[Path, list[Path]] = defaultdict(list)
-    doc_files = list(docs_path.rglob("*.md"))
+    doc_files = list(docs_path.rglob(MARKDOWN_GLOB))
     for doc_file in doc_files:
         try:
             parsed = parse_doc(doc_file, config.metadata)

@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from doctrace.core.constants import DOCSYNC_DIR, LOCK_FILENAME
+from doctrace.core.constants import DOCTRACE_DIR, LOCK_FILENAME
 from doctrace.core.git import get_current_commit
 
 
@@ -35,7 +35,7 @@ def load_lock(start_path: Path | None = None) -> Lock:
 def find_lock(start_path: Path) -> Path | None:
     current = start_path.resolve()
     while current != current.parent:
-        lock_path = current / DOCSYNC_DIR / LOCK_FILENAME
+        lock_path = current / DOCTRACE_DIR / LOCK_FILENAME
         if lock_path.exists():
             return lock_path
         current = current.parent
@@ -43,7 +43,7 @@ def find_lock(start_path: Path) -> Path | None:
 
 
 def save_lock(lock: Lock, repo_root: Path) -> Path:
-    doctrace_dir = repo_root / DOCSYNC_DIR
+    doctrace_dir = repo_root / DOCTRACE_DIR
     doctrace_dir.mkdir(exist_ok=True)
     lock_path = doctrace_dir / LOCK_FILENAME
     lock.last_run = datetime.now(timezone.utc).isoformat()

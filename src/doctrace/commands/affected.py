@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 from doctrace.core.config import Config, find_repo_root
+from doctrace.core.constants import MARKDOWN_GLOB
 from doctrace.core.git import (
     FileChange,
     get_changed_files,
@@ -90,7 +91,7 @@ def _build_indexes(
 ) -> tuple[dict[str, list[Path]], dict[Path, list[Path]]]:
     source_to_docs: dict[str, list[Path]] = defaultdict(list)
     doc_to_docs: dict[Path, list[Path]] = defaultdict(list)
-    doc_files = [f.resolve() for f in docs_path.rglob("*.md")]
+    doc_files = [f.resolve() for f in docs_path.rglob(MARKDOWN_GLOB)]
     for doc_file in doc_files:
         try:
             parsed = parse_doc(doc_file, config.metadata)

@@ -1,7 +1,13 @@
-DOCSYNC_DIR = ".doctrace"
+APP_NAME = "doctrace"
+DOCTRACE_DIR = ".doctrace"
 CONFIG_FILENAME = "config.json"
 LOCK_FILENAME = "lock.json"
 SYNCS_DIR = "syncs"
+GIT_DIR = ".git"
+
+DEFAULT_DOCS_PATH = "docs"
+DEFAULT_PREVIEW_PORT = 8420
+MARKDOWN_GLOB = "*.md"
 
 DEFAULT_METADATA = {
     "required_docs_key": "required_docs",

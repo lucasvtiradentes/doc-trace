@@ -83,7 +83,7 @@ doctrace preview docs/
 | make changelog       | build CHANGELOG.md           |
 | make changelog-draft | preview changelog            |
 
-## Initialize Docsync in Your Project
+## Initialize Doctrace in Your Project
 
 After installation:
 
