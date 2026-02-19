@@ -1,7 +1,5 @@
 APP_NAME = "doctrace"
-DOCTRACE_DIR = ".doctrace"
-CONFIG_FILENAME = "config.json"
-LOCK_FILENAME = "lock.json"
+CONFIG_FILENAME = "doctrace.json"
 GIT_DIR = ".git"
 
 DEFAULT_PREVIEW_PORT = 8420
@@ -14,9 +12,5 @@ DEFAULT_METADATA = {
 }
 
 DEFAULT_CONFIG = {
-    "ignored_paths": [],
-    "affected_depth_limit": None,
     "metadata": DEFAULT_METADATA,
 }
-
-DEFAULT_LOCK = {"last_analyzed_commit": None, "last_run": None, "docs_validated": []}

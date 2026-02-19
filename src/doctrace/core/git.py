@@ -13,6 +13,12 @@ class FileChange(NamedTuple):
     old_path: str | None = None
 
 
+class CurrentCommitInfo(NamedTuple):
+    hash: str
+    message: str
+    date: str
+
+
 def get_current_commit(cwd: Path | None = None) -> str | None:
     try:
         result = subprocess.run(
@@ -23,6 +29,23 @@ def get_current_commit(cwd: Path | None = None) -> str | None:
             cwd=cwd,
         )
         return result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+
+
+def get_current_commit_info(cwd: Path | None = None) -> CurrentCommitInfo | None:
+    try:
+        result = subprocess.run(
+            ["git", "log", "-1", "--pretty=format:%H|%s|%aI"],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=cwd,
+        )
+        parts = result.stdout.strip().split("|", 2)
+        if len(parts) >= 3:
+            return CurrentCommitInfo(hash=parts[0], message=parts[1], date=parts[2])
+        return None
     except (subprocess.CalledProcessError, FileNotFoundError):
         return None
 

@@ -7,18 +7,6 @@ def test_validate_config_unknown_key():
     assert "unknown key" in errors[0]
 
 
-def test_validate_config_invalid_ignored_paths():
-    errors = validate_config({"ignored_paths": "not_a_list"})
-    assert len(errors) == 1
-    assert "must be a list" in errors[0]
-
-
-def test_validate_config_invalid_affected_depth():
-    errors = validate_config({"affected_depth_limit": "not_an_int"})
-    assert len(errors) == 1
-    assert "must be null or integer" in errors[0]
-
-
 def test_validate_config_invalid_metadata_unknown_key():
     errors = validate_config({"metadata": {"unknown_key": "value"}})
     assert len(errors) == 1

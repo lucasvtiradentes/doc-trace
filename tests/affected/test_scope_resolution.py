@@ -6,7 +6,7 @@ from unittest.mock import patch
 import pytest
 
 from doctrace.commands.affected import resolve_commit_ref
-from doctrace.core.lock import Lock
+from doctrace.core.config import Config
 
 
 def test_resolve_commit_ref_with_last():
@@ -19,16 +19,18 @@ def test_resolve_commit_ref_last_must_be_positive():
         resolve_commit_ref(Path("."), last=0)
 
 
-def test_resolve_commit_ref_with_since_lock():
-    with patch("doctrace.commands.affected.load_lock", return_value=Lock({"last_analyzed_commit": "abc123"})):
-        commit_ref = resolve_commit_ref(Path("."), since_lock=True)
+def test_resolve_commit_ref_with_since_base():
+    mock_config = Config({"base": {"commit_hash": "abc123"}})
+    with patch("doctrace.commands.affected.load_config", return_value=mock_config):
+        commit_ref = resolve_commit_ref(Path("."), since_base=True)
     assert commit_ref == "abc123"
 
 
-def test_resolve_commit_ref_since_lock_missing_commit():
-    with patch("doctrace.commands.affected.load_lock", return_value=Lock({})):
-        with pytest.raises(ValueError, match="lock.json has no last_analyzed_commit"):
-            resolve_commit_ref(Path("."), since_lock=True)
+def test_resolve_commit_ref_since_base_missing_commit():
+    mock_config = Config({})
+    with patch("doctrace.commands.affected.load_config", return_value=mock_config):
+        with pytest.raises(ValueError, match="doctrace.json has no base"):
+            resolve_commit_ref(Path("."), since_base=True)
 
 
 def test_resolve_commit_ref_with_base_branch():

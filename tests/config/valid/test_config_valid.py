@@ -1,8 +1,8 @@
 from doctrace.core.config import validate_config
 
 
-def test_validate_config_valid():
-    errors = validate_config({"ignored_paths": ["*.md"], "affected_depth_limit": 2})
+def test_validate_config_empty():
+    errors = validate_config({})
     assert errors == []
 
 

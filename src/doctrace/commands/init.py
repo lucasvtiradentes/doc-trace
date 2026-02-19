@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from doctrace.core.config import init_doctrace
+from doctrace.core.config import init_config
 
 
 def run() -> int:
-    doctrace_dir = init_doctrace(Path.cwd())
-    print(f"Created {doctrace_dir}/")
+    config_path = init_config(Path.cwd())
+    print(f"Created {config_path}")
     return 0

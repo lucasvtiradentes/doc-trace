@@ -6,7 +6,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, NamedTuple
 
-from doctrace.core.config import Config, find_repo_root
+from doctrace.core.config import Config, find_repo_root, load_config
 from doctrace.core.constants import MARKDOWN_GLOB
 from doctrace.core.git import (
     FileChange,
@@ -17,7 +17,6 @@ from doctrace.core.git import (
     get_merged_branches_in_range,
     get_tags_in_range,
 )
-from doctrace.core.lock import load_lock
 from doctrace.core.parser import parse_doc
 
 
@@ -32,19 +31,19 @@ class AffectedResult(NamedTuple):
 
 def resolve_commit_ref(
     repo_root: Path,
-    since_lock: bool = False,
+    since_base: bool = False,
     last: int | None = None,
     base_branch: str | None = None,
     since: str | None = None,
 ) -> str:
-    options_selected = int(since_lock) + int(last is not None) + int(base_branch is not None) + int(since is not None)
+    options_selected = int(since_base) + int(last is not None) + int(base_branch is not None) + int(since is not None)
     if options_selected != 1:
-        raise ValueError("choose exactly one scope: --since-lock, --last <N>, --base-branch <branch>, or --since <ref>")
-    if since_lock:
-        lock = load_lock(repo_root)
-        if not lock.last_analyzed_commit:
-            raise ValueError("lock.json has no last_analyzed_commit; cannot use --since-lock")
-        return lock.last_analyzed_commit
+        raise ValueError("choose exactly one scope: --since-base, --last <N>, --base-branch <branch>, or --since <ref>")
+    if since_base:
+        config = load_config(repo_root, validate=False)
+        if not config.base.is_set:
+            raise ValueError("doctrace.json has no base; run 'doctrace base update' first")
+        return config.base.commit_hash
     if last is not None:
         if last <= 0:
             raise ValueError("--last must be greater than 0")
@@ -74,7 +73,7 @@ def _find_affected_docs_for_changes(
         return AffectedResult([], [], [], [], {}, {})
     source_to_docs, doc_to_docs = _build_indexes(docs_path, repo_root, config)
     direct_hits, matches = _find_direct_hits(changed_files, source_to_docs)
-    indirect_hits, circular_refs, indirect_chains = _propagate(direct_hits, doc_to_docs, config.affected_depth_limit)
+    indirect_hits, circular_refs, indirect_chains = _propagate(direct_hits, doc_to_docs)
     all_affected = list(set(direct_hits) | set(indirect_hits))
     return AffectedResult(
         affected_docs=all_affected,
@@ -125,16 +124,13 @@ def _find_direct_hits(
 
 
 def _propagate(
-    initial_docs: list[Path], doc_to_docs: dict[Path, list[Path]], depth_limit: int | None
+    initial_docs: list[Path], doc_to_docs: dict[Path, list[Path]]
 ) -> tuple[list[Path], list[tuple[Path, Path]], dict[Path, Path]]:
     indirect_hits = []
     indirect_chains: dict[Path, Path] = {}
     visited = set(initial_docs)
     current_level = set(initial_docs)
-    depth = 0
     while current_level:
-        if depth_limit is not None and depth >= depth_limit:
-            break
         next_level = set()
         for doc in current_level:
             for referencing_doc in doc_to_docs.get(doc, []):
@@ -145,7 +141,6 @@ def _propagate(
                 indirect_chains[referencing_doc] = doc
                 next_level.add(referencing_doc)
         current_level = next_level
-        depth += 1
     circular_refs = _find_circular_refs(visited, doc_to_docs)
     return indirect_hits, circular_refs, indirect_chains
 
@@ -345,7 +340,7 @@ def _print_from_data(data: dict[str, Any], verbose: bool = False) -> None:
 
 def run(
     docs_path: Path,
-    since_lock: bool = False,
+    since_base: bool = False,
     last: int | None = None,
     base_branch: str | None = None,
     since: str | None = None,
@@ -357,7 +352,7 @@ def run(
     config = load_config()
     repo_root = find_repo_root(docs_path)
     try:
-        commit_ref = resolve_commit_ref(repo_root, since_lock, last, base_branch, since)
+        commit_ref = resolve_commit_ref(repo_root, since_base, last, base_branch, since)
     except ValueError as e:
         if output_json:
             print(json.dumps({"error": str(e)}))

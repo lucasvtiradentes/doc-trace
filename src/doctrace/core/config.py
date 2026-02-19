@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from doctrace.core.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DEFAULT_METADATA, DOCTRACE_DIR, GIT_DIR
+from doctrace.core.constants import CONFIG_FILENAME, DEFAULT_METADATA, GIT_DIR
+from doctrace.core.git import get_current_commit_info
 
 
 class ConfigError(Exception):
@@ -18,28 +20,59 @@ class MetadataConfig:
         self.sources_key: str = data.get("sources_key", DEFAULT_METADATA["sources_key"])
 
 
+class Base:
+    def __init__(self, data: dict[str, Any] | None):
+        if data is None:
+            data = {}
+        self.commit_hash: str | None = data.get("commit_hash")
+        self.commit_message: str | None = data.get("commit_message")
+        self.commit_date: str | None = data.get("commit_date")
+        self.analyzed_at: str | None = data.get("analyzed_at")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "commit_hash": self.commit_hash,
+            "commit_message": self.commit_message,
+            "commit_date": self.commit_date,
+            "analyzed_at": self.analyzed_at,
+        }
+
+    @property
+    def is_set(self) -> bool:
+        return self.commit_hash is not None
+
+
 class Config:
     def __init__(self, data: dict[str, Any]):
-        self.ignored_paths: list[str] = data.get("ignored_paths", DEFAULT_CONFIG["ignored_paths"])
-        self.affected_depth_limit: int | None = data.get("affected_depth_limit", DEFAULT_CONFIG["affected_depth_limit"])
         self.metadata: MetadataConfig = MetadataConfig(data.get("metadata", {}))
+        self.base: Base = Base(data.get("base"))
+
+    def to_dict(self) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        if self._has_custom_metadata():
+            result["metadata"] = {
+                "required_docs_key": self.metadata.required_docs_key,
+                "related_docs_key": self.metadata.related_docs_key,
+                "sources_key": self.metadata.sources_key,
+            }
+        if self.base.is_set:
+            result["base"] = self.base.to_dict()
+        return result
+
+    def _has_custom_metadata(self) -> bool:
+        return (
+            self.metadata.required_docs_key != DEFAULT_METADATA["required_docs_key"]
+            or self.metadata.related_docs_key != DEFAULT_METADATA["related_docs_key"]
+            or self.metadata.sources_key != DEFAULT_METADATA["sources_key"]
+        )
 
 
 def validate_config(data: dict[str, Any], config_path: Path | None = None) -> list[str]:
     errors = []
-    valid_keys = {"ignored_paths", "affected_depth_limit", "metadata"}
+    valid_keys = {"metadata", "base"}
     for key in data:
         if key not in valid_keys:
             errors.append(f"unknown key: {key}")
-    if "ignored_paths" in data:
-        if not isinstance(data["ignored_paths"], list):
-            errors.append("ignored_paths must be a list")
-        elif not all(isinstance(p, str) for p in data["ignored_paths"]):
-            errors.append("ignored_paths must contain only strings")
-    if "affected_depth_limit" in data:
-        val = data["affected_depth_limit"]
-        if val is not None and not isinstance(val, int):
-            errors.append("affected_depth_limit must be null or integer")
     if "metadata" in data:
         errors.extend(_validate_metadata(data["metadata"]))
     return errors
@@ -78,19 +111,9 @@ def load_config(start_path: Path | None = None, validate: bool = True) -> Config
 def find_config(start_path: Path) -> Path | None:
     current = start_path.resolve()
     while current != current.parent:
-        config_path = current / DOCTRACE_DIR / CONFIG_FILENAME
+        config_path = current / CONFIG_FILENAME
         if config_path.exists():
             return config_path
-        current = current.parent
-    return None
-
-
-def find_doctrace_dir(start_path: Path) -> Path | None:
-    current = start_path.resolve()
-    while current != current.parent:
-        doctrace_dir = current / DOCTRACE_DIR
-        if doctrace_dir.exists():
-            return doctrace_dir
         current = current.parent
     return None
 
@@ -104,10 +127,30 @@ def find_repo_root(start_path: Path) -> Path:
     return start_path.resolve()
 
 
-def init_doctrace(target_dir: Path) -> Path:
-    doctrace_dir = target_dir / DOCTRACE_DIR
-    doctrace_dir.mkdir(exist_ok=True)
-    config_path = doctrace_dir / CONFIG_FILENAME
+def save_config(config: Config, repo_root: Path) -> Path:
+    config_path = repo_root / CONFIG_FILENAME
     with open(config_path, "w") as f:
-        json.dump(DEFAULT_CONFIG, f, indent=2)
-    return doctrace_dir
+        json.dump(config.to_dict(), f, indent=2)
+    return config_path
+
+
+def update_base(repo_root: Path) -> tuple[Path, Base]:
+    config = load_config(repo_root, validate=False)
+    commit_info = get_current_commit_info(repo_root)
+    if commit_info is None:
+        raise ConfigError("Could not get current commit info")
+    config.base = Base({
+        "commit_hash": commit_info.hash,
+        "commit_message": commit_info.message,
+        "commit_date": commit_info.date,
+        "analyzed_at": datetime.now(timezone.utc).isoformat(),
+    })
+    config_path = save_config(config, repo_root)
+    return config_path, config.base
+
+
+def init_config(target_dir: Path) -> Path:
+    config_path = target_dir / CONFIG_FILENAME
+    with open(config_path, "w") as f:
+        json.dump({}, f, indent=2)
+    return config_path

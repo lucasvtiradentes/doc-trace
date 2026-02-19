@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import fnmatch
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterator
@@ -33,8 +32,6 @@ def validate_refs(docs_path: Path, config: Config, repo_root: Path | None = None
         repo_root = find_repo_root(docs_path)
     doc_files = list(docs_path.rglob(MARKDOWN_GLOB))
     for doc_file in doc_files:
-        if _is_ignored(doc_file, config.ignored_paths, repo_root):
-            continue
         yield _check_single_doc(doc_file, repo_root, config)
 
 
@@ -70,14 +67,6 @@ def _glob_matches(pattern: str, repo_root: Path) -> bool:
     if "*" in pattern or "?" in pattern:
         matches = list(repo_root.glob(pattern))
         return len(matches) > 0
-    return False
-
-
-def _is_ignored(path: Path, ignored_patterns: list[str], repo_root: Path) -> bool:
-    rel_path = str(path.relative_to(repo_root))
-    for pattern in ignored_patterns:
-        if fnmatch.fnmatch(rel_path, pattern):
-            return True
     return False
 
 

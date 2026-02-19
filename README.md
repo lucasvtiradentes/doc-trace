@@ -81,7 +81,7 @@ The propagation: if `bookings.md` might be outdated, then `payments.md` (which r
 - validate - validates all referenced paths exist
 - affected - finds docs affected by code changes (with dependency ordering)
 - preview  - interactive docs explorer in browser
-- lock     - manages lock state for incremental analysis
+- base     - manages base commit for incremental analysis
 
 ## Motivation
 
@@ -169,31 +169,28 @@ doctrace init    # creates .doctrace/ folder
 <summary>Config options</summary>
 <div align="left">
 
-```
-.doctrace/
-├── config.json   # required
-└── lock.json     # tracks last analyzed commit
-```
-
-config.json:
+doctrace.json (at repo root):
 ```json
 {
-  "ignored_paths": ["**/migrations/**", "**/*.test.ts"],
-  "affected_depth_limit": null,
   "metadata": {
-    "style": "custom",
-    "docs_key": "related docs",
-    "sources_key": "related sources",
-    "require_separator": true
+    "required_docs_key": "required_docs",
+    "related_docs_key": "related_docs",
+    "sources_key": "sources"
+  },
+  "base": {
+    "commit_hash": "abc123...",
+    "commit_message": "feat: something",
+    "commit_date": "2026-02-17T10:30:00+00:00",
+    "analyzed_at": "2026-02-17T20:55:32+00:00"
   }
 }
 ```
 
-metadata options:
-- `style`:             "frontmatter" (YAML at top) or "custom" (flexible format)
-- `docs_key`:          header for doc references (default: "related docs")
-- `sources_key`:       header for source references (default: "related sources")
-- `require_separator`: if true, only parse after `---` (default: true, custom only)
+options:
+- `metadata.required_docs_key`: frontmatter key for required docs (default: "required_docs")
+- `metadata.related_docs_key`:  frontmatter key for related docs (default: "related_docs")
+- `metadata.sources_key`:       frontmatter key for source refs (default: "sources")
+- `base`:                       set by `doctrace base update`
 
 </div>
 </details>
@@ -218,14 +215,14 @@ doctrace preview docs/                      # interactive explorer in browser
 | `doctrace validate <path>`                        | validate refs exist                  |
 | `doctrace affected <path> --last <N>`             | list affected docs by last N commits |
 | `doctrace affected <path> --since <ref>`          | list affected docs since ref         |
-| `doctrace affected <path> --since-lock`           | list affected docs since lock commit |
+| `doctrace affected <path> --since-base`           | list affected docs since base commit |
 | `doctrace affected <path> --base-branch <branch>` | list affected docs from merge-base   |
 | `doctrace affected <path> --verbose`              | show changed files and match details |
 | `doctrace affected <path> --json`                 | output as JSON                       |
 | `doctrace preview <path>`                         | interactive explorer in browser      |
 | `doctrace preview <path> --port <N>`              | preview on custom port (default 8420)|
-| `doctrace lock update`                            | save current commit to lock.json     |
-| `doctrace lock show`                              | show lock.json state                 |
+| `doctrace base update`                            | save current commit as base          |
+| `doctrace base show`                              | show base state                      |
 | `doctrace init`                                   | create .doctrace/ folder              |
 | `doctrace --version`                              | show version                         |
 

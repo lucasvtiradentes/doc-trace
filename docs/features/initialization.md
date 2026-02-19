@@ -1,18 +1,18 @@
 ---
 title: Initialization
-description: Creates the .doctrace/ configuration directory
+description: Creates the doctrace.json configuration file
 related_docs:
   - docs/concepts.md: Config type
   - docs/guides/setup-project.md: project setup guide
 sources:
   - src/doctrace/commands/init.py: init command
-  - src/doctrace/core/config.py: init_doctrace function
+  - src/doctrace/core/config.py: init_config function
   - src/doctrace/core/constants.py: default config values
 ---
 
 # Initialization (init command)
 
-Creates the .doctrace/ configuration directory.
+Creates the doctrace.json configuration file at repo root.
 
 ## Usage
 
@@ -23,16 +23,19 @@ doctrace init
 ## What It Creates
 
 ```
-.doctrace/
-└── config.json     ← default configuration
+doctrace.json     ← configuration file at repo root
 ```
 
-## Default config.json
+## Default doctrace.json
+
+```json
+{}
+```
+
+An empty object uses all defaults. You can customize metadata keys:
 
 ```json
 {
-  "ignored_paths": [],
-  "affected_depth_limit": null,
   "metadata": {
     "required_docs_key": "required_docs",
     "related_docs_key": "related_docs",
@@ -43,25 +46,32 @@ doctrace init
 
 | Field                     | Default          | Description                        |
 |---------------------------|------------------|------------------------------------|
-| ignored_paths             | []               | patterns to skip in validation     |
-| affected_depth_limit      | null             | max propagation depth (unlimited)  |
 | metadata.required_docs_key| "required_docs"  | frontmatter key for required docs  |
 | metadata.related_docs_key | "related_docs"   | frontmatter key for related docs   |
 | metadata.sources_key      | "sources"        | frontmatter key for source refs    |
 
-## Idempotent
+## base
 
-Running `init` multiple times is safe:
-- Existing config.json is overwritten with defaults
+When you run `doctrace base update`, the file also stores the base commit:
+
+```json
+{
+  "base": {
+    "commit_hash": "abc123...",
+    "commit_message": "feat: add feature",
+    "commit_date": "2026-02-17T10:30:00+00:00",
+    "analyzed_at": "2026-02-17T20:55:32+00:00"
+  }
+}
+```
 
 ## Output
 
 ```
-Created .doctrace/
+Created doctrace.json
 ```
 
 ## Implementation
 
-Uses `init_doctrace()` from config module:
-1. Create .doctrace/ directory
-2. Write config.json with defaults
+Uses `init_config()` from config module:
+1. Write empty doctrace.json at repo root
