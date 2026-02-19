@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from doctrace.core.parser import parse_doc
+from doctrace.core.docs import parse_doc
 
 INPUT = Path(__file__).parent / "input.md"
 

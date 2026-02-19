@@ -5,7 +5,7 @@ required_docs:
   - docs/concepts.md: ValidateResult, RefError types
 sources:
   - src/doctrace/commands/info.py: validation implementation
-  - src/doctrace/core/parser.py: metadata extraction
+  - src/doctrace/core/docs.py: metadata extraction
 ---
 
 # Validation (validate command)

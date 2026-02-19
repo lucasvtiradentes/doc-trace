@@ -6,8 +6,7 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from doctrace.core.config import Config, find_repo_root, load_config
-from doctrace.core.docs import build_dependency_tree
-from doctrace.core.parser import RefEntry
+from doctrace.core.docs import RefEntry, build_dependency_tree
 
 
 @dataclass
@@ -69,8 +68,7 @@ def _build_data(tree, errors: list[tuple[Path, RefError]], repo_root: Path) -> d
 
     if tree.circular:
         data["circular_refs"] = [
-            [str(a.relative_to(repo_root)), str(b.relative_to(repo_root))]
-            for a, b in tree.circular
+            [str(a.relative_to(repo_root)), str(b.relative_to(repo_root))] for a, b in tree.circular
         ]
 
     if errors:

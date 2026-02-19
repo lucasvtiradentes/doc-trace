@@ -32,7 +32,7 @@ doc-sync/
 │   │   └── init.py        ← project initialization
 │   └── core/              ← shared logic
 │       ├── __init__.py
-│       ├── parser.py      ← metadata extraction
+│       ├── docs.py        ← doc parsing + indexing
 │       ├── config.py      ← config loading/validation
 │       ├── lock.py        ← state persistence
 │       ├── git.py         ← git operations
@@ -69,7 +69,7 @@ Each file implements one CLI subcommand. All follow the same pattern:
 ### src/doctrace/core/
 
 Shared modules used across commands:
-- `parser.py`    - extracts metadata from markdown
+- `docs.py`      - doc parsing, indexing, dependency tree
 - `config.py`    - loads and validates config.json
 - `lock.py`      - manages lock.json state
 - `git.py`       - git operations, change detection

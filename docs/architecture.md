@@ -47,7 +47,7 @@ src/doctrace/
 │   ├── lock.py         ← lock state management
 │   └── init.py         ← project setup
 ├── core/
-│   ├── parser.py       ← doc metadata extraction
+│   ├── docs.py         ← doc parsing + indexing
 │   ├── config.py       ← runtime configuration
 │   ├── lock.py         ← lock state persistence
 │   ├── git.py          ← git operations

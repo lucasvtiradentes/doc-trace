@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 from doctrace.core.config import Config, find_repo_root, load_config
-from doctrace.core.docs import build_doc_index, compute_levels
+from doctrace.core.docs import ParsedDoc, build_doc_index, compute_levels, parse_doc
 from doctrace.core.git import (
     FileChange,
     get_changed_files,
@@ -17,7 +17,6 @@ from doctrace.core.git import (
     get_merged_branches_in_range,
     get_tags_in_range,
 )
-from doctrace.core.parser import ParsedDoc, parse_doc
 
 
 class AffectedResult(NamedTuple):
