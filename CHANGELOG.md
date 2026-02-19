@@ -1,3 +1,8 @@
+## 0.2.2 (2026-02-19)
+
+No significant changes.
+
+
 ## 0.2.1 (2026-02-18)
 
 No significant changes.
