@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from doctrace.core.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DEFAULT_METADATA, DOCTRACE_DIR, GIT_DIR, SYNCS_DIR
+from doctrace.core.constants import CONFIG_FILENAME, DEFAULT_CONFIG, DEFAULT_METADATA, DOCTRACE_DIR, GIT_DIR
 
 
 class ConfigError(Exception):
@@ -110,22 +110,4 @@ def init_doctrace(target_dir: Path) -> Path:
     config_path = doctrace_dir / CONFIG_FILENAME
     with open(config_path, "w") as f:
         json.dump(DEFAULT_CONFIG, f, indent=2)
-    syncs_dir = doctrace_dir / SYNCS_DIR
-    syncs_dir.mkdir(exist_ok=True)
-    _add_syncs_to_gitignore(target_dir)
     return doctrace_dir
-
-
-def _add_syncs_to_gitignore(target_dir: Path) -> None:
-    gitignore_path = target_dir / ".gitignore"
-    syncs_entry = f"{DOCTRACE_DIR}/{SYNCS_DIR}/"
-    if gitignore_path.exists():
-        content = gitignore_path.read_text()
-        if syncs_entry not in content:
-            with open(gitignore_path, "a") as f:
-                if not content.endswith("\n"):
-                    f.write("\n")
-                f.write(f"{syncs_entry}\n")
-    else:
-        with open(gitignore_path, "w") as f:
-            f.write(f"{syncs_entry}\n")

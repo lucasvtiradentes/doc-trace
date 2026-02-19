@@ -172,8 +172,7 @@ doctrace init    # creates .doctrace/ folder
 ```
 .doctrace/
 ├── config.json   # required
-├── lock.json     # tracks last analyzed commit
-└── syncs/        # output directory (added to .gitignore)
+└── lock.json     # tracks last analyzed commit
 ```
 
 config.json:
