@@ -16,6 +16,7 @@ def main():
 
     validate_parser = subparsers.add_parser("validate", help="validate all refs exist")
     validate_parser.add_argument("path", type=Path, help="docs directory to validate")
+    validate_parser.add_argument("--phases", action="store_true", help="show docs organized by dependency phases")
 
     affected_parser = subparsers.add_parser("affected", help="list docs affected by git diff")
     affected_parser.add_argument("path", type=Path, help="docs directory")
@@ -45,7 +46,7 @@ def main():
         sys.exit(0)
 
     if args.command == "validate":
-        sys.exit(validate.run(args.path))
+        sys.exit(validate.run(args.path, args.phases))
     elif args.command == "affected":
         sys.exit(
             affected.run(
