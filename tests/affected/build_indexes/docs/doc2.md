@@ -1,6 +1,6 @@
-# Doc2
-
+---
+sources:
+  - src/other.py: other
 ---
 
-related sources:
-- src/other.py - other
+# Doc2

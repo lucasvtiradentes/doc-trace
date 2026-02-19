@@ -11,48 +11,64 @@ sources:
 
 Guide to adding metadata sections to documentation files.
 
-## Default Metadata Format (custom style)
+## Format
 
-With default config, add a `---` separator and put metadata after it:
+Add YAML frontmatter at the top of the doc:
 
 ```markdown
+---
+title: Your Doc Title
+description: Brief description of the doc
+required_docs:
+  - docs/dependency.md: needed to understand this doc
+related_docs:
+  - docs/related.md: related but not required
+sources:
+  - src/module.py: main implementation
+  - src/utils/: utility directory
+---
+
 # Your Doc Title
 
 Content here...
-
----
-
-related docs:
-- docs/other-doc.md - description of relationship
-
-related sources:
-- src/path/to/file.py - description
-- src/path/to/dir/ - description
 ```
 
-`doctrace` uses the last `---` outside fenced code blocks as the metadata separator.
+## Section Meanings
 
-## Section Format
+### required_docs
 
-### related docs:
+Hard dependencies - docs that must be understood first. Used for:
+- Propagation in affected analysis
+- Building doc phases/levels
+- Detecting circular dependencies (error)
 
-References to other documentation files:
-
+```yaml
+required_docs:
+  - docs/concepts.md: defines types used here
+  - docs/architecture.md: system design context
 ```
-related docs:
-- docs/concepts.md - defines types used here
-- docs/api.md - API documentation
+
+### related_docs
+
+Soft references - related but not required. Used for:
+- Informational cross-references
+- Bidirectional reference detection
+
+```yaml
+related_docs:
+  - docs/api.md: API documentation
+  - docs/guides/setup.md: setup guide
 ```
 
-### related sources:
+### sources
 
-References to source code files or directories:
+Code references - files/directories this doc describes:
 
-```
-related sources:
-- src/module.py - main implementation
-- src/utils/ - utility functions
-- tests/*.py - test files (glob pattern)
+```yaml
+sources:
+  - src/module.py: main implementation
+  - src/utils/: utility functions directory
+  - tests/*.py: test files (glob pattern)
 ```
 
 ## Path Rules
@@ -61,64 +77,56 @@ All paths are relative to repository root:
 
 ```
 Good:
-- src/module.py            ← from repo root
-- docs/api/endpoints.md    ← from repo root
+- src/module.py            <- from repo root
+- docs/api/endpoints.md    <- from repo root
 
 Bad:
-- ./src/module.py          ← don't use ./
-- ../src/module.py         ← don't use ../
-- /absolute/path.py        ← don't use absolute
+- ./src/module.py          <- don't use ./
+- ../src/module.py         <- don't use ../
+- /absolute/path.py        <- don't use absolute
 ```
 
-## Line Item Format
+## Item Format
 
-In default `custom` style, each item must follow:
+Each item follows YAML format with colon separator:
 
-```
-- path - description
-```
-
-| Component   | Required | Notes                           |
-|-------------|----------|---------------------------------|
-| `-`         | yes      | list marker                     |
-| path        | yes      | relative path from repo root    |
-| `-`         | yes      | separator                       |
-| description | yes      | human-readable description      |
-
-## Frontmatter Style (optional)
-
-If `.doctrace/config.json` sets metadata style to `frontmatter`, metadata is read from the top YAML-like block:
-
-```markdown
----
-related docs:
-- docs/concepts.md
-related sources:
-- src/module.py
----
+```yaml
+  - path: description
 ```
 
-In frontmatter style, list items can omit descriptions (`- path` is valid).
-
-## Separator Behavior
-
-- Default behavior (`require_separator: true`):   metadata is parsed only after the separator.
-- Optional behavior (`require_separator: false`): metadata headers can appear without a separator.
+| Component   | Required | Notes                        |
+|-------------|----------|------------------------------|
+| `-`         | yes      | list marker                  |
+| path        | yes      | relative path from repo root |
+| `:`         | yes      | separator                    |
+| description | optional | human-readable description   |
 
 ## Directory and Glob References
 
-The parser stores paths exactly as written, including directory and glob patterns:
+The parser stores paths exactly as written:
 
-```
-related sources:
-- src/booking/ - booking module
-- src/*.py - all Python files in src/
-- tests/**/*.py - all test files recursively
+```yaml
+sources:
+  - src/booking/: booking module
+  - src/*.py: all Python files in src/
+  - tests/**/*.py: all test files recursively
 ```
 
 ## Example Doc
 
 ```markdown
+---
+title: API Documentation
+description: API endpoints and handlers
+required_docs:
+  - docs/concepts.md: type definitions
+related_docs:
+  - docs/authentication.md: auth flow
+sources:
+  - src/api/: API implementation
+  - src/models.py: data models
+---
+
 # API Documentation
 
 This doc covers the API endpoints.
@@ -126,16 +134,6 @@ This doc covers the API endpoints.
 ## Endpoints
 
 ...content...
-
----
-
-related docs:
-- docs/concepts.md - type definitions
-- docs/authentication.md - auth flow
-
-related sources:
-- src/api/ - API implementation
-- src/models.py - data models
 ```
 
 ## Validation
@@ -149,6 +147,6 @@ doctrace validate docs/
 Errors show file path and line number:
 
 ```
-docs/api.md:25: related doc not found: docs/missing.md
+docs/api.md:5: required doc not found: docs/missing.md
+docs/api.md:10: source not found: src/deleted.py
 ```
-

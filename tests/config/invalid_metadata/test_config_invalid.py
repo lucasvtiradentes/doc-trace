@@ -19,7 +19,7 @@ def test_validate_config_invalid_affected_depth():
     assert "must be null or integer" in errors[0]
 
 
-def test_validate_config_invalid_metadata_style():
-    errors = validate_config({"metadata": {"style": "invalid"}})
+def test_validate_config_invalid_metadata_unknown_key():
+    errors = validate_config({"metadata": {"unknown_key": "value"}})
     assert len(errors) == 1
-    assert "frontmatter" in errors[0]
+    assert "unknown key" in errors[0]

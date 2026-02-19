@@ -1,19 +1,12 @@
-import re
-
-RELATED_DOCS_PATTERN = re.compile(r"^related docs:\s*$", re.MULTILINE | re.IGNORECASE)
-RELATED_SOURCES_PATTERN = re.compile(r"^related sources:\s*$", re.MULTILINE | re.IGNORECASE)
-LIST_ITEM_PATTERN = re.compile(r"^-\s+(\S+)\s+-\s+(.+)$")
-
 DOCSYNC_DIR = ".doctrace"
 CONFIG_FILENAME = "config.json"
 LOCK_FILENAME = "lock.json"
 SYNCS_DIR = "syncs"
 
 DEFAULT_METADATA = {
-    "style": "custom",
-    "docs_key": "related docs",
-    "sources_key": "related sources",
-    "require_separator": True,
+    "required_docs_key": "required_docs",
+    "related_docs_key": "related_docs",
+    "sources_key": "sources",
 }
 
 DEFAULT_CONFIG = {

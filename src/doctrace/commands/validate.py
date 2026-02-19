@@ -50,14 +50,18 @@ def _check_single_doc(doc_path: Path, repo_root: Path, config: Config) -> Valida
             )
         )
         return result
+    for ref in parsed.required_docs:
+        ref_path = repo_root / ref.path
+        if not ref_path.exists():
+            result.errors.append(RefError(doc_path=doc_path, ref=ref, message=f"required doc not found: {ref.path}"))
     for ref in parsed.related_docs:
         ref_path = repo_root / ref.path
         if not ref_path.exists():
             result.errors.append(RefError(doc_path=doc_path, ref=ref, message=f"related doc not found: {ref.path}"))
-    for ref in parsed.related_sources:
+    for ref in parsed.sources:
         ref_path = repo_root / ref.path
         if not ref_path.exists() and not _glob_matches(ref.path, repo_root):
-            result.errors.append(RefError(doc_path=doc_path, ref=ref, message=f"related source not found: {ref.path}"))
+            result.errors.append(RefError(doc_path=doc_path, ref=ref, message=f"source not found: {ref.path}"))
     return result
 
 

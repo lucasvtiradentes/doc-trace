@@ -1,6 +1,6 @@
-# Test
-
+---
+sources:
+  - src/module.py: module
 ---
 
-related sources:
-- src/module.py - module
+# Test

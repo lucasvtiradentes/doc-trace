@@ -1,6 +1,6 @@
-# Test
-
+---
+required_docs:
+  - docs/notexist.md: missing
 ---
 
-related docs:
-- docs/notexist.md - missing
+# Test

@@ -1,10 +1,4 @@
 {
   "ignored_paths": [],
-  "affected_depth_limit": null,
-  "metadata": {
-    "style": "custom",
-    "docs_key": "related docs",
-    "sources_key": "related sources",
-    "require_separator": true
-  }
+  "affected_depth_limit": null
 }

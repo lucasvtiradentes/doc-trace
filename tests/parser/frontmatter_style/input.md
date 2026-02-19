@@ -1,9 +1,9 @@
 ---
-related docs:
-  - docs/foo.md - foo doc
+required_docs:
+  - docs/foo.md: foo doc
 
-related sources:
-  - src/bar.py - bar source
+sources:
+  - src/bar.py: bar source
 ---
 
 # Test Doc

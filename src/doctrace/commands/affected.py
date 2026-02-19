@@ -96,9 +96,9 @@ def _build_indexes(
             parsed = parse_doc(doc_file, config.metadata)
         except Exception:
             continue
-        for ref in parsed.related_sources:
+        for ref in parsed.sources:
             source_to_docs[ref.path].append(doc_file)
-        for ref in parsed.related_docs:
+        for ref in parsed.required_docs:
             ref_path = repo_root / ref.path
             if ref_path.exists():
                 doc_to_docs[ref_path].append(doc_file)
@@ -176,8 +176,9 @@ def _get_doc_metadata(docs: list[Path], config: Config, repo_root: Path) -> list
             result.append(
                 {
                     "path": rel_path,
+                    "required_docs": [ref.path for ref in parsed.required_docs],
                     "related_docs": [ref.path for ref in parsed.related_docs],
-                    "related_sources": [ref.path for ref in parsed.related_sources],
+                    "sources": [ref.path for ref in parsed.sources],
                 }
             )
         except Exception:
@@ -191,7 +192,7 @@ def _build_levels(docs: list[dict[str, Any]], repo_root: Path) -> list[list[dict
     deps: dict[Path, list[Path]] = {}
     for d in docs:
         path = repo_root / d["path"]
-        deps[path] = [repo_root / rd for rd in d["related_docs"] if (repo_root / rd) in doc_paths]
+        deps[path] = [repo_root / rd for rd in d["required_docs"] if (repo_root / rd) in doc_paths]
     assigned: dict[Path, int] = {}
 
     def get_level(doc: Path, visiting: set[Path]) -> int:

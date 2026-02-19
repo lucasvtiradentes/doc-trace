@@ -1,6 +1,6 @@
-# Bookings
-
+---
+sources:
+  - api/src/booking/: booking module
 ---
 
-related sources:
-- api/src/booking/ - booking module
+# Bookings

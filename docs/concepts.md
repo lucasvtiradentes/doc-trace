@@ -28,10 +28,11 @@ Reference tuple extracted from doc metadata sections.
 
 Container for extracted references from a markdown file.
 
-| Field           | Type            | Description              |
-|-----------------|-----------------|--------------------------|
-| related_docs    | list[RefEntry]  | doc-to-doc references    |
-| related_sources | list[RefEntry]  | doc-to-source references |
+| Field         | Type           | Description                              |
+|---------------|----------------|------------------------------------------|
+| required_docs | list[RefEntry] | hard deps, used for propagation + phases |
+| related_docs  | list[RefEntry] | soft refs, informational only            |
+| sources       | list[RefEntry] | code references                          |
 
 ### AffectedResult
 
@@ -60,12 +61,11 @@ Runtime configuration loaded from .doctrace/config.json.
 
 Settings for how doc metadata is parsed.
 
-| Field             | Type | Default          | Description                              |
-|-------------------|------|------------------|------------------------------------------|
-| style             | str  | "custom"         | parsing style ("custom" or "frontmatter")|
-| docs_key          | str  | "related docs"   | header for doc references section        |
-| sources_key       | str  | "related sources"| header for source references section     |
-| require_separator | bool | True             | require --- separator before metadata    |
+| Field             | Type | Default         | Description                          |
+|-------------------|------|-----------------|--------------------------------------|
+| required_docs_key | str  | "required_docs" | header for required doc refs section |
+| related_docs_key  | str  | "related_docs"  | header for related doc refs section  |
+| sources_key       | str  | "sources"       | header for source references section |
 
 ### ValidateResult
 
@@ -101,11 +101,11 @@ State tracking for incremental mode.
 
 ### Direct Hit
 
-A doc is a "direct hit" when one of its `related sources:` paths appears in the git diff. These docs directly reference changed code.
+A doc is a "direct hit" when one of its `sources:` paths appears in the git diff. These docs directly reference changed code.
 
 ### Indirect Hit
 
-A doc is an "indirect hit" when it references (via `related docs:`) another doc that was affected. Indirect hits propagate through the dependency graph.
+A doc is an "indirect hit" when it references (via `required_docs:`) another doc that was affected. Indirect hits propagate through the dependency graph based on required_docs only (not related_docs).
 
 ### Circular Dependency
 
@@ -113,19 +113,22 @@ Occurs when docs reference each other in a cycle. Commands detect this and conti
 
 ### Metadata Section
 
-By default (`metadata.style = "custom"`), metadata is parsed after the last `---` separator and contains `related docs:` / `related sources:` lists. This is configurable via `.doctrace/config.json` (`metadata.style`, keys, separator requirement).
+YAML frontmatter at the top of the document:
 
 ```
+---
+title: Doc Title
+description: Brief description
+required_docs:
+  - docs/dependency.md: needed to understand this doc
+related_docs:
+  - docs/related.md: related but not required
+sources:
+  - src/module.py: code implementation
+---
+
 # Doc Title
 
 Content here...
-
----
-
-related docs:
-- docs/other.md - description
-
-related sources:
-- src/module.py - description
 ```
 

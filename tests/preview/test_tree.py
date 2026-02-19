@@ -5,18 +5,18 @@ from doctrace.commands.preview.tree import _compute_levels, build_dependency_tre
 from doctrace.core.config import Config
 
 
-def _create_doc(path: Path, related_docs: list[str] = None, related_sources: list[str] = None):
+def _create_doc(path: Path, required_docs: list[str] = None, sources: list[str] = None):
     path.parent.mkdir(parents=True, exist_ok=True)
-    content = "# Test\n\n---\n\n"
-    if related_docs:
-        content += "related docs:\n"
-        for doc in related_docs:
-            content += f"- {doc} - desc\n"
-        content += "\n"
-    if related_sources:
-        content += "related sources:\n"
-        for src in related_sources:
-            content += f"- {src} - desc\n"
+    content = "---\n"
+    if required_docs:
+        content += "required_docs:\n"
+        for doc in required_docs:
+            content += f"  - {doc}: desc\n"
+    if sources:
+        content += "sources:\n"
+        for src in sources:
+            content += f"  - {src}: desc\n"
+    content += "---\n\n# Test\n"
     path.write_text(content)
 
 
@@ -24,8 +24,8 @@ def test_build_dependency_tree_independent():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
         docs_dir = tmppath / "docs"
-        _create_doc(docs_dir / "a.md", related_sources=["src/a.py"])
-        _create_doc(docs_dir / "b.md", related_sources=["src/b.py"])
+        _create_doc(docs_dir / "a.md", sources=["src/a.py"])
+        _create_doc(docs_dir / "b.md", sources=["src/b.py"])
         config = Config({})
         tree = build_dependency_tree(docs_dir, config, tmppath)
         assert len(tree.levels) == 1
@@ -37,8 +37,8 @@ def test_build_dependency_tree_with_deps():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
         docs_dir = tmppath / "docs"
-        _create_doc(docs_dir / "base.md", related_sources=["src/base.py"])
-        _create_doc(docs_dir / "child.md", related_docs=["docs/base.md"])
+        _create_doc(docs_dir / "base.md", sources=["src/base.py"])
+        _create_doc(docs_dir / "child.md", required_docs=["docs/base.md"])
         config = Config({})
         tree = build_dependency_tree(docs_dir, config, tmppath)
         assert len(tree.levels) == 2
@@ -52,9 +52,9 @@ def test_build_dependency_tree_multi_level():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
         docs_dir = tmppath / "docs"
-        _create_doc(docs_dir / "l0.md", related_sources=["src/l0.py"])
-        _create_doc(docs_dir / "l1.md", related_docs=["docs/l0.md"])
-        _create_doc(docs_dir / "l2.md", related_docs=["docs/l1.md"])
+        _create_doc(docs_dir / "l0.md", sources=["src/l0.py"])
+        _create_doc(docs_dir / "l1.md", required_docs=["docs/l0.md"])
+        _create_doc(docs_dir / "l2.md", required_docs=["docs/l1.md"])
         config = Config({})
         tree = build_dependency_tree(docs_dir, config, tmppath)
         assert len(tree.levels) == 3
@@ -64,8 +64,8 @@ def test_build_dependency_tree_circular():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
         docs_dir = tmppath / "docs"
-        _create_doc(docs_dir / "a.md", related_docs=["docs/b.md"])
-        _create_doc(docs_dir / "b.md", related_docs=["docs/a.md"])
+        _create_doc(docs_dir / "a.md", required_docs=["docs/b.md"])
+        _create_doc(docs_dir / "b.md", required_docs=["docs/a.md"])
         config = Config({})
         tree = build_dependency_tree(docs_dir, config, tmppath)
         assert len(tree.circular) > 0

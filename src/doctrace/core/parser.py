@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, NamedTuple
 if TYPE_CHECKING:
     from doctrace.core.config import MetadataConfig
 
-LIST_ITEM_CUSTOM = re.compile(r"^-\s+(\S+(?:\s+\S+)*?)\s+-\s+(.+)$")
 LIST_ITEM_YAML = re.compile(r"^\s*-\s+([^:]+?):\s*(.*)$")
 
 
@@ -18,8 +17,9 @@ class RefEntry(NamedTuple):
 
 
 class ParsedDoc(NamedTuple):
+    required_docs: list[RefEntry]
     related_docs: list[RefEntry]
-    related_sources: list[RefEntry]
+    sources: list[RefEntry]
 
 
 def parse_doc(filepath: Path, metadata_config: MetadataConfig | None = None) -> ParsedDoc:
@@ -30,18 +30,16 @@ def parse_doc(filepath: Path, metadata_config: MetadataConfig | None = None) -> 
 
     content = filepath.read_text()
     lines = content.splitlines()
+    metadata_lines = _get_frontmatter_section(lines)
 
-    if metadata_config.style == "frontmatter":
-        metadata_lines = _get_frontmatter_section(lines)
-    else:
-        metadata_lines = _get_custom_section(lines, metadata_config.require_separator)
-
-    docs_pattern = re.compile(rf"^{re.escape(metadata_config.docs_key)}:\s*$", re.IGNORECASE)
+    required_docs_pattern = re.compile(rf"^{re.escape(metadata_config.required_docs_key)}:\s*$", re.IGNORECASE)
+    related_docs_pattern = re.compile(rf"^{re.escape(metadata_config.related_docs_key)}:\s*$", re.IGNORECASE)
     sources_pattern = re.compile(rf"^{re.escape(metadata_config.sources_key)}:\s*$", re.IGNORECASE)
 
-    related_docs = _extract_section(metadata_lines, docs_pattern, metadata_config.style)
-    related_sources = _extract_section(metadata_lines, sources_pattern, metadata_config.style)
-    return ParsedDoc(related_docs=related_docs, related_sources=related_sources)
+    required_docs = _extract_section(metadata_lines, required_docs_pattern)
+    related_docs = _extract_section(metadata_lines, related_docs_pattern)
+    sources = _extract_section(metadata_lines, sources_pattern)
+    return ParsedDoc(required_docs=required_docs, related_docs=related_docs, sources=sources)
 
 
 def _get_frontmatter_section(lines: list[str]) -> list[tuple[int, str]]:
@@ -57,41 +55,9 @@ def _get_frontmatter_section(lines: list[str]) -> list[tuple[int, str]]:
     return [(i + 1, line) for i, line in enumerate(lines) if 0 < i < end_line]
 
 
-def _get_custom_section(lines: list[str], require_separator: bool) -> list[tuple[int, str]]:
-    if not require_separator:
-        return _filter_code_blocks(lines)
-
-    in_code_block = False
-    separator_line = None
-    for i, line in enumerate(lines):
-        if line.startswith("```"):
-            in_code_block = not in_code_block
-            continue
-        if in_code_block:
-            continue
-        if line.strip() == "---":
-            separator_line = i
-    if separator_line is None:
-        return []
-    return [(i + 1, line) for i, line in enumerate(lines) if i > separator_line]
-
-
-def _filter_code_blocks(lines: list[str]) -> list[tuple[int, str]]:
-    result = []
-    in_code_block = False
-    for i, line in enumerate(lines):
-        if line.startswith("```"):
-            in_code_block = not in_code_block
-            continue
-        if not in_code_block:
-            result.append((i + 1, line))
-    return result
-
-
-def _extract_section(lines: list[tuple[int, str]], header_pattern: re.Pattern, style: str) -> list[RefEntry]:
+def _extract_section(lines: list[tuple[int, str]], header_pattern: re.Pattern) -> list[RefEntry]:
     entries = []
     in_section = False
-    item_pattern = LIST_ITEM_YAML if style == "frontmatter" else LIST_ITEM_CUSTOM
     for line_num, line in lines:
         if header_pattern.match(line):
             in_section = True
@@ -100,7 +66,7 @@ def _extract_section(lines: list[tuple[int, str]], header_pattern: re.Pattern, s
             if not line.strip():
                 continue
             if line.strip().startswith("-"):
-                match = item_pattern.match(line)
+                match = LIST_ITEM_YAML.match(line)
                 if match:
                     path = match.group(1).strip()
                     desc = match.group(2).strip() if match.group(2) else ""

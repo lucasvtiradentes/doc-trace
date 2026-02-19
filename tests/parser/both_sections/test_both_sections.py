@@ -7,9 +7,9 @@ INPUT = Path(__file__).parent / "input.md"
 
 def test_parse_doc_with_both_sections():
     result = parse_doc(INPUT)
-    assert len(result.related_docs) == 1
-    assert result.related_docs[0].path == "docs/other.md"
-    assert result.related_docs[0].description == "related documentation"
-    assert len(result.related_sources) == 2
-    assert result.related_sources[0].path == "src/module.py"
-    assert result.related_sources[1].path == "src/utils.py"
+    assert len(result.required_docs) == 1
+    assert result.required_docs[0].path == "docs/other.md"
+    assert result.required_docs[0].description == "related documentation"
+    assert len(result.sources) == 2
+    assert result.sources[0].path == "src/module.py"
+    assert result.sources[1].path == "src/utils.py"

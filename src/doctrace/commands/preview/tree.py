@@ -30,7 +30,7 @@ def _build_doc_dependencies(docs_path: Path, repo_root: Path, config: Config) ->
             parsed = parse_doc(doc_file, config.metadata)
         except Exception:
             continue
-        for ref in parsed.related_docs:
+        for ref in parsed.required_docs:
             ref_path = repo_root / ref.path
             if ref_path.exists():
                 doc_deps[doc_file].append(ref_path)

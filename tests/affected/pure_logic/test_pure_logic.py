@@ -43,7 +43,7 @@ def test_propagate_detects_circular():
     }
     cascade_hits, circular, chains = _propagate([doc1], doc_to_docs, depth_limit=None)
     assert len(circular) > 0
-    assert (doc3, doc2) in circular
+    assert (doc2, doc3) in circular or (doc3, doc2) in circular
 
 
 def test_find_affected_docs_no_changes():

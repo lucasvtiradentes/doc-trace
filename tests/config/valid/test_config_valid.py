@@ -8,6 +8,6 @@ def test_validate_config_valid():
 
 def test_validate_config_metadata():
     errors = validate_config(
-        {"metadata": {"style": "frontmatter", "docs_key": "docs", "sources_key": "sources", "require_separator": False}}
+        {"metadata": {"required_docs_key": "deps", "related_docs_key": "related", "sources_key": "code"}}
     )
     assert errors == []

@@ -13,10 +13,9 @@ class ConfigError(Exception):
 
 class MetadataConfig:
     def __init__(self, data: dict[str, Any]):
-        self.style: str = data.get("style", DEFAULT_METADATA["style"])
-        self.docs_key: str = data.get("docs_key", DEFAULT_METADATA["docs_key"])
+        self.required_docs_key: str = data.get("required_docs_key", DEFAULT_METADATA["required_docs_key"])
+        self.related_docs_key: str = data.get("related_docs_key", DEFAULT_METADATA["related_docs_key"])
         self.sources_key: str = data.get("sources_key", DEFAULT_METADATA["sources_key"])
-        self.require_separator: bool = data.get("require_separator", DEFAULT_METADATA["require_separator"])
 
 
 class Config:
@@ -50,19 +49,16 @@ def _validate_metadata(data: Any) -> list[str]:
     errors = []
     if not isinstance(data, dict):
         return ["metadata must be an object"]
-    valid_keys = {"style", "docs_key", "sources_key", "require_separator"}
+    valid_keys = {"required_docs_key", "related_docs_key", "sources_key"}
     for key in data:
         if key not in valid_keys:
             errors.append(f"metadata: unknown key: {key}")
-    if "style" in data:
-        if data["style"] not in ("frontmatter", "custom"):
-            errors.append("metadata.style must be 'frontmatter' or 'custom'")
-    if "docs_key" in data and not isinstance(data["docs_key"], str):
-        errors.append("metadata.docs_key must be a string")
+    if "required_docs_key" in data and not isinstance(data["required_docs_key"], str):
+        errors.append("metadata.required_docs_key must be a string")
+    if "related_docs_key" in data and not isinstance(data["related_docs_key"], str):
+        errors.append("metadata.related_docs_key must be a string")
     if "sources_key" in data and not isinstance(data["sources_key"], str):
         errors.append("metadata.sources_key must be a string")
-    if "require_separator" in data and not isinstance(data["require_separator"], bool):
-        errors.append("metadata.require_separator must be a boolean")
     return errors
 
 

@@ -1,6 +1,6 @@
-# Test
-
+---
+sources:
+  - src/notexist.py: missing
 ---
 
-related sources:
-- src/notexist.py - missing
+# Test

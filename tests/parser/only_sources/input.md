@@ -1,6 +1,6 @@
-# Test Doc
-
+---
+sources:
+  - src/main.py: entry point
 ---
 
-related sources:
-- src/main.py - entry point
+# Test Doc
