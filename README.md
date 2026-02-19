@@ -7,12 +7,12 @@ Add metadata hints to your docs, and doctrace builds a dependency graph that map
 ```
   src/booking/handler.ts changed
               │
-              ▼
+              v
   ┌───────────────────────────────────┐
-  │ doctrace affected docs/ --last 1   │
+  │ doctrace affected docs/ --last 1  │
   └───────────────────────────────────┘
               │
-              ▼
+              v
   ┌───────────────────────────────────┐
   │ Direct hits:                      │
   │   docs/bookings.md                │  ← has "related sources: src/booking/"
@@ -212,19 +212,19 @@ doctrace preview docs/                      # interactive explorer in browser
 
 | Command                                          | Description                          |
 |--------------------------------------------------|--------------------------------------|
-| `doctrace info <path>`                            | show phases + validate refs          |
-| `doctrace affected <path> --last <N>`             | list affected docs by last N commits |
-| `doctrace affected <path> --since <ref>`          | list affected docs since ref         |
-| `doctrace affected <path> --since-base`           | list affected docs since base commit |
-| `doctrace affected <path> --base-branch <branch>` | list affected docs from merge-base   |
-| `doctrace affected <path> --verbose`              | show changed files and match details |
-| `doctrace affected <path> --json`                 | output as JSON                       |
-| `doctrace preview <path>`                         | interactive explorer in browser      |
-| `doctrace preview <path> --port <N>`              | preview on custom port (default 8420)|
-| `doctrace base update`                            | save current commit as base          |
-| `doctrace base show`                              | show base state                      |
-| `doctrace init`                                   | create .doctrace/ folder              |
-| `doctrace --version`                              | show version                         |
+| `doctrace info <path>`                           | show phases + validate refs          |
+| `doctrace affected <path> --last <N>`            | list affected docs by last N commits |
+| `doctrace affected <path> --since <ref>`         | list affected docs since ref         |
+| `doctrace affected <path> --since-base`          | list affected docs since base commit |
+| `doctrace affected <path> --base-branch <branch>`| list affected docs from merge-base   |
+| `doctrace affected <path> --verbose`             | show changed files and match details |
+| `doctrace affected <path> --json`                | output as JSON                       |
+| `doctrace preview <path>`                        | interactive explorer in browser      |
+| `doctrace preview <path> --port <N>`             | preview on custom port (default 8420)|
+| `doctrace base update`                           | save current commit as base          |
+| `doctrace base show`                             | show base state                      |
+| `doctrace init`                                  | create .doctrace/ folder             |
+| `doctrace --version`                             | show version                         |
 
 </div>
 </details>
