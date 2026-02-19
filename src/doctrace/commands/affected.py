@@ -43,6 +43,7 @@ def resolve_commit_ref(
         config = load_config(repo_root, validate=False)
         if not config.base.is_set:
             raise ValueError("doctrace.json has no base; run 'doctrace base update' first")
+        assert config.base.commit_hash is not None
         return config.base.commit_hash
     if last is not None:
         if last <= 0:
@@ -53,7 +54,8 @@ def resolve_commit_ref(
         if not commit:
             raise ValueError(f"could not resolve merge-base with branch '{base_branch}'")
         return commit
-    assert since is not None
+    if since is None:
+        raise ValueError("since cannot be None")
     return since
 
 
@@ -94,7 +96,7 @@ def _build_indexes(
     for doc_file in doc_files:
         try:
             parsed = parse_doc(doc_file, config.metadata)
-        except Exception:
+        except (OSError, UnicodeDecodeError, ValueError):
             continue
         for ref in parsed.sources:
             source_to_docs[ref.path].append(doc_file)
@@ -175,7 +177,7 @@ def _get_doc_metadata(docs: list[Path], config: Config, repo_root: Path) -> list
                     "sources": [ref.path for ref in parsed.sources],
                 }
             )
-        except Exception:
+        except (OSError, UnicodeDecodeError, ValueError):
             continue
     return result
 
@@ -296,8 +298,8 @@ def _print_from_data(data: dict[str, Any], verbose: bool = False) -> None:
         commits = git.get("commits", {})
         if commits:
             print(f"\nCommits ({len(commits)}):")
-            for hash, message in commits.items():
-                print(f"  {hash} {message}")
+            for short_hash, message in commits.items():
+                print(f"  {short_hash} {message}")
 
         tags = git.get("tags", [])
         if tags:
@@ -316,7 +318,8 @@ def _print_from_data(data: dict[str, Any], verbose: bool = False) -> None:
             for source, docs in sorted(source_to_docs.items()):
                 print(f"  {source} -> {', '.join(docs)}")
 
-    print(f"\nDirect hits ({len(data['direct_hits'])}):" if verbose else f"Direct hits ({len(data['direct_hits'])}):")
+    prefix = "\n" if verbose else ""
+    print(f"{prefix}Direct hits ({len(data['direct_hits'])}):")
     for doc in data["direct_hits"]:
         print(f"  {doc}")
 
@@ -345,8 +348,6 @@ def run(
     verbose: bool = False,
     output_json: bool = False,
 ) -> int:
-    from doctrace.core.config import load_config
-
     config = load_config()
     repo_root = find_repo_root(docs_path)
     try:

@@ -6,12 +6,17 @@ import socketserver
 import threading
 import webbrowser
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 from doctrace.commands.preview.graph import build_graph_data, generate_html
 from doctrace.commands.preview.search import search_docs
 from doctrace.core.config import find_repo_root, load_config
 from doctrace.core.constants import DEFAULT_PREVIEW_PORT
 from doctrace.core.git import get_file_at_commit, get_file_history
+
+
+class ReuseAddrTCPServer(socketserver.TCPServer):
+    allow_reuse_address = True
 
 
 class PreviewHandler(http.server.SimpleHTTPRequestHandler):
@@ -21,9 +26,11 @@ class PreviewHandler(http.server.SimpleHTTPRequestHandler):
         self.docs_path = docs_path
         super().__init__(*args, **kwargs)
 
-    def do_GET(self):
-        from urllib.parse import parse_qs, urlparse
+    def _is_safe_path(self, doc_path: str) -> bool:
+        full_path = (self.repo_root / doc_path).resolve()
+        return full_path.is_relative_to(self.repo_root)
 
+    def do_GET(self):
         parsed = urlparse(self.path)
         if parsed.path == "/" or parsed.path == "/index.html":
             self.send_response(200)
@@ -35,7 +42,10 @@ class PreviewHandler(http.server.SimpleHTTPRequestHandler):
             doc_path = params.get("path", [None])[0]
             commit = params.get("commit", [None])[0]
             if doc_path:
-                full_path = self.repo_root / doc_path
+                if not self._is_safe_path(doc_path):
+                    self.send_error(403, "Forbidden")
+                    return
+                full_path = (self.repo_root / doc_path).resolve()
                 if full_path.suffix == ".md":
                     if commit:
                         content = get_file_at_commit(self.repo_root, doc_path, commit)
@@ -86,14 +96,15 @@ class PreviewHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error(404)
 
     def do_POST(self):
-        from urllib.parse import parse_qs, urlparse
-
         parsed = urlparse(self.path)
         if parsed.path == "/doc":
             params = parse_qs(parsed.query)
             doc_path = params.get("path", [None])[0]
             if doc_path:
-                full_path = self.repo_root / doc_path
+                if not self._is_safe_path(doc_path):
+                    self.send_error(403, "Forbidden")
+                    return
+                full_path = (self.repo_root / doc_path).resolve()
                 if full_path.exists() and full_path.suffix == ".md":
                     content_length = int(self.headers.get("Content-Length", 0))
                     body = self.rfile.read(content_length).decode("utf-8")
@@ -123,16 +134,16 @@ def run(docs_path: Path, port: int = DEFAULT_PREVIEW_PORT) -> int:
     def handler(*args, **kwargs):
         return PreviewHandler(*args, html_content=html_content, repo_root=repo_root, docs_path=docs_path, **kwargs)
 
-    class ReuseAddrTCPServer(socketserver.TCPServer):
-        allow_reuse_address = True
-
     with ReuseAddrTCPServer(("", port), handler) as httpd:
         url = f"http://localhost:{port}"
         print(f"Serving docs preview at {url}")
         print("Press Ctrl+C to stop")
-        threading.Timer(0.5, lambda: webbrowser.open(url)).start()
+        timer = threading.Timer(0.5, lambda: webbrowser.open(url))
+        timer.start()
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
             print("\nStopped")
+        finally:
+            timer.cancel()
     return 0

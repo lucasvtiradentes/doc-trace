@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 from doctrace.commands.preview.tree import build_dependency_tree
 from doctrace.core.config import Config
@@ -9,7 +10,7 @@ from doctrace.core.config import Config
 TEMPLATE_PATH = Path(__file__).parent / "template.html"
 
 
-def build_graph_data(docs_path: Path, config: Config, repo_root: Path) -> dict:
+def build_graph_data(docs_path: Path, config: Config, repo_root: Path) -> dict[str, Any]:
     tree = build_dependency_tree(docs_path, config, repo_root)
     nodes = []
     edges = []
@@ -71,7 +72,7 @@ def build_graph_data(docs_path: Path, config: Config, repo_root: Path) -> dict:
     }
 
 
-def generate_html(graph_data: dict) -> str:
+def generate_html(graph_data: dict[str, Any]) -> str:
     template = TEMPLATE_PATH.read_text(encoding="utf-8")
     graph_json = json.dumps(graph_data)
     return template.replace('"__GRAPH_DATA__"', graph_json)

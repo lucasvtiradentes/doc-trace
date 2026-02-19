@@ -22,6 +22,6 @@ def search_docs(repo_root: Path, docs_path: Path, query: str) -> list[dict]:
                         if len(matches) >= 3:
                             break
                 results.append({"path": rel_path, "name": md_file.stem, "matches": matches})
-        except Exception:
+        except (OSError, UnicodeDecodeError):
             pass
     return results

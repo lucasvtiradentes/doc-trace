@@ -161,7 +161,7 @@ def get_file_history(repo_root: Path, file_path: str, limit: int = 20) -> list[d
                     }
                 )
         return commits
-    except Exception:
+    except (subprocess.SubprocessError, FileNotFoundError, OSError):
         return []
 
 
@@ -176,7 +176,7 @@ def get_file_at_commit(repo_root: Path, file_path: str, commit: str) -> str | No
         if result.returncode == 0:
             return result.stdout
         return None
-    except Exception:
+    except (subprocess.SubprocessError, FileNotFoundError, OSError):
         return None
 
 

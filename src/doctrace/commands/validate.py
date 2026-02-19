@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterator
 
-from doctrace.core.config import Config, find_repo_root
+from doctrace.core.config import Config, find_repo_root, load_config
 from doctrace.core.constants import MARKDOWN_GLOB
 from doctrace.core.parser import RefEntry, parse_doc
 
@@ -23,7 +23,7 @@ class ValidateResult:
 
     @property
     def ok(self) -> bool:
-        return len(self.errors) == 0
+        return not self.errors
 
 
 def validate_refs(docs_path: Path, config: Config, repo_root: Path | None = None) -> Iterator[ValidateResult]:
@@ -39,7 +39,7 @@ def _check_single_doc(doc_path: Path, repo_root: Path, config: Config) -> Valida
     result = ValidateResult(doc_path=doc_path)
     try:
         parsed = parse_doc(doc_path, config.metadata)
-    except Exception as e:
+    except (OSError, UnicodeDecodeError, ValueError) as e:
         result.errors.append(
             RefError(
                 doc_path=doc_path,
@@ -65,14 +65,11 @@ def _check_single_doc(doc_path: Path, repo_root: Path, config: Config) -> Valida
 
 def _glob_matches(pattern: str, repo_root: Path) -> bool:
     if "*" in pattern or "?" in pattern:
-        matches = list(repo_root.glob(pattern))
-        return len(matches) > 0
+        return any(repo_root.glob(pattern))
     return False
 
 
 def run(docs_path: Path) -> int:
-    from doctrace.core.config import load_config
-
     config = load_config()
     has_errors = False
     for result in validate_refs(docs_path, config):

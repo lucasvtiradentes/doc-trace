@@ -29,7 +29,7 @@ def _build_doc_dependencies(docs_path: Path, repo_root: Path, config: Config) ->
     for doc_file in doc_files:
         try:
             parsed = parse_doc(doc_file, config.metadata)
-        except Exception:
+        except (OSError, UnicodeDecodeError, ValueError):
             continue
         for ref in parsed.required_docs:
             ref_path = repo_root / ref.path

@@ -67,7 +67,7 @@ class Config:
         )
 
 
-def validate_config(data: dict[str, Any], config_path: Path | None = None) -> list[str]:
+def validate_config(data: dict[str, Any]) -> list[str]:
     errors = []
     valid_keys = {"metadata", "base"}
     for key in data:
@@ -99,10 +99,10 @@ def load_config(start_path: Path | None = None, validate: bool = True) -> Config
     config_path = find_config(start_path or Path.cwd())
     if config_path is None:
         return Config({})
-    with open(config_path) as f:
+    with open(config_path, encoding="utf-8") as f:
         data = json.load(f)
     if validate:
-        errors = validate_config(data, config_path)
+        errors = validate_config(data)
         if errors:
             raise ConfigError(f"{config_path}: {', '.join(errors)}")
     return Config(data)
@@ -129,7 +129,7 @@ def find_repo_root(start_path: Path) -> Path:
 
 def save_config(config: Config, repo_root: Path) -> Path:
     config_path = repo_root / CONFIG_FILENAME
-    with open(config_path, "w") as f:
+    with open(config_path, "w", encoding="utf-8") as f:
         json.dump(config.to_dict(), f, indent=2)
     return config_path
 
@@ -153,6 +153,6 @@ def update_base(repo_root: Path) -> tuple[Path, Base]:
 
 def init_config(target_dir: Path) -> Path:
     config_path = target_dir / CONFIG_FILENAME
-    with open(config_path, "w") as f:
+    with open(config_path, "w", encoding="utf-8") as f:
         json.dump({}, f, indent=2)
     return config_path
