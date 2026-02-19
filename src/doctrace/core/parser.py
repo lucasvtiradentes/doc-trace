@@ -28,7 +28,7 @@ def parse_doc(filepath: Path, metadata_config: MetadataConfig | None = None) -> 
     if metadata_config is None:
         metadata_config = MetadataConfig({})
 
-    content = filepath.read_text()
+    content = filepath.read_text(encoding="utf-8")
     lines = content.splitlines()
     metadata_lines = _get_frontmatter_section(lines)
 

@@ -364,7 +364,7 @@ def run(
     result = _find_affected_docs_for_changes(docs_path, changed_files, config, repo_root)
 
     if not result.affected_docs:
-        data: dict[str, Any] = {"direct_hits": [], "indirect_hits": [], "phases": []}
+        data: dict[str, Any] = {"direct_hits": [], "indirect_hits": [], "phases": {}}
         if verbose:
             git_data = _build_git_data(changed_files_detailed, result, commit_ref, repo_root)
             data["git"] = git_data

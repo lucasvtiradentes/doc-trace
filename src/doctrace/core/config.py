@@ -108,22 +108,24 @@ def load_config(start_path: Path | None = None, validate: bool = True) -> Config
     return Config(data)
 
 
-def find_config(start_path: Path) -> Path | None:
+def _walk_up_find(start_path: Path, target: str) -> Path | None:
     current = start_path.resolve()
     while current != current.parent:
-        config_path = current / CONFIG_FILENAME
-        if config_path.exists():
-            return config_path
+        candidate = current / target
+        if candidate.exists():
+            return candidate
         current = current.parent
     return None
 
 
+def find_config(start_path: Path) -> Path | None:
+    return _walk_up_find(start_path, CONFIG_FILENAME)
+
+
 def find_repo_root(start_path: Path) -> Path:
-    current = start_path.resolve()
-    while current != current.parent:
-        if (current / GIT_DIR).exists():
-            return current
-        current = current.parent
+    git_dir = _walk_up_find(start_path, GIT_DIR)
+    if git_dir:
+        return git_dir.parent
     return start_path.resolve()
 
 

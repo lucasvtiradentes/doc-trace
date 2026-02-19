@@ -10,7 +10,3 @@ DEFAULT_METADATA = {
     "related_docs_key": "related_docs",
     "sources_key": "sources",
 }
-
-DEFAULT_CONFIG = {
-    "metadata": DEFAULT_METADATA,
-}

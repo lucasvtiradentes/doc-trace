@@ -71,6 +71,9 @@ class PreviewHandler(http.server.SimpleHTTPRequestHandler):
             params = parse_qs(parsed.query)
             doc_path = params.get("path", [None])[0]
             if doc_path:
+                if not self._is_safe_path(doc_path):
+                    self.send_error(403, "Forbidden")
+                    return
                 history = get_file_history(self.repo_root, doc_path)
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")

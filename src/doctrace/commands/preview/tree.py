@@ -35,8 +35,7 @@ def _build_doc_dependencies(docs_path: Path, repo_root: Path, config: Config) ->
             ref_path = repo_root / ref.path
             if ref_path.exists():
                 doc_deps[doc_file].append(ref_path)
-        if doc_file not in doc_deps:
-            doc_deps[doc_file] = []
+        doc_deps.setdefault(doc_file, [])
     return dict(doc_deps)
 
 
