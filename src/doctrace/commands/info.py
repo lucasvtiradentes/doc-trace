@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator
+from typing import Any, Iterator
 
 from doctrace.core.config import Config, find_repo_root, load_config
 from doctrace.core.docs import build_dependency_tree
@@ -56,25 +57,61 @@ def _glob_matches(pattern: str, repo_root: Path) -> bool:
     return False
 
 
-def run(docs_path: Path) -> int:
+def _build_data(tree, errors: list[tuple[Path, RefError]], repo_root: Path) -> dict[str, Any]:
+    phases: dict[str, list[str]] = {}
+    for i, level_docs in enumerate(tree.levels):
+        if not level_docs:
+            continue
+        label = "independent" if i == 0 else str(i)
+        phases[label] = [str(doc.relative_to(repo_root)) for doc in sorted(level_docs)]
+
+    data: dict[str, Any] = {"phases": phases}
+
+    if tree.circular:
+        data["circular_refs"] = [
+            [str(a.relative_to(repo_root)), str(b.relative_to(repo_root))]
+            for a, b in tree.circular
+        ]
+
+    if errors:
+        data["warnings"] = [
+            {
+                "doc": str(doc_path.relative_to(repo_root)),
+                "line": error.ref.line_number,
+                "message": error.message,
+            }
+            for doc_path, error in errors
+        ]
+
+    return data
+
+
+def _print_from_data(data: dict[str, Any]) -> None:
+    if data.get("circular_refs"):
+        print("Circular refs:")
+        for pair in data["circular_refs"]:
+            print(f"  {pair[0]} <-> {pair[1]}")
+        print()
+
+    for label, docs in data["phases"].items():
+        phase_label = "Independent" if label == "independent" else f"Phase {label}"
+        print(f"{phase_label} ({len(docs)}):")
+        for doc in docs:
+            print(f"  {doc}")
+
+    warnings = data.get("warnings", [])
+    if warnings:
+        print()
+        print(f"Warnings ({len(warnings)}):")
+        for w in warnings:
+            print(f"  {w['doc']}:{w['line']}: {w['message']}")
+
+
+def run(docs_path: Path, output_json: bool = False) -> int:
     config = load_config()
     repo_root = find_repo_root(docs_path)
     docs_path = docs_path.resolve()
     tree = build_dependency_tree(docs_path, config, repo_root)
-
-    if tree.circular:
-        print("Circular refs:")
-        for a, b in tree.circular:
-            print(f"  {a.relative_to(repo_root)} <-> {b.relative_to(repo_root)}")
-        print()
-
-    for i, level_docs in enumerate(tree.levels):
-        if not level_docs:
-            continue
-        label = "Independent" if i == 0 else f"Phase {i}"
-        print(f"{label} ({len(level_docs)}):")
-        for doc in sorted(level_docs):
-            print(f"  {doc.relative_to(repo_root)}")
 
     errors: list[tuple[Path, RefError]] = []
     for doc_path in tree.index.parsed_cache.keys():
@@ -82,11 +119,11 @@ def run(docs_path: Path) -> int:
         for error in result.errors:
             errors.append((doc_path, error))
 
-    if errors:
-        print()
-        print(f"Warnings ({len(errors)}):")
-        for doc_path, error in errors:
-            print(f"  {doc_path.relative_to(repo_root)}:{error.ref.line_number}: {error.message}")
-        return 1
+    data = _build_data(tree, errors, repo_root)
 
-    return 0
+    if output_json:
+        print(json.dumps(data, indent=2))
+    else:
+        _print_from_data(data)
+
+    return 1 if data.get("warnings") else 0

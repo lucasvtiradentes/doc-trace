@@ -16,6 +16,7 @@ def main():
 
     info_parser = subparsers.add_parser("info", help="show docs phases and warnings")
     info_parser.add_argument("path", type=Path, help="docs directory")
+    info_parser.add_argument("--json", action="store_true", help="output as JSON")
 
     affected_parser = subparsers.add_parser("affected", help="list docs affected by git diff")
     affected_parser.add_argument("path", type=Path, help="docs directory")
@@ -45,7 +46,7 @@ def main():
         sys.exit(0)
 
     if args.command == "info":
-        sys.exit(info.run(args.path))
+        sys.exit(info.run(args.path, args.json))
     elif args.command == "affected":
         sys.exit(
             affected.run(
