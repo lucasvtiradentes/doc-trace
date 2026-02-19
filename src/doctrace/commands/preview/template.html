@@ -58,10 +58,6 @@
         .doc-empty svg { width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5; }
         .doc-empty p { font-size: 14px; }
         .graph-wrapper.hidden { display: none; }
-        .doc-path { font-size: 12px; color: #94a3b8; padding: 8px 12px; background: #f8fafc; border-radius: 6px; font-family: 'SF Mono', Monaco, monospace; }
-        .doc-stats { display: flex; gap: 16px; margin-bottom: 24px; font-size: 12px; color: #64748b; }
-        .doc-stat { display: flex; align-items: center; gap: 4px; }
-        .doc-stat-label { color: #94a3b8; }
         .doc-content { line-height: 1.7; }
         .doc-content h1 { font-size: 32px; font-weight: 700; margin-bottom: 16px; color: #1e293b; }
         .doc-content h2 { font-size: 24px; font-weight: 600; margin-top: 40px; margin-bottom: 16px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
@@ -77,11 +73,20 @@
         .doc-content th { background: #f8fafc; font-weight: 600; color: #1e293b; }
         .doc-content a { color: #3b82f6; text-decoration: none; }
         .doc-content a:hover { text-decoration: underline; }
+        .doc-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
+        .doc-hero-content { flex: 1; min-width: 0; }
+        .doc-title { font-size: 28px; font-weight: 700; color: #1e293b; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .doc-version-tag { font-size: 12px; font-weight: 500; color: #8b5cf6; background: #f3e8ff; padding: 4px 8px; border-radius: 4px; }
+        .doc-desc { font-size: 15px; color: #64748b; margin-bottom: 12px; line-height: 1.5; }
+        .doc-breadcrumb { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; font-size: 12px; color: #94a3b8; }
+        .doc-refs { margin-top: 12px; }
+        .doc-refs-label { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 4px; }
+        .doc-refs-list { list-style: none; padding: 0; margin: 0; font-size: 12px; font-family: 'SF Mono', Monaco, monospace; color: #64748b; }
+        .doc-refs-list li { padding: 2px 0; }
+        .doc-refs-list li::before { content: '→ '; color: #94a3b8; }
+        .doc-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .node { cursor: pointer; transition: opacity 0.2s; }
         .flowchart-link { transition: opacity 0.2s; }
-        .doc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-        .doc-header .doc-path { margin-bottom: 0; flex: 1; }
-        .doc-actions { display: flex; gap: 8px; margin-left: 16px; }
         .doc-btn { padding: 6px 12px; font-size: 12px; font-weight: 500; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
         .doc-btn svg { width: 14px; height: 14px; }
         .doc-btn-edit { color: #3b82f6; background: #eff6ff; }
@@ -351,8 +356,7 @@
                     }
                 }
                 renderDocView(path, md);
-                const node = graphData.nodes.find(n => n.path === path);
-                document.getElementById('page-title').textContent = node ? node.name : path.split('/').pop();
+                document.getElementById('page-title').textContent = path;
             } catch (e) {
                 container.innerHTML = '<div style="color:#ef4444;text-align:center;padding:40px">Failed to load document</div>';
             }
@@ -360,7 +364,8 @@
 
         function renderDocView(path, md) {
             const container = document.getElementById('doc-container');
-            const html = marked.parse(md);
+            const { content, meta } = parseFrontmatter(md);
+            const html = marked.parse(content);
             const isOldVersion = currentCommit !== null;
             const lineCount = md.split('\n').length;
             const versions = docHistory.length;
@@ -375,9 +380,25 @@
                     diffSummary = generateDiffSummary(previousContent, md);
                 }
             }
+            const title = meta?.title || path.split('/').pop().replace(/\.md$/, '');
+            const description = meta?.description || '';
+            function renderMetaList(label, items) {
+                if (!items || !Array.isArray(items) || items.length === 0) return '';
+                return '<div class="doc-refs"><span class="doc-refs-label">' + label + '</span><ul class="doc-refs-list">' + items.map(s => '<li>' + escapeHtml(s) + '</li>').join('') + '</ul></div>';
+            }
+            const refsHtml = renderMetaList('Sources', meta?.sources) + renderMetaList('Related', meta?.related_docs) + renderMetaList('Required', meta?.required_docs);
             container.innerHTML = `
-                <div class="doc-header">
-                    <div class="doc-path">${path}${isOldVersion ? ' @ ' + currentCommit.substring(0, 7) : ''}</div>
+                <div class="doc-breadcrumb">
+                    <span class="doc-breadcrumb-stats">${versions} versions</span>
+                    <span class="doc-breadcrumb-stats">updated ${lastUpdated}</span>
+                    <span class="doc-breadcrumb-stats">${lineCount} lines</span>
+                </div>
+                <div class="doc-hero">
+                    <div class="doc-hero-content">
+                        <h1 class="doc-title">${escapeHtml(title)}${isOldVersion ? '<span class="doc-version-tag">@ ' + currentCommit.substring(0, 7) + '</span>' : ''}</h1>
+                        ${description ? '<p class="doc-desc">' + escapeHtml(description) + '</p>' : ''}
+                        ${refsHtml}
+                    </div>
                     <div class="doc-actions">
                         ${isOldVersion ? `
                             <button class="doc-btn doc-btn-cancel" onclick="loadCurrentVersion()">
@@ -395,12 +416,6 @@
                             </button>
                         `}
                     </div>
-                </div>
-                <div class="doc-stats">
-                    <span class="doc-stat"><span class="doc-stat-label">versions:</span> ${versions}</span>
-                    <span class="doc-stat"><span class="doc-stat-label">updated:</span> ${lastUpdated}</span>
-                    <span class="doc-stat"><span class="doc-stat-label">created:</span> ${createdAt}</span>
-                    <span class="doc-stat"><span class="doc-stat-label">lines:</span> ${lineCount}</span>
                 </div>
                 <div class="doc-view">
                     ${diffSummary ? '<div class="doc-diff-summary">' + diffSummary + '</div>' : ''}
@@ -555,6 +570,34 @@
             return div.innerHTML;
         }
 
+        function parseFrontmatter(md) {
+            if (!md.startsWith('---')) return { content: md, meta: null };
+            const endIndex = md.indexOf('\n---', 3);
+            if (endIndex === -1) return { content: md, meta: null };
+            const yamlBlock = md.slice(4, endIndex);
+            const content = md.slice(endIndex + 4).trimStart();
+            const meta = {};
+            let currentKey = null;
+            let currentList = null;
+            yamlBlock.split('\n').forEach(line => {
+                const keyMatch = line.match(/^(\w+):\s*(.*)$/);
+                if (keyMatch) {
+                    currentKey = keyMatch[1];
+                    const value = keyMatch[2].trim();
+                    if (value) {
+                        meta[currentKey] = value;
+                        currentList = null;
+                    } else {
+                        meta[currentKey] = [];
+                        currentList = meta[currentKey];
+                    }
+                } else if (currentList && line.match(/^\s+-\s+(.+)$/)) {
+                    currentList.push(line.match(/^\s+-\s+(.+)$/)[1]);
+                }
+            });
+            return { content, meta };
+        }
+
         async function toggleEditMode() {
             if (isEditing) {
                 const editor = document.getElementById('doc-editor');
@@ -605,7 +648,7 @@
                 });
                 if (!res.ok) throw new Error('Failed to save');
                 originalContent = newContent;
-                const html = marked.parse(newContent);
+                const html = marked.parse(parseFrontmatter(newContent).content);
                 document.querySelector('.doc-content').innerHTML = html;
                 exitEditMode();
             } catch (e) {
