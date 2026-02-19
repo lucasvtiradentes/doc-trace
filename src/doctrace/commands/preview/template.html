@@ -36,6 +36,11 @@
         .tree-children { display: block; }
         .tree-children.collapsed { display: none; }
         .tree-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .tree-filter-btn { width: 20px; height: 20px; padding: 2px; background: none; border: none; border-radius: 4px; cursor: pointer; color: #94a3b8; opacity: 0; transition: all 0.15s; flex-shrink: 0; margin-left: auto; }
+        .tree-item.folder:hover .tree-filter-btn { opacity: 1; }
+        .tree-filter-btn:hover { background: #e2e8f0; color: #3b82f6; }
+        .tree-filter-btn.active { opacity: 1; color: #3b82f6; background: #dbeafe; }
+        .tree-filter-btn svg { width: 14px; height: 14px; display: block; }
         .level-item { padding: 8px 12px 8px 24px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; }
         .level-item:hover { background: #f1f5f9; }
         .level-item.active { background: #dbeafe; }
@@ -242,6 +247,7 @@
         let currentListView = 'tree';
         let currentMainView = 'diagram';
         let autoSelectedDoc = false;
+        let currentFolderFilter = null;
 
         function switchListView(view) {
             currentListView = view;
@@ -632,7 +638,7 @@
                     current = current[part];
                 });
             });
-            function renderTree(obj, depth = 0) {
+            function renderTree(obj, depth = 0, parentPath = '') {
                 const fragment = document.createDocumentFragment();
                 const entries = Object.entries(obj).filter(([k]) => k !== '__file').sort((a, b) => {
                     const aIsFile = !!a[1].__file;
@@ -642,6 +648,7 @@
                 });
                 entries.forEach(([name, value]) => {
                     const isFile = !!value.__file;
+                    const currentPath = parentPath ? parentPath + '/' + name : name;
                     const item = document.createElement('div');
                     item.className = 'tree-item' + (isFile ? '' : ' folder');
                     if (isFile) item.dataset.path = value.__file.path;
@@ -651,7 +658,8 @@
                     const icon = isFile
                         ? '<svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>'
                         : '<svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
-                    item.innerHTML = indent + (isFile ? '' : chevron) + icon + '<span class="tree-name">' + name + '</span>';
+                    const filterBtn = (isFile || depth === 0) ? '' : '<button class="tree-filter-btn" data-folder="' + currentPath + '" title="Filter graph by folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>';
+                    item.innerHTML = indent + (isFile ? '' : chevron) + icon + '<span class="tree-name">' + name + '</span>' + filterBtn;
                     if (isFile) {
                         item.addEventListener('click', () => selectDoc(value.__file.path));
                     }
@@ -659,9 +667,17 @@
                     if (!isFile) {
                         const children = document.createElement('div');
                         children.className = 'tree-children';
-                        children.appendChild(renderTree(value, depth + 1));
+                        children.appendChild(renderTree(value, depth + 1, currentPath));
                         fragment.appendChild(children);
-                        item.addEventListener('click', () => {
+                        const filterBtnEl = item.querySelector('.tree-filter-btn');
+                        if (filterBtnEl) {
+                            filterBtnEl.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                filterByFolder(currentPath);
+                            });
+                        }
+                        item.addEventListener('click', (e) => {
+                            if (e.target.closest('.tree-filter-btn')) return;
                             item.classList.toggle('collapsed');
                             children.classList.toggle('collapsed');
                         });
@@ -868,6 +884,47 @@
             });
             edgeElements.forEach(el => el.style.opacity = '1');
             document.querySelectorAll('.edgeLabel').forEach(el => el.style.opacity = '1');
+        }
+
+        function filterByFolder(folderPath) {
+            if (currentFolderFilter === folderPath) {
+                currentFolderFilter = null;
+                document.querySelectorAll('.tree-filter-btn').forEach(btn => btn.classList.remove('active'));
+                resetHighlight();
+                return;
+            }
+            currentFolderFilter = folderPath;
+            selectedNode = null;
+            document.querySelectorAll('.tree-filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.folder === folderPath);
+            });
+            const folderNodes = new Set();
+            graphData.nodes.forEach(n => {
+                if (n.path.startsWith(folderPath + '/') || n.path === folderPath) {
+                    folderNodes.add(n.id);
+                }
+            });
+            const folderEdgeIndices = new Set();
+            graphData.edges.forEach((e, i) => {
+                if (folderNodes.has(e.from) && folderNodes.has(e.to)) {
+                    folderEdgeIndices.add(i);
+                }
+            });
+            document.querySelectorAll('.node').forEach(el => {
+                const id = el.id.split('-')[1];
+                el.style.opacity = folderNodes.has(id) ? '1' : '0.06';
+                const rect = el.querySelector('rect, polygon, circle, ellipse');
+                if (rect) {
+                    rect.style.stroke = '';
+                    rect.style.strokeWidth = '';
+                }
+            });
+            edgeElements.forEach((el, i) => {
+                el.style.opacity = folderEdgeIndices.has(i) ? '1' : '0';
+            });
+            document.querySelectorAll('.edgeLabel').forEach(el => {
+                el.style.opacity = '0';
+            });
         }
 
         mermaid.initialize({
