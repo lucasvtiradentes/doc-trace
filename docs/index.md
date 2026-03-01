@@ -16,6 +16,7 @@
 |           | docs/features/validation.md     | Validates that all doc references point to existing files   |     0     |     1     |    2    |
 |-----------|---------------------------------|-------------------------------------------------------------|-----------|-----------|---------|
 | guides    | docs/guides/add-doc-metadata.md | Guide to adding metadata sections to documentation files    |     0     |     1     |    1    |
+|           | docs/guides/create-release.md   | How to create and publish a new version to PyPI             |     1     |     0     |    4    |
 |           | docs/guides/setup-project.md    | Guide to setting up doctrace development environment        |     1     |     0     |    2    |
 |           | docs/guides/validate-docs.md    | Guide to validating documentation references                |     0     |     1     |    1    |
 |-----------|---------------------------------|-------------------------------------------------------------|-----------|-----------|---------|

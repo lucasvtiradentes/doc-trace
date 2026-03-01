@@ -59,7 +59,6 @@ compdef _{APP_NAME} {aliases_str}
 def _get_bash_completion() -> str:
     cmd_names = " ".join(COMMANDS.keys())
     complete_lines = "\n".join(f"complete -F _{APP_NAME} {alias}" for alias in CLI_ALIASES)
-    case_aliases = "|".join(CLI_ALIASES)
 
     case_blocks = []
     for name, info in COMMANDS.items():
@@ -140,7 +139,9 @@ def _get_fish_completion() -> str:
 
         if is_dir_cmd:
             for a in CLI_ALIASES:
-                lines.append(f'complete -c {a} -n "__fish_seen_subcommand_from {name}" -a "(__fish_complete_directories)"')
+                lines.append(
+                    f'complete -c {a} -n "__fish_seen_subcommand_from {name}" -a "(__fish_complete_directories)"'
+                )
 
     return "\n".join(lines) + "\n"
 

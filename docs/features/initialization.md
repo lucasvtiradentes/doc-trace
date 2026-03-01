@@ -3,7 +3,6 @@ title: Initialization
 description: Creates the doctrace.json configuration file
 related_docs:
   - docs/concepts.md: Config type
-  - docs/guides/setup-project.md: project setup guide
 sources:
   - src/doctrace/commands/init.py: init command
   - src/doctrace/core/config.py: init_config function
