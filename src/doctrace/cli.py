@@ -3,7 +3,7 @@ import sys
 from importlib.metadata import version
 from pathlib import Path
 
-from doctrace.commands import affected, base, index, info, init, preview
+from doctrace.commands import affected, base, completion, index, info, init, preview
 from doctrace.core.constants import DEFAULT_PREVIEW_PORT
 
 VERSION = version("doctrace")
@@ -43,6 +43,9 @@ def main():
     index_parser.add_argument("path", type=Path, help="docs directory")
     index_parser.add_argument("-o", "--output", type=Path, required=True, help="output file")
 
+    completion_parser = subparsers.add_parser("completion", help="generate shell completion")
+    completion_parser.add_argument("shell", nargs="?", help="shell type (zsh, bash, fish)")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -74,6 +77,8 @@ def main():
         sys.exit(init.run())
     elif args.command == "index":
         sys.exit(index.run(args.path, args.output))
+    elif args.command == "completion":
+        sys.exit(completion.run(args.shell))
 
 
 if __name__ == "__main__":
