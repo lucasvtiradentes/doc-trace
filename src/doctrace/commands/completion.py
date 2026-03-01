@@ -1,49 +1,49 @@
 from __future__ import annotations
 
+from doctrace.cmd_registry import COMMANDS, DIR_COMMANDS
 from doctrace.core.constants import APP_NAME, CLI_ALIASES
-
-COMMANDS = {
-    "info": "show docs phases and warnings",
-    "affected": "list docs affected by git diff",
-    "preview": "interactive docs explorer in browser",
-    "base": "manage base commit state",
-    "init": "create doctrace.json",
-    "index": "generate index.md from frontmatter",
-    "completion": "generate shell completion",
-}
-
-DIR_COMMANDS = [c for c in COMMANDS if c not in ("base", "init", "completion")]
 
 
 def _get_zsh_completion() -> str:
-    cmd_lines = "\n        ".join(f"'{name}:{desc}'" for name, desc in COMMANDS.items())
+    cmd_lines = "\n        ".join(f"'{name}:{info['desc']}'" for name, info in COMMANDS.items())
     aliases_str = " ".join(CLI_ALIASES)
+
+    case_blocks = []
+    for name, info in COMMANDS.items():
+        flags = info["flags"]
+        subcommands = info["subcommands"]
+        is_dir_cmd = name in DIR_COMMANDS
+
+        conditions = []
+        if subcommands:
+            subs = " ".join(f"'{s}'" for s in subcommands)
+            conditions.append(f"(( CURRENT == 3 )) && _values 'subcommand' {subs}")
+        if is_dir_cmd:
+            conditions.append("(( CURRENT == 3 )) && _files -/")
+        if flags:
+            flags_str = " ".join(f"'{f}'" for f in flags)
+            conditions.append(f'[[ "$cur" == -* ]] && _values "flag" {flags_str}')
+        if is_dir_cmd and flags:
+            conditions.append("(( CURRENT > 3 )) && _files -/")
+
+        if conditions:
+            body = "\n            ".join(conditions)
+            case_blocks.append(f"        {name})\n            {body}\n            ;;")
+
+    cases_str = "\n".join(case_blocks)
 
     return f"""#compdef {APP_NAME}
 
 _{APP_NAME}() {{
     local -a commands
+    local cur="${{words[CURRENT]}}"
 
     commands=(
         {cmd_lines}
     )
 
     case "$words[2]" in
-        base)
-            if (( CURRENT == 3 )); then
-                _values 'subcommand' 'update' 'show'
-            fi
-            ;;
-        completion)
-            if (( CURRENT == 3 )); then
-                _values 'shell' 'zsh' 'bash' 'fish'
-            fi
-            ;;
-        {"|".join(DIR_COMMANDS)})
-            if (( CURRENT == 3 )); then
-                _files -/
-            fi
-            ;;
+{cases_str}
         *)
             if (( CURRENT == 2 )); then
                 _describe -t commands 'command' commands
@@ -61,30 +61,50 @@ def _get_bash_completion() -> str:
     complete_lines = "\n".join(f"complete -F _{APP_NAME} {alias}" for alias in CLI_ALIASES)
     case_aliases = "|".join(CLI_ALIASES)
 
+    case_blocks = []
+    for name, info in COMMANDS.items():
+        flags = info["flags"]
+        subcommands = info["subcommands"]
+        is_dir_cmd = name in DIR_COMMANDS
+
+        if subcommands:
+            subs_str = " ".join(subcommands)
+            case_blocks.append(f'''        {name})
+            if [[ "$cur" == -* ]]; then
+                COMPREPLY=( $(compgen -W "{" ".join(flags)}" -- "$cur") )
+            else
+                COMPREPLY=( $(compgen -W "{subs_str}" -- "$cur") )
+            fi
+            return 0
+            ;;''')
+        elif is_dir_cmd:
+            flags_str = " ".join(flags) if flags else ""
+            case_blocks.append(f'''        {name})
+            if [[ "$cur" == -* ]]; then
+                COMPREPLY=( $(compgen -W "{flags_str}" -- "$cur") )
+            else
+                COMPREPLY=( $(compgen -d -- "$cur") )
+            fi
+            return 0
+            ;;''')
+
+    cases_str = "\n".join(case_blocks)
+
     return f'''_{APP_NAME}() {{
-    local cur prev commands
-    COMPREPLY=()
+    local cur prev words cword
+    _init_completion || return
+
     cur="${{COMP_WORDS[COMP_CWORD]}}"
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
-    commands="{cmd_names}"
+    local cmd="${{COMP_WORDS[1]}}"
 
-    case "$prev" in
-        base)
-            COMPREPLY=( $(compgen -W "update show" -- "$cur") )
-            return 0
-            ;;
-        completion)
-            COMPREPLY=( $(compgen -W "zsh bash fish" -- "$cur") )
-            return 0
-            ;;
-        {"|".join(DIR_COMMANDS)})
-            COMPREPLY=( $(compgen -d -- "$cur") )
-            return 0
-            ;;
-        {case_aliases})
-            COMPREPLY=( $(compgen -W "$commands" -- "$cur") )
-            return 0
-            ;;
+    if [[ $COMP_CWORD -eq 1 ]]; then
+        COMPREPLY=( $(compgen -W "{cmd_names}" -- "$cur") )
+        return 0
+    fi
+
+    case "$cmd" in
+{cases_str}
     esac
 }}
 
@@ -93,34 +113,36 @@ def _get_bash_completion() -> str:
 
 
 def _get_fish_completion() -> str:
-    cmd_lines = "\n".join(
-        "\n".join(f'complete -c {a} -n "__fish_use_subcommand" -a {name} -d "{desc}"' for a in CLI_ALIASES)
-        for name, desc in COMMANDS.items()
-    )
+    lines = []
 
-    init_lines = "\n".join(f"complete -c {a} -f" for a in CLI_ALIASES)
-    completion_lines = "\n".join(
-        f'complete -c {a} -n "__fish_seen_subcommand_from completion" -a "zsh bash fish"' for a in CLI_ALIASES
-    )
-    base_lines = "\n".join(
-        f'complete -c {a} -n "__fish_seen_subcommand_from base" -a "update show"' for a in CLI_ALIASES
-    )
-    dir_cmds_str = " ".join(DIR_COMMANDS)
-    dir_lines = "\n".join(
-        f'complete -c {a} -n "__fish_seen_subcommand_from {dir_cmds_str}" -a "(__fish_complete_directories)"'
-        for a in CLI_ALIASES
-    )
+    for a in CLI_ALIASES:
+        lines.append(f"complete -c {a} -f")
 
-    return f"""{init_lines}
+    for name, info in COMMANDS.items():
+        for a in CLI_ALIASES:
+            lines.append(f'complete -c {a} -n "__fish_use_subcommand" -a {name} -d "{info["desc"]}"')
 
-{cmd_lines}
+    for name, info in COMMANDS.items():
+        subcommands = info["subcommands"]
+        flags = info["flags"]
+        is_dir_cmd = name in DIR_COMMANDS
 
-{completion_lines}
+        for sub in subcommands:
+            for a in CLI_ALIASES:
+                lines.append(f'complete -c {a} -n "__fish_seen_subcommand_from {name}" -a "{sub}"')
 
-{base_lines}
+        for flag in flags:
+            for a in CLI_ALIASES:
+                if flag.startswith("--"):
+                    lines.append(f'complete -c {a} -n "__fish_seen_subcommand_from {name}" -l {flag[2:]}')
+                elif flag.startswith("-") and len(flag) == 2:
+                    lines.append(f'complete -c {a} -n "__fish_seen_subcommand_from {name}" -s {flag[1:]}')
 
-{dir_lines}
-"""
+        if is_dir_cmd:
+            for a in CLI_ALIASES:
+                lines.append(f'complete -c {a} -n "__fish_seen_subcommand_from {name}" -a "(__fish_complete_directories)"')
+
+    return "\n".join(lines) + "\n"
 
 
 def run(shell: str | None) -> int:
