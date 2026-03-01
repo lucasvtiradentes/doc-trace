@@ -1,4 +1,5 @@
 APP_NAME = "doctrace"
+CLI_ALIASES = [APP_NAME]
 CONFIG_FILENAME = "doctrace.json"
 GIT_DIR = ".git"
 

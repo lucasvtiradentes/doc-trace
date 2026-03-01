@@ -78,10 +78,12 @@ The propagation: if `bookings.md` might be outdated, then `payments.md` (which r
 
 ## Features
 
-- info     - shows doc phases and validates refs
-- affected - finds docs affected by code changes (with dependency ordering)
-- preview  - interactive docs explorer in browser
-- base     - manages base commit for incremental analysis
+- info       - shows doc phases and validates refs
+- affected   - finds docs affected by code changes (with dependency ordering)
+- preview    - interactive docs explorer in browser
+- base       - manages base commit for incremental analysis
+- index      - generates index.md from frontmatter metadata
+- completion - generates shell completion scripts (zsh/bash/fish)
 
 ## Motivation
 
@@ -187,6 +189,8 @@ doctrace preview docs/                      # interactive explorer in browser
 | `doctrace base update`                           | save current commit as base          |
 | `doctrace base show`                             | show base state                      |
 | `doctrace init`                                  | create doctrace.json                 |
+| `doctrace index <path> -o <file>`                | generate index.md from frontmatter   |
+| `doctrace completion <shell>`                    | generate shell completion script     |
 | `doctrace --version`                             | show version                         |
 
 </div>

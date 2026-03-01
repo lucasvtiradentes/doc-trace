@@ -38,10 +38,12 @@ CLI tool that keeps documentation in sync with code changes.
 
 ## Commands
 
-| Command  | Description                          |
-|----------|:-------------------------------------|
-| info     | show phases + validate all doc refs  |
-| affected | list docs affected by git diff       |
-| preview  | interactive docs explorer in browser |
-| base     | manage base commit state             |
-| init     | create doctrace.json config file     |
+| Command    | Description                          |
+|------------|:-------------------------------------|
+| info       | show phases + validate all doc refs  |
+| affected   | list docs affected by git diff       |
+| preview    | interactive docs explorer in browser |
+| base       | manage base commit state             |
+| init       | create doctrace.json config file     |
+| index      | generate index.md from frontmatter   |
+| completion | generate shell completion scripts    |

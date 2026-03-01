@@ -23,6 +23,11 @@ class ParsedDoc(NamedTuple):
     required_docs: list[RefEntry]
     related_docs: list[RefEntry]
     sources: list[RefEntry]
+    title: str
+    description: str
+
+
+SCALAR_FIELD = re.compile(r"^(\w+):\s*(.+)$")
 
 
 def parse_doc(filepath: Path, metadata_config: MetadataConfig | None = None) -> ParsedDoc:
@@ -42,7 +47,14 @@ def parse_doc(filepath: Path, metadata_config: MetadataConfig | None = None) -> 
     required_docs = _extract_section(metadata_lines, required_docs_pattern)
     related_docs = _extract_section(metadata_lines, related_docs_pattern)
     sources = _extract_section(metadata_lines, sources_pattern)
-    return ParsedDoc(required_docs=required_docs, related_docs=related_docs, sources=sources)
+    title, description = _extract_scalars(metadata_lines)
+    return ParsedDoc(
+        required_docs=required_docs,
+        related_docs=related_docs,
+        sources=sources,
+        title=title,
+        description=description,
+    )
 
 
 def _get_frontmatter_section(lines: list[str]) -> list[tuple[int, str]]:
@@ -77,6 +89,23 @@ def _extract_section(lines: list[tuple[int, str]], header_pattern: re.Pattern) -
             else:
                 break
     return entries
+
+
+def _extract_scalars(lines: list[tuple[int, str]]) -> tuple[str, str]:
+    title = ""
+    description = ""
+    for _, line in lines:
+        match = SCALAR_FIELD.match(line)
+        if match:
+            key = match.group(1).lower()
+            value = match.group(2).strip()
+            if key == "title":
+                title = value
+            elif key == "description":
+                description = value
+            if title and description:
+                break
+    return title, description
 
 
 class DocIndex(NamedTuple):
