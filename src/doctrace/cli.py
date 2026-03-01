@@ -3,7 +3,7 @@ import sys
 from importlib.metadata import version
 from pathlib import Path
 
-from doctrace.commands import affected, base, info, init, preview
+from doctrace.commands import affected, base, index, info, init, preview
 from doctrace.core.constants import DEFAULT_PREVIEW_PORT
 
 VERSION = version("doctrace")
@@ -39,6 +39,10 @@ def main():
 
     subparsers.add_parser("init", help="create doctrace.json")
 
+    index_parser = subparsers.add_parser("index", help="generate index.md from frontmatter")
+    index_parser.add_argument("path", type=Path, help="docs directory")
+    index_parser.add_argument("-o", "--output", type=Path, required=True, help="output file")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -68,6 +72,8 @@ def main():
             sys.exit(base.run_show())
     elif args.command == "init":
         sys.exit(init.run())
+    elif args.command == "index":
+        sys.exit(index.run(args.path, args.output))
 
 
 if __name__ == "__main__":
