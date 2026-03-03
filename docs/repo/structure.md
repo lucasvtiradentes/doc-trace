@@ -29,7 +29,8 @@ doc-trace/
 │   └── core/              ← shared logic
 │       ├── __init__.py
 │       ├── docs.py        ← doc parsing + indexing
-│       ├── config.py      ← config loading/validation + base state
+│       ├── config.py      ← config loading/validation
+│       ├── filtering.py   ← fnmatch-based ignore filtering
 │       ├── git.py         ← git operations
 │       └── constants.py   ← shared constants
 ├── tests/                 ← pytest test suite
@@ -66,6 +67,7 @@ Each file implements one CLI subcommand. All follow the same pattern:
 Shared modules used across commands:
 - `docs.py`      - doc parsing, indexing, dependency tree
 - `config.py`    - loads and validates doctrace.json
+- `filtering.py` - fnmatch-based ignore filtering
 - `git.py`       - git operations, change detection
 - `constants.py` - file/dir names, default values
 

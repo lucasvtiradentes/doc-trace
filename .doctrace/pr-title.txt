@@ -1,0 +1,1 @@
+docs: sync with info validation, ignore flag, and refactors

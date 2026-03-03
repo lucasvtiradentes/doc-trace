@@ -39,13 +39,14 @@ sources:
 src/doctrace/
 ├── cli.py              ← entry point, arg parsing
 ├── commands/
-│   ├── info.py         ← info command (phases + validation)
+│   ├── info.py         ← info command (levels + validation)
 │   ├── affected.py     ← change detection + output formatting
 │   ├── preview/        ← interactive browser UI module
 │   └── init.py         ← project setup
 ├── core/
 │   ├── docs.py         ← doc parsing + indexing
 │   ├── config.py       ← runtime configuration
+│   ├── filtering.py    ← ignore pattern matching
 │   ├── git.py          ← git operations
 │   └── constants.py    ← shared constants
 ```
@@ -90,7 +91,7 @@ source_to_docs           doc_to_docs               │
                                     │
                                     v
        _propagate() → indirect_hits, circular_refs, indirect_chains
-       (BFS traversal, depth_limit)
+       (BFS traversal)
                                     │
                                     v
                             AffectedResult
@@ -106,17 +107,13 @@ source_to_docs           doc_to_docs               │
 ## Propagation Algorithm (BFS)
 
 ```
-Input: initial_docs, doc_to_docs, depth_limit
+Input: initial_docs, doc_to_docs
 Output: indirect_hits, circular_refs, indirect_chains
 
 visited = set(initial_docs)
 current_level = set(initial_docs)
-depth = 0
 
 while current_level not empty:
-    if depth_limit reached:
-        break
-
     next_level = empty set
 
     for each doc in current_level:
@@ -130,7 +127,6 @@ while current_level not empty:
             add to next_level
 
     current_level = next_level
-    depth += 1
 ```
 
 ## Observability

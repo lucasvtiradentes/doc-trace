@@ -52,7 +52,7 @@ Enables forward references and modern type syntax.
 ### Lowercase CLI
 
 Commands are lowercase, no hyphens:
-- `validate`, `affected`, `preview`, `lock`, `init`
+- `info`, `affected`, `preview`, `init`, `index`, `completion`
 
 ### Path-Based Abstractions
 
@@ -74,7 +74,7 @@ Return types are NamedTuples for clear structure:
 
 ### Exhaustive Dependency Crawling
 
-Do not recursively follow all refs without limits. Use `affected_depth_limit`.
+Do not recursively follow all refs without limits.
 
 ### Hardcoded Doc Paths
 

@@ -7,6 +7,7 @@ sources:
   - src/doctrace/commands/affected.py: affected implementation
   - src/doctrace/core/git.py:          git helpers used by affected (FileChange, commits, tags)
   - src/doctrace/cli.py:               CLI flag definitions for affected command
+  - src/doctrace/core/filtering.py:    ignore pattern matching used by _filter_docs
 ---
 
 Maps code changes to affected documentation.

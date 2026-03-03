@@ -36,7 +36,7 @@ Tests are organized by feature area:
 | Directory / File  | Coverage                                                   |
 |-------------------|------------------------------------------------------------|
 | `tests/affected/` | index building, direct hits, propagation, scope resolution |
-| `tests/validate/` | valid refs, missing docs, missing sources                  |
+| `tests/validate/` | valid refs, missing docs, missing sources, inline refs     |
 | `tests/config/`   | config validation (valid + invalid)                        |
 | `tests/parser/`   | frontmatter parsing, code blocks, line numbers             |
 | `tests/preview/`  | search, graph building                                     |

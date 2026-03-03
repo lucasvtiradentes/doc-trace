@@ -105,6 +105,7 @@ Single validation error.
 | doc_path | Path     | doc containing the bad ref |
 | ref      | RefEntry | the problematic reference  |
 | message  | str      | error description          |
+| ref_type | str      | type of reference          |
 
 ## Terminology
 
