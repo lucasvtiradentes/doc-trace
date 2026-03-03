@@ -9,4 +9,4 @@ _branch
 .bctx/branches/
 CLAUDE.local.md
 CLAUDE.md
-.doctrace
+.doctrace/

@@ -1,1 +1,0 @@
-docs: sync with v0.3.0 refactors, new commands, and validation overhaul
