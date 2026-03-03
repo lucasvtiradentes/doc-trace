@@ -767,7 +767,7 @@
             const fileIcon = '<svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
             Object.keys(levelGroups).sort((a, b) => a - b).forEach(level => {
                 const color = levelColors[level % levelColors.length];
-                const label = level == 0 ? 'Independent' : 'Level ' + level;
+                const label = 'Level ' + level;
                 const folder = document.createElement('div');
                 folder.className = 'tree-item folder';
                 folder.innerHTML = chevronSvg + folderIcon + '<span class="tree-name">' + label + ' <span style="color:#94a3b8;font-weight:400">(' + levelGroups[level].length + ')</span></span>' + '<span class="level-dot" style="background:' + color + ';margin-left:auto"></span>';
@@ -852,7 +852,7 @@
             });
             Object.keys(levelGroups).sort((a, b) => a - b).forEach(level => {
                 const nodes = levelGroups[level];
-                const label = level == 0 ? 'Independent' : 'Level ' + level;
+                const label = 'Level ' + level;
                 const color = levelColors[level % levelColors.length];
                 lines.push('    subgraph L' + level + '[' + label + ']');
                 lines.push('        style L' + level + ' fill:#fff,stroke:' + color + ',stroke-width:2px');

@@ -46,6 +46,7 @@ class Config:
     def __init__(self, data: dict[str, Any]):
         self.metadata: MetadataConfig = MetadataConfig(data.get("metadata", {}))
         self.base: Base = Base(data.get("base"))
+        self.ignore_inline_refs: list[str] = data.get("ignore_inline_refs", [])
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {}
@@ -57,6 +58,8 @@ class Config:
             }
         if self.base.is_set:
             result["base"] = self.base.to_dict()
+        if self.ignore_inline_refs:
+            result["ignore_inline_refs"] = self.ignore_inline_refs
         return result
 
     def _has_custom_metadata(self) -> bool:
@@ -69,12 +72,18 @@ class Config:
 
 def validate_config(data: dict[str, Any]) -> list[str]:
     errors = []
-    valid_keys = {"metadata", "base"}
+    valid_keys = {"metadata", "base", "ignore_inline_refs"}
     for key in data:
         if key not in valid_keys:
             errors.append(f"unknown key: {key}")
     if "metadata" in data:
         errors.extend(_validate_metadata(data["metadata"]))
+    if "ignore_inline_refs" in data:
+        val = data["ignore_inline_refs"]
+        if not isinstance(val, list):
+            errors.append("ignore_inline_refs must be an array")
+        elif not all(isinstance(item, str) for item in val):
+            errors.append("ignore_inline_refs items must be strings")
     return errors
 
 

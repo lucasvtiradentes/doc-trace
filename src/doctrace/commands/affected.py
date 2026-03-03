@@ -8,6 +8,7 @@ from typing import Any, NamedTuple
 
 from doctrace.core.config import Config, find_repo_root, load_config
 from doctrace.core.docs import ParsedDoc, build_doc_index, compute_levels, parse_doc
+from doctrace.core.filtering import matches_ignore_pattern
 from doctrace.core.git import (
     FileChange,
     get_changed_files,
@@ -238,9 +239,9 @@ def _build_git_data(
     }
 
 
-def _print_from_data(data: dict[str, Any], verbose: bool = False) -> None:
+def _print_from_data(data: dict[str, Any]) -> None:
     git = data.get("git", {})
-    if verbose and git:
+    if git:
         files = git.get("changed_files", [])
         if files:
             print(f"Changed files ({len(files)}):")
@@ -285,8 +286,7 @@ def _print_from_data(data: dict[str, Any], verbose: bool = False) -> None:
             for source, docs in sorted(source_to_docs.items()):
                 print(f"  {source} -> {', '.join(docs)}")
 
-    prefix = "\n" if verbose else ""
-    print(f"{prefix}Direct hits ({len(data['direct_hits'])}):")
+    print(f"\nDirect hits ({len(data['direct_hits'])}):")
     for doc in data["direct_hits"]:
         print(f"  {doc}")
 
@@ -306,17 +306,25 @@ def _print_from_data(data: dict[str, Any], verbose: bool = False) -> None:
             print(f"  {phase_num}. {', '.join(docs)}")
 
 
+def _filter_docs(docs: list[Path], repo_root: Path, ignore_patterns: list[str]) -> list[Path]:
+    if not ignore_patterns:
+        return docs
+    return [d for d in docs if not matches_ignore_pattern(d, repo_root, ignore_patterns)]
+
+
 def run(
     docs_path: Path,
     since_base: bool = False,
     last: int | None = None,
     base_branch: str | None = None,
     since: str | None = None,
-    verbose: bool = False,
     output_json: bool = False,
+    ignore_patterns: list[str] | None = None,
 ) -> int:
     config = load_config()
     repo_root = find_repo_root(docs_path)
+    all_ignore = config.ignore_inline_refs + (ignore_patterns or [])
+
     try:
         commit_ref = resolve_commit_ref(repo_root, since_base, last, base_branch, since)
     except ValueError as e:
@@ -327,32 +335,51 @@ def run(
         return 2
 
     changed_files = get_changed_files(commit_ref, repo_root)
-    changed_files_detailed = get_changed_files_detailed(commit_ref, repo_root) if verbose else []
+    changed_files_detailed = get_changed_files_detailed(commit_ref, repo_root)
     result = _find_affected_docs_for_changes(docs_path, changed_files, config, repo_root)
 
+    filtered_direct = _filter_docs(result.direct_hits, repo_root, all_ignore)
+    filtered_indirect = _filter_docs(result.indirect_hits, repo_root, all_ignore)
+    filtered_direct_set = set(filtered_direct)
+    filtered_indirect_set = set(filtered_indirect)
+    filtered_all_set = filtered_direct_set | filtered_indirect_set
+
+    filtered_affected = list(filtered_all_set)
+    filtered_circular = [(a, b) for a, b in result.circular_refs if a in filtered_all_set and b in filtered_all_set]
+    filtered_chains = {k: v for k, v in result.indirect_chains.items() if k in filtered_indirect_set}
+    filtered_matches = {src: [d for d in docs if d in filtered_direct_set] for src, docs in result.matches.items()}
+    filtered_matches = {k: v for k, v in filtered_matches.items() if v}
+    filtered_cache = {k: v for k, v in result.parsed_cache.items() if k in filtered_all_set}
+
+    result = AffectedResult(
+        affected_docs=filtered_affected,
+        direct_hits=filtered_direct,
+        indirect_hits=filtered_indirect,
+        circular_refs=filtered_circular,
+        matches=filtered_matches,
+        indirect_chains=filtered_chains,
+        parsed_cache=filtered_cache,
+    )
+
     if not result.affected_docs:
-        data: dict[str, Any] = {"direct_hits": [], "indirect_hits": [], "phases": {}}
-        if verbose:
-            git_data = _build_git_data(changed_files_detailed, result, commit_ref, repo_root)
-            data["git"] = git_data
+        git_data = _build_git_data(changed_files_detailed, result, commit_ref, repo_root)
+        data: dict[str, Any] = {"direct_hits": [], "indirect_hits": [], "phases": {}, "git": git_data}
         if output_json:
             print(json.dumps(data, indent=2))
-        elif verbose:
-            _print_from_data(data, verbose=True)
-            print("\nNo docs affected")
         else:
-            print("No docs affected")
+            _print_from_data(data)
+            print("\nNo docs affected")
         return 0
 
     docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root, result.parsed_cache)
     levels = _build_levels(docs_metadata, repo_root)
 
-    git_data = _build_git_data(changed_files_detailed, result, commit_ref, repo_root) if verbose else None
+    git_data = _build_git_data(changed_files_detailed, result, commit_ref, repo_root)
     data = _build_output_data(result, levels, repo_root, git_data)
 
     if output_json:
         print(json.dumps(data, indent=2))
     else:
-        _print_from_data(data, verbose=verbose)
+        _print_from_data(data)
 
     return 0

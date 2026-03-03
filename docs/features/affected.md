@@ -18,7 +18,6 @@ doctrace affected docs/ --last 1
 doctrace affected docs/ --since-base
 doctrace affected docs/ --base-branch main
 doctrace affected docs/ --since v0.1.0
-doctrace affected docs/ --last 5 --verbose
 doctrace affected docs/ --last 1 --json
 ```
 
@@ -26,9 +25,20 @@ doctrace affected docs/ --last 1 --json
 
 ### Default
 
-Shows direct hits, indirect hits (with propagation chain), and phases:
+Shows git context (changed files, commits, tags, merged branches, source-to-doc matches), direct hits, indirect hits (with propagation chain), and phases:
 
 ```
+Changed files (2):
+  M  (+10 -5)  src/api.py
+  A  (+50)     src/booking.py
+
+Commits (1):
+  abc1234 feat: add booking endpoint
+
+Matched (2 sources -> 2 docs):
+  src/api.py -> docs/api.md
+  src/booking.py -> docs/booking.md
+
 Direct hits (2):
   docs/api.md
   docs/booking.md
@@ -40,10 +50,6 @@ Phases (2):
   1. docs/api.md, docs/booking.md
   2. docs/overview.md
 ```
-
-### --verbose
-
-Adds git context before the default output: changed files with status and line stats, commits, tags, merged branches, and source-to-doc matches.
 
 ### --json
 
