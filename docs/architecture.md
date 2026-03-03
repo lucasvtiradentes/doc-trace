@@ -18,19 +18,19 @@ sources:
 `cli.py:main()` parses arguments and dispatches to subcommand handlers.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        cli.py:main()                        │
-├─────────────────────────────────────────────────────────────┤
-│  argparse → subcommand dispatcher                           │
-│                                                             │
-│  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────┐             │
-│  │   info   │ │ affected │ │ preview │ │ init │             │
-│  └────┬─────┘ └────┬─────┘ └────┬────┘ └──┬───┘             │
-│       │            │            │         │                 │
-│       v            v            v         v                 │
-│  commands/    commands/    commands/  commands/             │
-│  info.py     affected.py  preview.py init.py                │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                                  cli.py:main()                                   │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│  argparse → subcommand dispatcher                                                │
+│                                                                                  │
+│  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────┐ ┌───────┐ ┌────────────┐         │
+│  │   info   │ │ affected │ │ preview │ │ init │ │ index │ │ completion │         │
+│  └────┬─────┘ └────┬─────┘ └────┬────┘ └──┬───┘ └───┬───┘ └─────┬──────┘         │
+│       │            │            │         │         │            │               │
+│       v            v            v         v         v            v               │
+│  commands/    commands/    commands/  commands/ commands/    commands/            │
+│  info.py     affected.py  preview/   init.py   index.py    completion.py         │
+└──────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Module Structure
@@ -38,16 +38,20 @@ sources:
 ```
 src/doctrace/
 ├── cli.py              ← entry point, arg parsing
+├── cmd_registry.py     ← centralized command metadata
 ├── commands/
 │   ├── info.py         ← info command (phases + validation)
 │   ├── affected.py     ← change detection + output formatting
 │   ├── preview/        ← interactive browser UI module
-│   └── init.py         ← project setup
+│   ├── init.py         ← project setup
+│   ├── index.py        ← index generation from frontmatter
+│   └── completion.py   ← shell autocompletion
 ├── core/
 │   ├── docs.py         ← doc parsing + indexing
 │   ├── config.py       ← runtime configuration
 │   ├── git.py          ← git operations
-│   └── constants.py    ← shared constants
+│   ├── constants.py    ← shared constants
+│   └── filtering.py    ← fnmatch-based ignore filtering
 ```
 
 ## Data Flow - Info Command
@@ -74,11 +78,11 @@ docs/*.md → parse_doc() → RefEntry list (path, line)
 ```
 git diff <commit> → get_changed_files() → changed_files (list[str])
                     (core/git.py)                  │
-docs/*.md → _build_indexes()                       │
-                   │                               │
+docs/*.md → build_doc_index()                       │
+                   │         (core/docs.py)         │
        ┌───────────┴───────────┐                   │
        v                       v                   │
-source_to_docs           doc_to_docs               │
+source_to_docs           reverse_deps              │
 {path: [docs]}           {doc: [docs]}             │
        │                       │                   │
        └───────────┬───────────┘                   │
@@ -90,7 +94,7 @@ source_to_docs           doc_to_docs               │
                                     │
                                     v
        _propagate() → indirect_hits, circular_refs, indirect_chains
-       (BFS traversal, depth_limit)
+       (BFS traversal)
                                     │
                                     v
                             AffectedResult
@@ -106,31 +110,26 @@ source_to_docs           doc_to_docs               │
 ## Propagation Algorithm (BFS)
 
 ```
-Input: initial_docs, doc_to_docs, depth_limit
+Input: initial_docs, doc_to_docs
 Output: indirect_hits, circular_refs, indirect_chains
 
 visited = set(initial_docs)
 current_level = set(initial_docs)
-depth = 0
 
 while current_level not empty:
-    if depth_limit reached:
-        break
-
     next_level = empty set
 
     for each doc in current_level:
         for each referencing_doc in doc_to_docs[doc]:
             if referencing_doc in visited:
-                if not in initial_docs:
-                    record circular ref
                 continue
             add to visited
             add to indirect_hits
             add to next_level
 
     current_level = next_level
-    depth += 1
+
+circular_refs = _find_circular_refs(visited, doc_to_docs)
 ```
 
 ## Observability

@@ -7,6 +7,7 @@ sources:
   - src/doctrace/commands/affected.py: affected implementation
   - src/doctrace/core/git.py:          git helpers used by affected (FileChange, commits, tags)
   - src/doctrace/cli.py:               CLI flag definitions for affected command
+  - src/doctrace/core/filtering.py:    matches_ignore_pattern used by affected filtering
 ---
 
 Maps code changes to affected documentation.
@@ -18,6 +19,7 @@ doctrace affected docs/ --last 1
 doctrace affected docs/ --base-branch main
 doctrace affected docs/ --since v0.1.0
 doctrace affected docs/ --last 1 --json
+doctrace affected docs/ --last 1 --ignore docs/index.md
 ```
 
 ## Output Formats
@@ -53,6 +55,10 @@ Phases (2):
 ### --json
 
 Outputs the full result as JSON instead of text.
+
+### --ignore
+
+Excludes docs matching fnmatch patterns from results. Can be used multiple times. Combined with `ignore_inline_refs` from config.
 
 ## How It Works
 

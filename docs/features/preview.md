@@ -37,7 +37,7 @@ Starts a local HTTP server serving an interactive single-page application for ex
 - Edit docs directly in browser
 - View git history for each doc
 - Compare versions with diff highlighting
-- Doc stats (versions, updated date, created date, line count)
+- Doc stats (versions, updated date, line count)
 
 ### Navigation
 

@@ -22,17 +22,17 @@ doctrace index docs/ -o docs/index.md
 1. Scans all `.md` files in the directory
 2. Extracts `title` and `description` from frontmatter
 3. Counts `required_docs`, `related_docs`, and `sources` entries
-4. Generates a markdown table sorted by filename
+4. Generates a markdown table sorted by category, then filename
 
 ## Output Format
 
 ```markdown
-## Doc Index
+## Documentation Index
 
-| File                 | Description           |
-|----------------------|-----------------------|
-| docs/overview.md     | project summary       |
-| docs/architecture.md | system design details |
+| Category  | File                 | Description           | Rel. docs | Req. docs | Sources |
+|-----------|----------------------|-----------------------|-----------|-----------|---------|
+| Top-Level | docs/overview.md     | project summary       |     0     |     0     |    1    |
+| features  | docs/architecture.md | system design details |     1     |     0     |    2    |
 ```
 
 ## Frontmatter Fields Used
@@ -51,4 +51,4 @@ doctrace index docs/ -o docs/index.md
 
 ## Implementation
 
-Uses `get_docs_metadata()` to extract frontmatter, then generates markdown table.
+Uses `build_doc_index()` to extract frontmatter, then generates markdown table.

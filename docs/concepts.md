@@ -30,6 +30,8 @@ Container for extracted references from a markdown file.
 | required_docs | list[RefEntry] | hard deps, used for propagation + phases |
 | related_docs  | list[RefEntry] | soft refs, informational only            |
 | sources       | list[RefEntry] | code references                          |
+| title         | str            | title from frontmatter                   |
+| description   | str            | description from frontmatter             |
 
 ### DocIndex
 
@@ -100,11 +102,12 @@ Validation result for a single doc.
 
 Single validation error.
 
-| Field    | Type     | Description                |
-|----------|----------|----------------------------|
-| doc_path | Path     | doc containing the bad ref |
-| ref      | RefEntry | the problematic reference  |
-| message  | str      | error description          |
+| Field     | Type     | Description                             |
+|-----------|----------|-----------------------------------------|
+| doc_path  | Path     | doc containing the bad ref              |
+| ref       | RefEntry | the problematic reference               |
+| message   | str      | error description                       |
+| ref_type  | str      | type of ref (required, related, source) |
 
 ## Terminology
 

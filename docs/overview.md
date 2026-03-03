@@ -22,7 +22,7 @@ CLI tool that keeps documentation in sync with code changes.
 | Field       | Value                   |
 |-------------|-------------------------|
 | Name        | doctrace                |
-| Version     | 0.1.1                   |
+| Version     | 0.3.0                   |
 | Python      | 3.9+                    |
 | Entry point | doctrace.cli:main       |
 | Build       | hatch (wheel packaging) |

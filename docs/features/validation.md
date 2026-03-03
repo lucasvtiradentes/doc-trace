@@ -52,12 +52,14 @@ sources:
 
 ## Error Output
 
-Reports errors with file path and line number:
+Reports errors under dedicated section headers:
 
 ```
-Warnings (2):
-  docs/api.md:15: required doc not found: docs/missing.md
-  docs/api.md:18: source not found: src/deleted.py
+## Missing Referenced Docs
+----------------------------------------
+ERROR: Referenced docs not found!
+  docs/api.md -> docs/missing.md (required)
+  docs/api.md -> src/deleted.py (source)
 ```
 
 ## Exit Codes
@@ -65,29 +67,41 @@ Warnings (2):
 | Code | Meaning                  |
 |------|--------------------------|
 | 0    | all refs valid           |
-| 1    | one or more refs invalid |
+| 1    | errors found (missing refs, circular deps, or undeclared inline refs) |
 
 ## Output Format
 
-Shows dependency phases followed by any validation warnings:
+Shows a structured report with sections for circular deps, missing refs, levels, inline refs, and summary:
 
 ```
+============================================================
+DOCUMENTATION DEPENDENCY ANALYSIS
+============================================================
+
+## Documentation Levels (by required_docs depth)
+----------------------------------------
+
 Level 0:
-  docs/concepts.md
-  docs/utils.md
+  docs/concepts.md  (req: 0, rel: 1)
+  docs/utils.md     (req: 0, rel: 0)
 
 Level 1:
-  docs/api.md
+  docs/api.md  (req: 1, rel: 0)
 
-Warnings (1):
-  docs/api.md:15: source not found: src/deleted.py
+## Summary
+----------------------------------------
+Total docs: 3
+Levels: 2 (0 to 1)
+Circular deps (required): 0
+Missing referenced docs: 0
+Missing inline refs: 0
 ```
 
 ## Behavior
 
 - Scans all `*.md` files recursively in target directory
-- Skips docs matching ignored_paths patterns
-- Reports docs that fail to parse as validation errors (continues scanning)
+- Skips docs matching ignore_inline_refs config patterns and --ignore CLI patterns
+- Silently skips docs that fail to parse (continues scanning)
 - All paths resolved relative to repo root
 
 ## Implementation Details

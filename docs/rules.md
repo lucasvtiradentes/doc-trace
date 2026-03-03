@@ -14,10 +14,12 @@ sources:
 ### Single-Responsibility Commands
 
 Each command does one thing:
-- `info`     - shows phases + validates refs
-- `affected` - finds affected docs
-- `preview`  - interactive explorer
-- `init`     - creates config
+- `info`       - shows phases + validates refs
+- `affected`   - finds affected docs
+- `preview`    - interactive explorer
+- `init`       - creates config
+- `index`      - generates doc index from frontmatter
+- `completion` - generates shell completions
 
 ### Explicit Paths from Repo Root
 
@@ -35,7 +37,7 @@ Validation and affected rely on doc metadata sections. No magic inference or heu
 
 ### Lazy Error Recovery
 
-On parse errors in `validate`, report the doc error and continue scanning other docs. The command still exits non-zero when any error exists.
+On parse errors in `info`, report the doc error and continue scanning other docs. The command still exits non-zero when any error exists.
 
 ## Code Conventions
 
@@ -52,7 +54,7 @@ Enables forward references and modern type syntax.
 ### Lowercase CLI
 
 Commands are lowercase, no hyphens:
-- `validate`, `affected`, `preview`, `lock`, `init`
+- `info`, `affected`, `preview`, `init`, `index`, `completion`
 
 ### Path-Based Abstractions
 
@@ -74,7 +76,7 @@ Return types are NamedTuples for clear structure:
 
 ### Exhaustive Dependency Crawling
 
-Do not recursively follow all refs without limits. Use `affected_depth_limit`.
+Do not recursively follow all refs without limits.
 
 ### Hardcoded Doc Paths
 
