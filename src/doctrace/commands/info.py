@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterator
@@ -72,10 +73,52 @@ def find_missing_bidirectional(parsed_cache: dict[Path, ParsedDoc], repo_root: P
     return missing
 
 
+def extract_inline_refs(filepath: Path, pattern: re.Pattern[str]) -> list[str]:
+    content = filepath.read_text(encoding="utf-8")
+    lines = content.splitlines()
+    if not lines or lines[0].strip() != "---":
+        body_start = 0
+    else:
+        body_start = 1
+        for i, line in enumerate(lines[1:], start=1):
+            if line.strip() == "---":
+                body_start = i + 1
+                break
+    body_lines = lines[body_start:]
+    in_code_block = False
+    filtered = []
+    for line in body_lines:
+        if line.strip().startswith("```"):
+            in_code_block = not in_code_block
+            continue
+        if not in_code_block:
+            line = re.sub(r"`[^`]+`", "", line)
+            filtered.append(line)
+    body = "\n".join(filtered)
+    return list(set(pattern.findall(body)))
+
+
+def find_undeclared_inline_refs(
+    parsed_cache: dict[Path, ParsedDoc], repo_root: Path, docs_prefix: str
+) -> list[tuple[Path, str]]:
+    escaped_prefix = re.escape(docs_prefix)
+    pattern = re.compile(rf"{escaped_prefix}[a-zA-Z0-9/_.-]+\.md")
+    undeclared = []
+    for doc_path, parsed in parsed_cache.items():
+        declared = {ref.path for ref in parsed.related_docs}
+        declared.update(ref.path for ref in parsed.required_docs)
+        inline_refs = extract_inline_refs(doc_path, pattern)
+        for ref in inline_refs:
+            if ref not in declared:
+                undeclared.append((doc_path, ref))
+    return undeclared
+
+
 def _build_data(
     tree,
     errors: list[tuple[Path, RefError]],
     missing_bidirectional: list[tuple[Path, Path]],
+    undeclared_inline: list[tuple[Path, str]],
     repo_root: Path,
 ) -> dict[str, Any]:
     phases: dict[str, list[str]] = {}
@@ -108,6 +151,11 @@ def _build_data(
             for a, b in missing_bidirectional
         ]
 
+    if undeclared_inline:
+        data["undeclared_inline_refs"] = [
+            {"doc": str(doc.relative_to(repo_root)), "ref": ref} for doc, ref in undeclared_inline
+        ]
+
     return data
 
 
@@ -138,6 +186,13 @@ def _print_from_data(data: dict[str, Any]) -> None:
         for m in missing_bidir:
             print(f"  {m['doc']} -> {m['missing_in']} (should reference back)")
 
+    undeclared = data.get("undeclared_inline_refs", [])
+    if undeclared:
+        print()
+        print(f"Undeclared inline refs ({len(undeclared)}):")
+        for u in undeclared:
+            print(f"  {u['doc']}: {u['ref']} (add to related_docs)")
+
 
 def run(docs_path: Path, output_json: bool = False) -> int:
     config = load_config()
@@ -152,12 +207,14 @@ def run(docs_path: Path, output_json: bool = False) -> int:
             errors.append((doc_path, error))
 
     missing_bidirectional = find_missing_bidirectional(tree.index.parsed_cache, repo_root)
-    data = _build_data(tree, errors, missing_bidirectional, repo_root)
+    docs_prefix = str(docs_path.relative_to(repo_root)) + "/"
+    undeclared_inline = find_undeclared_inline_refs(tree.index.parsed_cache, repo_root, docs_prefix)
+    data = _build_data(tree, errors, missing_bidirectional, undeclared_inline, repo_root)
 
     if output_json:
         print(json.dumps(data, indent=2))
     else:
         _print_from_data(data)
 
-    has_issues = data.get("warnings") or data.get("missing_bidirectional")
+    has_issues = data.get("warnings") or data.get("missing_bidirectional") or data.get("undeclared_inline_refs")
     return 1 if has_issues else 0
