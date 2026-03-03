@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fnmatch
 import json
 import sys
 from collections import defaultdict
@@ -306,6 +307,17 @@ def _print_from_data(data: dict[str, Any], verbose: bool = False) -> None:
             print(f"  {phase_num}. {', '.join(docs)}")
 
 
+def _filter_docs(docs: list[Path], repo_root: Path, ignore_patterns: list[str]) -> list[Path]:
+    if not ignore_patterns:
+        return docs
+    filtered = []
+    for doc in docs:
+        rel_path = str(doc.relative_to(repo_root))
+        if not any(fnmatch.fnmatch(rel_path, pat) for pat in ignore_patterns):
+            filtered.append(doc)
+    return filtered
+
+
 def run(
     docs_path: Path,
     since_base: bool = False,
@@ -314,9 +326,12 @@ def run(
     since: str | None = None,
     verbose: bool = False,
     output_json: bool = False,
+    ignore_patterns: list[str] | None = None,
 ) -> int:
     config = load_config()
     repo_root = find_repo_root(docs_path)
+    all_ignore = config.ignore_inline_refs + (ignore_patterns or [])
+
     try:
         commit_ref = resolve_commit_ref(repo_root, since_base, last, base_branch, since)
     except ValueError as e:
@@ -329,6 +344,29 @@ def run(
     changed_files = get_changed_files(commit_ref, repo_root)
     changed_files_detailed = get_changed_files_detailed(commit_ref, repo_root) if verbose else []
     result = _find_affected_docs_for_changes(docs_path, changed_files, config, repo_root)
+
+    filtered_direct = _filter_docs(result.direct_hits, repo_root, all_ignore)
+    filtered_indirect = _filter_docs(result.indirect_hits, repo_root, all_ignore)
+    filtered_direct_set = set(filtered_direct)
+    filtered_indirect_set = set(filtered_indirect)
+    filtered_all_set = filtered_direct_set | filtered_indirect_set
+
+    filtered_affected = list(filtered_all_set)
+    filtered_circular = [(a, b) for a, b in result.circular_refs if a in filtered_all_set and b in filtered_all_set]
+    filtered_chains = {k: v for k, v in result.indirect_chains.items() if k in filtered_indirect_set}
+    filtered_matches = {src: [d for d in docs if d in filtered_direct_set] for src, docs in result.matches.items()}
+    filtered_matches = {k: v for k, v in filtered_matches.items() if v}
+    filtered_cache = {k: v for k, v in result.parsed_cache.items() if k in filtered_all_set}
+
+    result = AffectedResult(
+        affected_docs=filtered_affected,
+        direct_hits=filtered_direct,
+        indirect_hits=filtered_indirect,
+        circular_refs=filtered_circular,
+        matches=filtered_matches,
+        indirect_chains=filtered_chains,
+        parsed_cache=filtered_cache,
+    )
 
     if not result.affected_docs:
         data: dict[str, Any] = {"direct_hits": [], "indirect_hits": [], "phases": {}}

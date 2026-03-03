@@ -22,7 +22,7 @@ def test_affected_last_passes_arguments_to_run():
             with pytest.raises(SystemExit) as exc:
                 main()
     assert exc.value.code == 0
-    run_mock.assert_called_once_with(Path("docs"), False, 5, None, None, True, False)
+    run_mock.assert_called_once_with(Path("docs"), False, 5, None, None, True, False, [])
 
 
 def test_affected_json_flag():
@@ -31,7 +31,7 @@ def test_affected_json_flag():
             with pytest.raises(SystemExit) as exc:
                 main()
     assert exc.value.code == 0
-    run_mock.assert_called_once_with(Path("docs"), False, 1, None, None, False, True)
+    run_mock.assert_called_once_with(Path("docs"), False, 1, None, None, False, True, [])
 
 
 def test_affected_since_flag():
@@ -40,4 +40,4 @@ def test_affected_since_flag():
             with pytest.raises(SystemExit) as exc:
                 main()
     assert exc.value.code == 0
-    run_mock.assert_called_once_with(Path("docs"), False, None, None, "v1.0.0", False, False)
+    run_mock.assert_called_once_with(Path("docs"), False, None, None, "v1.0.0", False, False, [])

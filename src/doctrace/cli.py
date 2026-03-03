@@ -29,6 +29,7 @@ def main():
     scope_group.add_argument("--since", help="compare from git ref (commit/tag/branch)")
     affected_parser.add_argument("--verbose", "-V", action="store_true", help="show changed files and match details")
     affected_parser.add_argument("--json", action="store_true", help="output as JSON")
+    affected_parser.add_argument("--ignore", action="append", default=[], help="ignore file pattern")
 
     preview_parser = subparsers.add_parser("preview", help=COMMANDS["preview"]["desc"])
     preview_parser.add_argument("path", type=Path, help="docs directory")
@@ -66,6 +67,7 @@ def main():
                 args.since,
                 args.verbose,
                 args.json,
+                args.ignore,
             )
         )
     elif args.command == "preview":
