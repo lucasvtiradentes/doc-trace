@@ -147,7 +147,6 @@ doctrace affected <path> --last <N>            # list affected docs by last N co
 doctrace affected <path> --since <ref>         # list affected docs since ref
 doctrace affected <path> --since-base          # list affected docs since base commit
 doctrace affected <path> --base-branch <branch># list affected docs from merge-base
-doctrace affected <path> --verbose             # show changed files and match details
 doctrace affected <path> --json                # output as JSON
 doctrace preview <path>                        # interactive explorer in browser
 doctrace preview <path> --port <N>             # preview on custom port (default 8420)

@@ -39,8 +39,8 @@ doctrace completion fish | source
 |----------------------------|------------------------------------------|
 | `doctrace <TAB>`           | all commands                             |
 | `doctrace info <TAB>`      | directories                              |
-| `doctrace info --<TAB>`    | `--json`                                 |
-| `doctrace affected --<TAB>`| `--since-base --last --verbose --json`  |
+| `doctrace info --<TAB>`    | `--json --ignore`                        |
+| `doctrace affected --<TAB>`| `--since-base --last --json --ignore`   |
 | `doctrace base <TAB>`      | `update show`                            |
 | `doctrace completion <TAB>`| `zsh bash fish`                          |
 | `doctrace index --<TAB>`   | `-o --output`                            |
