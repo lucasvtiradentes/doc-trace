@@ -1,26 +1,47 @@
-# doctrace
+<a name="TOC"></a>
 
-Trace documentation dependencies in large codebases. When code changes, know exactly which docs need review - and in what order.
+<h1 align="center">doctrace</h1>
 
-Add metadata hints to your docs, and doctrace builds a dependency graph that maps code→docs and docs→docs relationships. AI agents use these hints to know exactly what to read when validating or updating documentation.
+<p align="center">
+  <a href="#-overview">Overview</a> •
+  <a href="#-features">Features</a> •
+  <a href="#-motivation">Motivation</a> •
+  <a href="#-quick-start">Quick Start</a> •
+  <a href="#-commands">Commands</a> •
+  <a href="#-configuration">Configuration</a> •
+  <a href="#-contributing">Contributing</a> •
+  <a href="#-license">License</a>
+</p>
+
+<div width="100%" align="center">
+  <img src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/divider.png" />
+</div>
+
+## 🎺 Overview<a href="#TOC"><img align="right" src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/up_arrow.png" width="22"></a>
+
+Keep documentation in sync with code. When files change, know exactly which docs need review - and in what order.
 
 ```
   src/booking/handler.ts changed
               │
               v
-  ┌───────────────────────────────────┐
-  │ doctrace affected docs/ --last 1  │
-  └───────────────────────────────────┘
+      ┌──────────────────┐
+      │ doctrace affected │
+      └────────┬─────────┘
               │
               v
-  ┌───────────────────────────────────┐
-  │ Direct hits:                      │
-  │   docs/bookings.md                │  ← has "sources: src/booking/"
-  │                                   │
-  │ Indirect hits:                    │
-  │   docs/payments.md                │  ← referenced BY docs/bookings.md
-  └───────────────────────────────────┘
+  ┌─────────────────────────────────┐
+  │ Direct hits:                    │
+  │   docs/bookings.md              │  ← has "sources: src/booking/"
+  │                                 │
+  │ Indirect hits:                  │
+  │   docs/payments.md              │  ← requires docs/bookings.md
+  └─────────────────────────────────┘
 ```
+
+<div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/preview.png" width="650" />
+</div>
 
 <div align="center">
 <details>
@@ -62,48 +83,32 @@ The propagation: if `bookings.md` might be outdated, then `payments.md` (which r
 </details>
 </div>
 
-<div align="center">
-<details>
-<summary>Interactive preview explorer</summary>
-<div align="left">
+## ⭐ Features<a href="#TOC"><img align="right" src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/up_arrow.png" width="22"></a>
 
-<figure>
-  <img src=".github/images/preview.png" alt="Preview">
-  <figcaption>Interactive panel to visualize dependencies between docs, edit content, and explore git history.</figcaption>
-</figure>
+- **Impact analysis**: detects which docs need review when code changes, with cascading through dependencies
+- **AI-ready output**: JSON output feeds AI agents to auto-update docs based on code changes
+- **Interactive UI**: browser dashboard to explore and visualize doc dependencies
+- **Auto-gen index**: generates index.md table from frontmatter metadata
 
-</div>
-</details>
-</div>
-
-## Features
-
-- info       - shows doc phases and validates refs
-- affected   - finds docs affected by code changes (with dependency ordering)
-- preview    - interactive docs explorer in browser
-- base       - manages base commit for incremental analysis
-- index      - generates index.md from frontmatter metadata
-- completion - generates shell completion scripts (zsh/bash/fish)
-
-## Motivation
+## ❓ Motivation<a href="#TOC"><img align="right" src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/up_arrow.png" width="22"></a>
 
 In large codebases, docs get outdated because:
+
 1. No one remembers which docs need updating when a file changes
 2. AI agents don't know which files to read to understand each doc
 
 doctrace solves this by adding "hints" to each doc - `sources:` tells any AI exactly what to read.
 
-## Quickstart
+## 🚀 Quick Start<a href="#TOC"><img align="right" src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/up_arrow.png" width="22"></a>
 
-### 1. Install
+Install:
 
 ```bash
-pipx install doctrace
+brew install pipx         # if not installed (macOS/linux)
+pipx install doctrace     # or: pip install doctrace
 ```
 
-### 2. Add metadata to your docs
-
-Add YAML frontmatter at the top of your docs:
+Add metadata to your docs:
 
 ```markdown
 ---
@@ -123,79 +128,36 @@ sources:
 Documentation content here...
 ```
 
-### 3. Initialize config (optional)
+Setup in your repo:
 
 ```bash
-doctrace init    # creates doctrace.json
+cd your-repo
+doctrace init                        # creates doctrace.json (optional)
+
+doctrace info docs/                  # show phases + validate refs
+doctrace affected docs/ --last 5     # find docs affected by last 5 commits
+doctrace preview docs/               # interactive explorer in browser
 ```
 
-<div align="center">
-<details>
-<summary>Config options</summary>
-<div align="left">
-
-doctrace.json (at repo root):
-```json
-{
-  "metadata": {
-    "required_docs_key": "required_docs",
-    "related_docs_key": "related_docs",
-    "sources_key": "sources"
-  },
-  "base": {
-    "commit_hash": "abc123...",
-    "commit_message": "feat: something",
-    "commit_date": "2026-02-17T10:30:00+00:00",
-    "analyzed_at": "2026-02-17T20:55:32+00:00"
-  }
-}
-```
-
-options:
-- `metadata.required_docs_key`: frontmatter key for required docs (default: "required_docs")
-- `metadata.related_docs_key`:  frontmatter key for related docs (default: "related_docs")
-- `metadata.sources_key`:       frontmatter key for source refs (default: "sources")
-- `base`:                       set by `doctrace base update`
-
-</div>
-</details>
-</div>
-
-### 4. Use it
+## 📖 Commands<a href="#TOC"><img align="right" src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/up_arrow.png" width="22"></a>
 
 ```bash
-doctrace info docs/                         # show phases + validate refs
-doctrace affected docs/ --last 5            # find docs affected by last 5 commits
-doctrace affected docs/ --since v1.0.0      # find docs affected since tag/commit/branch
-doctrace preview docs/                      # interactive explorer in browser
+doctrace info <path>                           # show phases + validate refs
+doctrace affected <path> --last <N>            # list affected docs by last N commits
+doctrace affected <path> --since <ref>         # list affected docs since ref
+doctrace affected <path> --since-base          # list affected docs since base commit
+doctrace affected <path> --base-branch <branch># list affected docs from merge-base
+doctrace affected <path> --verbose             # show changed files and match details
+doctrace affected <path> --json                # output as JSON
+doctrace preview <path>                        # interactive explorer in browser
+doctrace preview <path> --port <N>             # preview on custom port (default 8420)
+doctrace base update                           # save current commit as base
+doctrace base show                             # show base state
+doctrace init                                  # create doctrace.json
+doctrace index <path> -o <file>                # generate index.md from frontmatter
+doctrace completion <shell>                    # generate shell completion script
+doctrace --version                             # show version
 ```
-
-<div align="center">
-<details>
-<summary>All commands</summary>
-<div align="left">
-
-| Command                                          | Description                          |
-|--------------------------------------------------|--------------------------------------|
-| `doctrace info <path>`                           | show phases + validate refs          |
-| `doctrace affected <path> --last <N>`            | list affected docs by last N commits |
-| `doctrace affected <path> --since <ref>`         | list affected docs since ref         |
-| `doctrace affected <path> --since-base`          | list affected docs since base commit |
-| `doctrace affected <path> --base-branch <branch>`| list affected docs from merge-base   |
-| `doctrace affected <path> --verbose`             | show changed files and match details |
-| `doctrace affected <path> --json`                | output as JSON                       |
-| `doctrace preview <path>`                        | interactive explorer in browser      |
-| `doctrace preview <path> --port <N>`             | preview on custom port (default 8420)|
-| `doctrace base update`                           | save current commit as base          |
-| `doctrace base show`                             | show base state                      |
-| `doctrace init`                                  | create doctrace.json                 |
-| `doctrace index <path> -o <file>`                | generate index.md from frontmatter   |
-| `doctrace completion <shell>`                    | generate shell completion script     |
-| `doctrace --version`                             | show version                         |
-
-</div>
-</details>
-</div>
 
 <div align="center">
 <details>
@@ -223,17 +185,92 @@ Phases show dependency order - useful for AI agents processing docs.
 </details>
 </div>
 
-## Development
+## ⚙️ Configuration<a href="#TOC"><img align="right" src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/up_arrow.png" width="22"></a>
 
-```bash
-make install           # create venv + install
-make check             # lint
-make test              # run tests
-doctrace info docs/    # practical test
+<div align="center">
+<details>
+<summary>Config file</summary>
+<div align="left">
+
+`doctrace.json` (at repo root):
+
+```json
+{
+  "metadata": {
+    "required_docs_key": "required_docs",
+    "related_docs_key": "related_docs",
+    "sources_key": "sources"
+  },
+  "base": {
+    "commit_hash": "abc123...",
+    "commit_message": "feat: something",
+    "commit_date": "2026-02-17T10:30:00+00:00",
+    "analyzed_at": "2026-02-17T20:55:32+00:00"
+  }
+}
 ```
 
+| Key                        | Description                                   |
+|----------------------------|-----------------------------------------------|
+| `metadata.required_docs_key` | frontmatter key for required docs (default: "required_docs") |
+| `metadata.related_docs_key`  | frontmatter key for related docs (default: "related_docs")   |
+| `metadata.sources_key`       | frontmatter key for source refs (default: "sources")         |
+| `base`                       | set by `doctrace base update`               |
+
+</div>
+</details>
+</div>
+
+<div align="center">
+<details>
+<summary>Shell Completion</summary>
+<div align="left">
+
 ```bash
-# dev alias (doctraced)
-ln -s $(pwd)/.venv/bin/doctrace ~/.local/bin/doctraced   # install
-rm ~/.local/bin/doctraced                                # remove
+# zsh - add to ~/.zshrc
+eval "$(doctrace completion zsh)"
+
+# bash - add to ~/.bashrc
+eval "$(doctrace completion bash)"
+
+# fish
+doctrace completion fish | source
 ```
+
+</div>
+</details>
+</div>
+
+## 🤝 Contributing<a href="#TOC"><img align="right" src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/up_arrow.png" width="22"></a>
+
+```bash
+make install    # venv + deps + pre-commit
+make test       # run tests
+make format     # ruff fix + format
+make check      # validate ruff rules
+make build      # build package
+make clean      # remove venv + dist
+```
+
+Dev alias:
+
+```bash
+ln -sf $(pwd)/.venv/bin/doctrace ~/.local/bin/doctraced   # install
+rm ~/.local/bin/doctraced                                 # remove
+```
+
+## 📜 License<a href="#TOC"><img align="right" src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/up_arrow.png" width="22"></a>
+
+This project is licensed under the [MIT License](LICENSE).
+
+<div width="100%" align="center">
+  <img src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/divider.png" />
+</div>
+
+<br />
+
+<div align="center">
+  <a target="_blank" href="https://www.linkedin.com/in/lucasvtiradentes/"><img src="https://img.shields.io/badge/-linkedin-blue?logo=Linkedin&logoColor=white" alt="LinkedIn"></a>
+  <a target="_blank" href="mailto:lucasvtiradentes@gmail.com"><img src="https://img.shields.io/badge/-email-red?logo=Gmail&logoColor=white" alt="Email"></a>
+  <a target="_blank" href="https://github.com/lucasvtiradentes"><img src="https://img.shields.io/badge/-github-gray?logo=Github&logoColor=white" alt="GitHub"></a>
+</div>
