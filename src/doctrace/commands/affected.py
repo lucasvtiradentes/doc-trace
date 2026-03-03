@@ -239,9 +239,9 @@ def _build_git_data(
     }
 
 
-def _print_from_data(data: dict[str, Any], verbose: bool = False) -> None:
+def _print_from_data(data: dict[str, Any]) -> None:
     git = data.get("git", {})
-    if verbose and git:
+    if git:
         files = git.get("changed_files", [])
         if files:
             print(f"Changed files ({len(files)}):")
@@ -286,8 +286,7 @@ def _print_from_data(data: dict[str, Any], verbose: bool = False) -> None:
             for source, docs in sorted(source_to_docs.items()):
                 print(f"  {source} -> {', '.join(docs)}")
 
-    prefix = "\n" if verbose else ""
-    print(f"{prefix}Direct hits ({len(data['direct_hits'])}):")
+    print(f"\nDirect hits ({len(data['direct_hits'])}):")
     for doc in data["direct_hits"]:
         print(f"  {doc}")
 
@@ -319,7 +318,6 @@ def run(
     last: int | None = None,
     base_branch: str | None = None,
     since: str | None = None,
-    verbose: bool = False,
     output_json: bool = False,
     ignore_patterns: list[str] | None = None,
 ) -> int:
@@ -337,7 +335,7 @@ def run(
         return 2
 
     changed_files = get_changed_files(commit_ref, repo_root)
-    changed_files_detailed = get_changed_files_detailed(commit_ref, repo_root) if verbose else []
+    changed_files_detailed = get_changed_files_detailed(commit_ref, repo_root)
     result = _find_affected_docs_for_changes(docs_path, changed_files, config, repo_root)
 
     filtered_direct = _filter_docs(result.direct_hits, repo_root, all_ignore)
@@ -364,28 +362,24 @@ def run(
     )
 
     if not result.affected_docs:
-        data: dict[str, Any] = {"direct_hits": [], "indirect_hits": [], "phases": {}}
-        if verbose:
-            git_data = _build_git_data(changed_files_detailed, result, commit_ref, repo_root)
-            data["git"] = git_data
+        git_data = _build_git_data(changed_files_detailed, result, commit_ref, repo_root)
+        data: dict[str, Any] = {"direct_hits": [], "indirect_hits": [], "phases": {}, "git": git_data}
         if output_json:
             print(json.dumps(data, indent=2))
-        elif verbose:
-            _print_from_data(data, verbose=True)
-            print("\nNo docs affected")
         else:
-            print("No docs affected")
+            _print_from_data(data)
+            print("\nNo docs affected")
         return 0
 
     docs_metadata = _get_doc_metadata(result.affected_docs, config, repo_root, result.parsed_cache)
     levels = _build_levels(docs_metadata, repo_root)
 
-    git_data = _build_git_data(changed_files_detailed, result, commit_ref, repo_root) if verbose else None
+    git_data = _build_git_data(changed_files_detailed, result, commit_ref, repo_root)
     data = _build_output_data(result, levels, repo_root, git_data)
 
     if output_json:
         print(json.dumps(data, indent=2))
     else:
-        _print_from_data(data, verbose=verbose)
+        _print_from_data(data)
 
     return 0

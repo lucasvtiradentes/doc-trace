@@ -18,11 +18,11 @@ def test_affected_requires_scope_flag():
 
 def test_affected_last_passes_arguments_to_run():
     with patch("doctrace.cli.affected.run", return_value=0) as run_mock:
-        with patch.object(sys, "argv", ["doctrace", "affected", "docs/", "--last", "5", "--verbose"]):
+        with patch.object(sys, "argv", ["doctrace", "affected", "docs/", "--last", "5"]):
             with pytest.raises(SystemExit) as exc:
                 main()
     assert exc.value.code == 0
-    run_mock.assert_called_once_with(Path("docs"), False, 5, None, None, True, False, [])
+    run_mock.assert_called_once_with(Path("docs"), False, 5, None, None, False, [])
 
 
 def test_affected_json_flag():
@@ -31,7 +31,7 @@ def test_affected_json_flag():
             with pytest.raises(SystemExit) as exc:
                 main()
     assert exc.value.code == 0
-    run_mock.assert_called_once_with(Path("docs"), False, 1, None, None, False, True, [])
+    run_mock.assert_called_once_with(Path("docs"), False, 1, None, None, True, [])
 
 
 def test_affected_since_flag():
@@ -40,7 +40,7 @@ def test_affected_since_flag():
             with pytest.raises(SystemExit) as exc:
                 main()
     assert exc.value.code == 0
-    run_mock.assert_called_once_with(Path("docs"), False, None, None, "v1.0.0", False, False, [])
+    run_mock.assert_called_once_with(Path("docs"), False, None, None, "v1.0.0", False, [])
 
 
 def test_affected_ignore_flag():
@@ -49,7 +49,7 @@ def test_affected_ignore_flag():
             with pytest.raises(SystemExit) as exc:
                 main()
     assert exc.value.code == 0
-    run_mock.assert_called_once_with(Path("docs"), False, 1, None, None, False, False, ["docs/index.md"])
+    run_mock.assert_called_once_with(Path("docs"), False, 1, None, None, False, ["docs/index.md"])
 
 
 def test_affected_multiple_ignore_flags():
@@ -62,4 +62,4 @@ def test_affected_multiple_ignore_flags():
             with pytest.raises(SystemExit) as exc:
                 main()
     assert exc.value.code == 0
-    run_mock.assert_called_once_with(Path("docs"), False, 1, None, None, False, False, ["docs/a.md", "docs/b.md"])
+    run_mock.assert_called_once_with(Path("docs"), False, 1, None, None, False, ["docs/a.md", "docs/b.md"])

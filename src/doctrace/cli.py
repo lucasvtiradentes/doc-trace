@@ -27,7 +27,6 @@ def main():
     scope_group.add_argument("--last", type=int, help="compare against HEAD~N (N must be > 0)")
     scope_group.add_argument("--base-branch", help="compare from merge-base(HEAD, <branch>)")
     scope_group.add_argument("--since", help="compare from git ref (commit/tag/branch)")
-    affected_parser.add_argument("--verbose", "-V", action="store_true", help="show changed files and match details")
     affected_parser.add_argument("--json", action="store_true", help="output as JSON")
     affected_parser.add_argument("--ignore", action="append", default=[], help="ignore file pattern")
 
@@ -65,7 +64,6 @@ def main():
                 args.last,
                 args.base_branch,
                 args.since,
-                args.verbose,
                 args.json,
                 args.ignore,
             )

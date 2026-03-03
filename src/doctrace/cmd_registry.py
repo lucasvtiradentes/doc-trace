@@ -20,7 +20,7 @@ COMMANDS: dict[str, CommandInfo] = {
     "affected": {
         "desc": "list docs affected by git diff",
         "args": "<path>",
-        "flags": ["--since-base", "--last", "--base-branch", "--since", "--verbose", "-V", "--json", "--ignore"],
+        "flags": ["--since-base", "--last", "--base-branch", "--since", "--json", "--ignore"],
         "subcommands": [],
     },
     "preview": {
