@@ -23,13 +23,13 @@ Keep documentation in sync with code. When files change, know exactly which docs
 
 ```
   src/booking/handler.ts changed
-              │
-              v
-      ┌──────────────────┐
+               │
+               v
+      ┌───────────────────┐
       │ doctrace affected │
-      └────────┬─────────┘
-              │
-              v
+      └────────┬──────────┘
+               │
+               v
   ┌─────────────────────────────────┐
   │ Direct hits:                    │
   │   docs/bookings.md              │  ← has "sources: src/booking/"
@@ -40,7 +40,10 @@ Keep documentation in sync with code. When files change, know exactly which docs
 ```
 
 <div align="center">
-  <img src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/preview.png" width="650" />
+<details>
+<summary>Preview</summary>
+<img src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/preview.png" width="650" />
+</details>
 </div>
 
 <div align="center">
@@ -87,8 +90,8 @@ The propagation: if `bookings.md` might be outdated, then `payments.md` (which r
 
 - **Impact analysis**: detects which docs need review when code changes, with cascading through dependencies
 - **AI-ready output**: JSON output feeds AI agents to auto-update docs based on code changes
-- **Interactive UI**: browser dashboard to explore and visualize doc dependencies
-- **Auto-gen index**: generates index.md table from frontmatter metadata
+- **Interactive UI**:  browser dashboard to explore and visualize doc dependencies
+- **Auto-gen index**:  generates index.md table from frontmatter metadata
 
 ## ❓ Motivation<a href="#TOC"><img align="right" src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/doc-trace@main/.github/images/up_arrow.png" width="22"></a>
 
@@ -209,12 +212,12 @@ Phases show dependency order - useful for AI agents processing docs.
 }
 ```
 
-| Key                        | Description                                   |
-|----------------------------|-----------------------------------------------|
+| Key                          | Description                                                  |
+|------------------------------|--------------------------------------------------------------|
 | `metadata.required_docs_key` | frontmatter key for required docs (default: "required_docs") |
 | `metadata.related_docs_key`  | frontmatter key for related docs (default: "related_docs")   |
 | `metadata.sources_key`       | frontmatter key for source refs (default: "sources")         |
-| `base`                       | set by `doctrace base update`               |
+| `base`                       | set by `doctrace base update`                                |
 
 </div>
 </details>
