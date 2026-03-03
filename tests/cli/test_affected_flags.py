@@ -41,3 +41,25 @@ def test_affected_since_flag():
                 main()
     assert exc.value.code == 0
     run_mock.assert_called_once_with(Path("docs"), False, None, None, "v1.0.0", False, False, [])
+
+
+def test_affected_ignore_flag():
+    with patch("doctrace.cli.affected.run", return_value=0) as run_mock:
+        with patch.object(sys, "argv", ["doctrace", "affected", "docs/", "--last", "1", "--ignore", "docs/index.md"]):
+            with pytest.raises(SystemExit) as exc:
+                main()
+    assert exc.value.code == 0
+    run_mock.assert_called_once_with(Path("docs"), False, 1, None, None, False, False, ["docs/index.md"])
+
+
+def test_affected_multiple_ignore_flags():
+    with patch("doctrace.cli.affected.run", return_value=0) as run_mock:
+        with patch.object(
+            sys,
+            "argv",
+            ["doctrace", "affected", "docs/", "--last", "1", "--ignore", "docs/a.md", "--ignore", "docs/b.md"],
+        ):
+            with pytest.raises(SystemExit) as exc:
+                main()
+    assert exc.value.code == 0
+    run_mock.assert_called_once_with(Path("docs"), False, 1, None, None, False, False, ["docs/a.md", "docs/b.md"])

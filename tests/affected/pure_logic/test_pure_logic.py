@@ -2,7 +2,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from doctrace.commands.affected import _find_direct_hits, _propagate, find_affected_docs
+from doctrace.commands.affected import _filter_docs, _find_direct_hits, _propagate, find_affected_docs
 from doctrace.core.config import Config
 
 
@@ -70,3 +70,35 @@ def test_find_direct_hits_nested_directory():
     source_to_docs = {"api/src/booking/": [doc1]}
     hits, matches = _find_direct_hits(["api/src/booking/commands/handler.ts"], source_to_docs)
     assert doc1 in hits
+
+
+def test_filter_docs_exact_match():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        repo_root = Path(tmpdir)
+        docs = [repo_root / "docs/a.md", repo_root / "docs/b.md", repo_root / "docs/c.md"]
+        filtered = _filter_docs(docs, repo_root, ["docs/b.md"])
+        assert len(filtered) == 2
+        assert repo_root / "docs/a.md" in filtered
+        assert repo_root / "docs/c.md" in filtered
+        assert repo_root / "docs/b.md" not in filtered
+
+
+def test_filter_docs_glob_pattern():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        repo_root = Path(tmpdir)
+        docs = [
+            repo_root / "docs/overview.md",
+            repo_root / "docs/features/a.md",
+            repo_root / "docs/features/b.md",
+        ]
+        filtered = _filter_docs(docs, repo_root, ["docs/features/*"])
+        assert len(filtered) == 1
+        assert repo_root / "docs/overview.md" in filtered
+
+
+def test_filter_docs_no_patterns():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        repo_root = Path(tmpdir)
+        docs = [repo_root / "docs/a.md", repo_root / "docs/b.md"]
+        filtered = _filter_docs(docs, repo_root, [])
+        assert filtered == docs

@@ -105,29 +105,10 @@ def find_undeclared_inline_refs(
     return undeclared
 
 
-def find_bidirectional_refs(parsed_cache: dict[Path, ParsedDoc], repo_root: Path) -> list[tuple[str, str]]:
-    related_map: dict[str, set[str]] = {}
-    for doc_path, parsed in parsed_cache.items():
-        rel_path = str(doc_path.relative_to(repo_root))
-        related_map[rel_path] = {ref.path for ref in parsed.related_docs}
-
-    bidirectional = []
-    seen: set[tuple[str, str]] = set()
-    for doc_a, a_related in related_map.items():
-        for doc_b in a_related:
-            if doc_b in related_map and doc_a in related_map[doc_b]:
-                pair = tuple(sorted([doc_a, doc_b]))
-                if pair not in seen:
-                    seen.add(pair)
-                    bidirectional.append((pair[0], pair[1]))
-    return bidirectional
-
-
 def _build_data(
     tree,
     errors: list[tuple[Path, RefError]],
     undeclared_inline: list[tuple[Path, str]],
-    bidirectional: list[tuple[str, str]],
     repo_root: Path,
 ) -> dict[str, Any]:
     levels: dict[str, list[dict[str, Any]]] = {}
@@ -160,9 +141,6 @@ def _build_data(
             for doc_path, error in errors
         ]
 
-    if bidirectional:
-        data["bidirectional_refs"] = [[a, b] for a, b in bidirectional]
-
     if undeclared_inline:
         data["undeclared_inline_refs"] = [
             {"doc": str(doc.relative_to(repo_root)), "ref": ref} for doc, ref in undeclared_inline
@@ -176,7 +154,6 @@ def _build_data(
         "max_level": max_level,
         "circular_count": len(tree.circular),
         "missing_count": len(errors),
-        "bidirectional_count": len(bidirectional),
         "undeclared_inline_count": len(undeclared_inline),
     }
 
@@ -223,16 +200,6 @@ def _print_from_data(data: dict[str, Any]) -> None:
             padding = " " * (max_path_len - len(path) + 2)
             print(f"  {path}{padding}(req: {d['required']}, rel: {d['related']})")
 
-    _print_section_header("Bidirectional References (related_docs)")
-    bidirectional = data.get("bidirectional_refs", [])
-    if bidirectional:
-        print(f"Found {len(bidirectional)} bidirectional reference(s):")
-        for pair in bidirectional:
-            print(f"  {pair[0]}")
-            print(f"    <-> {pair[1]}")
-    else:
-        print("No bidirectional references found")
-
     _print_section_header("Inline Reference Check")
     undeclared = data.get("undeclared_inline_refs", [])
     if undeclared:
@@ -248,7 +215,6 @@ def _print_from_data(data: dict[str, Any]) -> None:
     print(f"Levels: {s['levels']} (0 to {s['max_level']})")
     print(f"Circular deps (required): {s['circular_count']}")
     print(f"Missing referenced docs: {s['missing_count']}")
-    print(f"Bidirectional refs (related): {s['bidirectional_count']}")
     print(f"Missing inline refs: {s['undeclared_inline_count']}")
 
 
@@ -282,7 +248,6 @@ def run(docs_path: Path, output_json: bool = False, ignore_patterns: list[str] |
 
     docs_prefix = str(docs_path.relative_to(repo_root)) + "/"
     undeclared_inline = find_undeclared_inline_refs(filtered_cache, repo_root, docs_prefix, [])
-    bidirectional = find_bidirectional_refs(filtered_cache, repo_root)
 
     filtered_levels = []
     for level_docs in tree.levels:
@@ -297,7 +262,7 @@ def run(docs_path: Path, output_json: bool = False, ignore_patterns: list[str] |
         index=SimpleNamespace(parsed_cache=filtered_cache),
     )
 
-    data = _build_data(filtered_tree, errors, undeclared_inline, bidirectional, repo_root)
+    data = _build_data(filtered_tree, errors, undeclared_inline, repo_root)
 
     if output_json:
         print(json.dumps(data, indent=2))
