@@ -72,11 +72,11 @@ Warnings (2):
 Shows dependency phases followed by any validation warnings:
 
 ```
-Independent (2):
+Level 0:
   docs/concepts.md
   docs/utils.md
 
-Phase 1 (1):
+Level 1:
   docs/api.md
 
 Warnings (1):

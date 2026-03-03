@@ -57,7 +57,7 @@ def build_graph_data(docs_path: Path, config: Config, repo_root: Path) -> dict[s
             {
                 "level": i,
                 "count": len(level_docs),
-                "label": "Independent" if i == 0 else f"Level {i}",
+                "label": f"Level {i}",
             }
         )
     return {
@@ -66,7 +66,7 @@ def build_graph_data(docs_path: Path, config: Config, repo_root: Path) -> dict[s
         "levels": levels_info,
         "stats": {
             "total": len(nodes),
-            "independent": len(tree.levels[0]) if tree.levels else 0,
+            "level_0": len(tree.levels[0]) if tree.levels else 0,
             "circular": len(tree.circular),
             "max_depth": len(tree.levels) - 1,
         },

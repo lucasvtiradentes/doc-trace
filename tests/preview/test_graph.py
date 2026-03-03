@@ -45,7 +45,7 @@ def test_build_graph_data_stats():
         config = Config({})
         data = build_graph_data(docs_dir, config, tmppath)
         assert data["stats"]["total"] == 2
-        assert data["stats"]["independent"] == 2
+        assert data["stats"]["level_0"] == 2
         assert data["stats"]["circular"] == 0
 
 
