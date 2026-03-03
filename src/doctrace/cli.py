@@ -18,6 +18,7 @@ def main():
     info_parser = subparsers.add_parser("info", help=COMMANDS["info"]["desc"])
     info_parser.add_argument("path", type=Path, help="docs directory")
     info_parser.add_argument("--json", action="store_true", help="output as JSON")
+    info_parser.add_argument("--ignore", action="append", default=[], help="ignore file pattern for inline refs")
 
     affected_parser = subparsers.add_parser("affected", help=COMMANDS["affected"]["desc"])
     affected_parser.add_argument("path", type=Path, help="docs directory")
@@ -54,7 +55,7 @@ def main():
         sys.exit(0)
 
     if args.command == "info":
-        sys.exit(info.run(args.path, args.json))
+        sys.exit(info.run(args.path, args.json, args.ignore))
     elif args.command == "affected":
         sys.exit(
             affected.run(

@@ -16,5 +16,5 @@ def test_inline_refs_in_code_block():
         shutil.copytree(DOCS_DIR, docs_dir)
         config = Config({})
         index = build_doc_index(docs_dir, config, repo_root=tmppath)
-        undeclared = find_undeclared_inline_refs(index.parsed_cache, tmppath, "docs/")
+        undeclared = find_undeclared_inline_refs(index.parsed_cache, tmppath, "docs/", [])
         assert len(undeclared) == 0

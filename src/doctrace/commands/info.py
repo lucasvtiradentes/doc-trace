@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fnmatch
 import json
 import re
 from dataclasses import dataclass, field
@@ -83,12 +84,16 @@ def extract_inline_refs(filepath: Path, pattern: re.Pattern[str]) -> list[str]:
 
 
 def find_undeclared_inline_refs(
-    parsed_cache: dict[Path, ParsedDoc], repo_root: Path, docs_prefix: str
+    parsed_cache: dict[Path, ParsedDoc], repo_root: Path, docs_prefix: str, ignore_patterns: list[str]
 ) -> list[tuple[Path, str]]:
     escaped_prefix = re.escape(docs_prefix)
     pattern = re.compile(rf"{escaped_prefix}[a-zA-Z0-9/_.-]+\.md")
     undeclared = []
     for doc_path, parsed in parsed_cache.items():
+        if ignore_patterns:
+            rel_path = str(doc_path.relative_to(repo_root))
+            if any(fnmatch.fnmatch(rel_path, pat) for pat in ignore_patterns):
+                continue
         declared = {ref.path for ref in parsed.related_docs}
         declared.update(ref.path for ref in parsed.required_docs)
         inline_refs = extract_inline_refs(doc_path, pattern)
@@ -164,7 +169,7 @@ def _print_from_data(data: dict[str, Any]) -> None:
             print(f"  {u['doc']}: {u['ref']} (add to related_docs)")
 
 
-def run(docs_path: Path, output_json: bool = False) -> int:
+def run(docs_path: Path, output_json: bool = False, ignore_patterns: list[str] | None = None) -> int:
     config = load_config()
     repo_root = find_repo_root(docs_path)
     docs_path = docs_path.resolve()
@@ -176,8 +181,9 @@ def run(docs_path: Path, output_json: bool = False) -> int:
         for error in result.errors:
             errors.append((doc_path, error))
 
+    all_ignore = config.ignore_inline_refs + (ignore_patterns or [])
     docs_prefix = str(docs_path.relative_to(repo_root)) + "/"
-    undeclared_inline = find_undeclared_inline_refs(tree.index.parsed_cache, repo_root, docs_prefix)
+    undeclared_inline = find_undeclared_inline_refs(tree.index.parsed_cache, repo_root, docs_prefix, all_ignore)
     data = _build_data(tree, errors, undeclared_inline, repo_root)
 
     if output_json:
