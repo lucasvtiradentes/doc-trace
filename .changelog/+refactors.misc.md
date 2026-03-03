@@ -1,0 +1,1 @@
+Align `info` output format with shell script style (sections, headers, summary). Remove `--verbose` flag from `affected`, make verbose default. Rename "Independent" to "Level 0" in preview. Extract shared `matches_ignore_pattern` to core/filtering.py. Use sets for O(1) lookups in affected. Restructure README. Add pre-commit hooks and devpanel config.
