@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from doctrace.core.config import Config, find_repo_root, load_config
-from doctrace.core.docs import RefEntry, build_dependency_tree
+from doctrace.core.docs import ParsedDoc, RefEntry, build_dependency_tree
 
 
 @dataclass
@@ -56,7 +56,28 @@ def _glob_matches(pattern: str, repo_root: Path) -> bool:
     return False
 
 
-def _build_data(tree, errors: list[tuple[Path, RefError]], repo_root: Path) -> dict[str, Any]:
+def find_missing_bidirectional(parsed_cache: dict[Path, ParsedDoc], repo_root: Path) -> list[tuple[Path, Path]]:
+    missing = []
+    repo_root = repo_root.resolve()
+    for doc_a, parsed_a in parsed_cache.items():
+        rel_a = str(doc_a.relative_to(repo_root))
+        for ref in parsed_a.related_docs:
+            doc_b = (repo_root / ref.path).resolve()
+            if doc_b not in parsed_cache:
+                continue
+            parsed_b = parsed_cache[doc_b]
+            b_related_paths = {r.path for r in parsed_b.related_docs}
+            if rel_a not in b_related_paths:
+                missing.append((doc_a, doc_b))
+    return missing
+
+
+def _build_data(
+    tree,
+    errors: list[tuple[Path, RefError]],
+    missing_bidirectional: list[tuple[Path, Path]],
+    repo_root: Path,
+) -> dict[str, Any]:
     phases: dict[str, list[str]] = {}
     for i, level_docs in enumerate(tree.levels):
         if not level_docs:
@@ -79,6 +100,12 @@ def _build_data(tree, errors: list[tuple[Path, RefError]], repo_root: Path) -> d
                 "message": error.message,
             }
             for doc_path, error in errors
+        ]
+
+    if missing_bidirectional:
+        data["missing_bidirectional"] = [
+            {"doc": str(a.relative_to(repo_root)), "missing_in": str(b.relative_to(repo_root))}
+            for a, b in missing_bidirectional
         ]
 
     return data
@@ -104,6 +131,13 @@ def _print_from_data(data: dict[str, Any]) -> None:
         for w in warnings:
             print(f"  {w['doc']}:{w['line']}: {w['message']}")
 
+    missing_bidir = data.get("missing_bidirectional", [])
+    if missing_bidir:
+        print()
+        print(f"Missing bidirectional refs ({len(missing_bidir)}):")
+        for m in missing_bidir:
+            print(f"  {m['doc']} -> {m['missing_in']} (should reference back)")
+
 
 def run(docs_path: Path, output_json: bool = False) -> int:
     config = load_config()
@@ -117,11 +151,13 @@ def run(docs_path: Path, output_json: bool = False) -> int:
         for error in result.errors:
             errors.append((doc_path, error))
 
-    data = _build_data(tree, errors, repo_root)
+    missing_bidirectional = find_missing_bidirectional(tree.index.parsed_cache, repo_root)
+    data = _build_data(tree, errors, missing_bidirectional, repo_root)
 
     if output_json:
         print(json.dumps(data, indent=2))
     else:
         _print_from_data(data)
 
-    return 1 if data.get("warnings") else 0
+    has_issues = data.get("warnings") or data.get("missing_bidirectional")
+    return 1 if has_issues else 0

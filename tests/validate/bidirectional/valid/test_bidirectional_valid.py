@@ -1,0 +1,20 @@
+import shutil
+import tempfile
+from pathlib import Path
+
+from doctrace.commands.info import find_missing_bidirectional
+from doctrace.core.config import Config
+from doctrace.core.docs import build_doc_index
+
+DOCS_DIR = Path(__file__).parent / "docs"
+
+
+def test_bidirectional_valid():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir).resolve()
+        docs_dir = tmppath / "docs"
+        shutil.copytree(DOCS_DIR, docs_dir)
+        config = Config({})
+        index = build_doc_index(docs_dir, config, repo_root=tmppath)
+        missing = find_missing_bidirectional(index.parsed_cache, tmppath)
+        assert len(missing) == 0
