@@ -6,7 +6,6 @@ from unittest.mock import patch
 import pytest
 
 from doctrace.commands.affected import resolve_commit_ref
-from doctrace.core.config import Config
 
 
 def test_resolve_commit_ref_with_last():
@@ -17,20 +16,6 @@ def test_resolve_commit_ref_with_last():
 def test_resolve_commit_ref_last_must_be_positive():
     with pytest.raises(ValueError, match="--last must be greater than 0"):
         resolve_commit_ref(Path("."), last=0)
-
-
-def test_resolve_commit_ref_with_since_base():
-    mock_config = Config({"base": {"commit_hash": "abc123"}})
-    with patch("doctrace.commands.affected.load_config", return_value=mock_config):
-        commit_ref = resolve_commit_ref(Path("."), since_base=True)
-    assert commit_ref == "abc123"
-
-
-def test_resolve_commit_ref_since_base_missing_commit():
-    mock_config = Config({})
-    with patch("doctrace.commands.affected.load_config", return_value=mock_config):
-        with pytest.raises(ValueError, match="doctrace.json has no base"):
-            resolve_commit_ref(Path("."), since_base=True)
 
 
 def test_resolve_commit_ref_with_base_branch():

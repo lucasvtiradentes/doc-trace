@@ -3,10 +3,10 @@ title: Repository Structure
 description: Directory layout and file organization
 related_docs:
   - docs/repo/tooling.md: dev tools configuration
-  - docs/testing.md: test patterns and coverage
+  - docs/testing.md:      test patterns and coverage
 sources:
-  - src/doctrace/: main package
-  - tests/: test suite
+  - src/doctrace/:      main package
+  - tests/:             test suite
   - .github/workflows/: CI pipelines
 ---
 
@@ -25,7 +25,6 @@ doc-trace/
 │   │   │   ├── graph.py   ← graph data building
 │   │   │   ├── search.py  ← doc content search
 │   │   │   └── template.html ← HTML/JS template
-│   │   ├── base.py        ← base commit state management
 │   │   └── init.py        ← project initialization
 │   └── core/              ← shared logic
 │       ├── __init__.py
@@ -66,7 +65,7 @@ Each file implements one CLI subcommand. All follow the same pattern:
 
 Shared modules used across commands:
 - `docs.py`      - doc parsing, indexing, dependency tree
-- `config.py`    - loads and validates doctrace.json, manages base state
+- `config.py`    - loads and validates doctrace.json
 - `git.py`       - git operations, change detection
 - `constants.py` - file/dir names, default values
 

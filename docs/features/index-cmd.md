@@ -2,11 +2,11 @@
 title: Index Command
 description: Generates index.md table from frontmatter metadata
 related_docs:
-  - docs/concepts.md: DocMeta type
+  - docs/concepts.md:            DocMeta type
   - docs/features/validation.md: uses same frontmatter parsing
 sources:
   - src/doctrace/commands/index.py: index command
-  - src/doctrace/core/docs.py: frontmatter parsing
+  - src/doctrace/core/docs.py:      frontmatter parsing
 ---
 
 Generates an index table from all docs' frontmatter metadata.
@@ -29,25 +29,25 @@ doctrace index docs/ -o docs/index.md
 ```markdown
 ## Doc Index
 
-| File                       | Description                    |
-|----------------------------|--------------------------------|
-| docs/overview.md           | project summary                |
-| docs/architecture.md       | system design details          |
+| File                 | Description           |
+|----------------------|-----------------------|
+| docs/overview.md     | project summary       |
+| docs/architecture.md | system design details |
 ```
 
 ## Frontmatter Fields Used
 
-| Field       | Required | Description                    |
-|-------------|----------|--------------------------------|
-| title       | no       | doc title (defaults to filename)|
-| description | no       | short description              |
+| Field       | Required | Description                      |
+|-------------|----------|----------------------------------|
+| title       | no       | doc title (defaults to filename) |
+| description | no       | short description                |
 
 ## Options
 
-| Option          | Required | Description        |
-|-----------------|----------|--------------------|
-| `path`          | yes      | docs directory     |
-| `-o`, `--output`| yes      | output file path   |
+| Option           | Required | Description      |
+|------------------|----------|------------------|
+| `path`           | yes      | docs directory   |
+| `-o`, `--output` | yes      | output file path |
 
 ## Implementation
 

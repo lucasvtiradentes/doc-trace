@@ -5,8 +5,8 @@ required_docs:
   - docs/concepts.md: AffectedResult type
 sources:
   - src/doctrace/commands/affected.py: affected implementation
-  - src/doctrace/core/git.py: git helpers used by affected (FileChange, commits, tags)
-  - src/doctrace/cli.py: CLI flag definitions for affected command
+  - src/doctrace/core/git.py:          git helpers used by affected (FileChange, commits, tags)
+  - src/doctrace/cli.py:               CLI flag definitions for affected command
 ---
 
 Maps code changes to affected documentation.
@@ -15,7 +15,6 @@ Maps code changes to affected documentation.
 
 ```bash
 doctrace affected docs/ --last 1
-doctrace affected docs/ --since-base
 doctrace affected docs/ --base-branch main
 doctrace affected docs/ --since v0.1.0
 doctrace affected docs/ --last 1 --json
@@ -61,7 +60,6 @@ Outputs the full result as JSON instead of text.
 
 Resolves a comparison base from one required scope flag:
 - `--last <N>` -> `HEAD~N`
-- `--since-base` -> `doctrace.json:base.commit_hash`
 - `--base-branch <branch>` -> `git merge-base HEAD <branch>`
 - `--since <ref>` -> uses the ref directly (commit, tag, or branch)
 

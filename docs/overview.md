@@ -3,10 +3,10 @@ title: Overview
 description: CLI tool that keeps documentation in sync with code changes
 related_docs:
   - docs/architecture.md: system design details
-  - docs/concepts.md: key terminology
+  - docs/concepts.md:     key terminology
 sources:
   - src/doctrace/cli.py: main entry point
-  - src/doctrace/: main package directory
+  - src/doctrace/:       main package directory
 ---
 
 CLI tool that keeps documentation in sync with code changes.
@@ -16,17 +16,16 @@ CLI tool that keeps documentation in sync with code changes.
 - Detects docs affected by code changes via git diff
 - Validates all doc references point to existing files
 - Tracks doc-to-doc relationships for cascading updates
-- Manages base commit state for incremental analysis
 
 ## Package Info
 
-| Field       | Value                       |
-|-------------|:----------------------------|
-| Name        | doctrace                     |
-| Version     | 0.1.1                       |
-| Python      | 3.9+                        |
-| Entry point | doctrace.cli:main            |
-| Build       | hatch (wheel packaging)     |
+| Field       | Value                   |
+|-------------|-------------------------|
+| Name        | doctrace                |
+| Version     | 0.1.1                   |
+| Python      | 3.9+                    |
+| Entry point | doctrace.cli:main       |
+| Build       | hatch (wheel packaging) |
 
 ## Built With
 
@@ -39,11 +38,10 @@ CLI tool that keeps documentation in sync with code changes.
 ## Commands
 
 | Command    | Description                          |
-|------------|:-------------------------------------|
+| ---------- | :----------------------------------- |
 | info       | show phases + validate all doc refs  |
 | affected   | list docs affected by git diff       |
 | preview    | interactive docs explorer in browser |
-| base       | manage base commit state             |
 | init       | create doctrace.json config file     |
 | index      | generate index.md from frontmatter   |
 | completion | generate shell completion scripts    |

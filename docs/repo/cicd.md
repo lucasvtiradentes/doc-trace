@@ -4,20 +4,20 @@ description: CI/CD pipelines and deployment
 related_docs:
   - docs/repo/tooling.md: tool configurations
 sources:
-  - .github/workflows/prs.yml: PR workflow
+  - .github/workflows/prs.yml:          PR workflow
   - .github/workflows/push-to-main.yml: main branch workflow
-  - .github/workflows/callable-ci.yml: reusable CI
-  - .github/workflows/release.yml: release workflow
+  - .github/workflows/callable-ci.yml:  reusable CI
+  - .github/workflows/release.yml:      release workflow
 ---
 
 ## Pipelines
 
-| Workflow         | Trigger              | Purpose                  |
-|------------------|----------------------|--------------------------|
-| prs.yml          | pull_request         | validate PRs             |
-| push-to-main.yml | push to main         | validate main branch     |
-| callable-ci.yml  | workflow_call        | reusable CI workflow     |
-| release.yml      | workflow_dispatch    | publish to PyPI          |
+| Workflow         | Trigger           | Purpose              |
+|------------------|-------------------|----------------------|
+| prs.yml          | pull_request      | validate PRs         |
+| push-to-main.yml | push to main      | validate main branch |
+| callable-ci.yml  | workflow_call     | reusable CI workflow |
+| release.yml      | workflow_dispatch | publish to PyPI      |
 
 ## CI Jobs (callable-ci.yml)
 
@@ -36,10 +36,10 @@ steps:
 
 Runs pytest with Python version matrix.
 
-| Python | Status     |
-|--------|------------|
-| 3.9    | tested     |
-| 3.12   | tested     |
+| Python | Status |
+|--------|--------|
+| 3.9    | tested |
+| 3.12   | tested |
 
 ```yaml
 steps:
@@ -80,12 +80,12 @@ Environment: `pypi`
 
 ### Version Bump Options
 
-| Option  | Example         |
-|---------|-----------------|
-| patch   | 0.1.0 → 0.1.1   |
-| minor   | 0.1.0 → 0.2.0   |
-| major   | 0.1.0 → 1.0.0   |
-| initial | no bump         |
+| Option  | Example       |
+|---------|---------------|
+| patch   | 0.1.0 → 0.1.1 |
+| minor   | 0.1.0 → 0.2.0 |
+| major   | 0.1.0 → 1.0.0 |
+| initial | no bump       |
 
 ## Branch Strategy
 

@@ -12,10 +12,10 @@ sources:
 
 Fast Python linter and formatter.
 
-| Setting     | Value           |
-|-------------|-----------------|
-| Line length | 120             |
-| Rules       | E, F, I         |
+| Setting     | Value   |
+|-------------|---------|
+| Line length | 120     |
+| Rules       | E, F, I |
 
 Rules enabled:
 - E - pycodestyle errors
@@ -34,10 +34,10 @@ ruff format --check # check formatting
 
 Test framework configured via `pyproject.toml`.
 
-| Setting     | Value             |
-|-------------|-------------------|
-| testpaths   | tests/            |
-| python_files| test.py, test_*.py|
+| Setting      | Value              |
+|--------------|--------------------|
+| testpaths    | tests/             |
+| python_files | test.py, test_*.py |
 
 ```bash
 pytest -v           # run tests verbose
@@ -60,11 +60,11 @@ packages = ["src/doctrace"]
 
 Changelog generation from fragments.
 
-| Setting        | Value                          |
-|----------------|--------------------------------|
-| directory      | .changelog                     |
-| filename       | CHANGELOG.md                   |
-| title_format   | ## {version} ({project_date})  |
+| Setting      | Value                         |
+|--------------|-------------------------------|
+| directory    | .changelog                    |
+| filename     | CHANGELOG.md                  |
+| title_format | ## {version} ({project_date}) |
 
 Fragment types:
 - `feature/` - new features
