@@ -5,7 +5,7 @@ required_docs:
   - docs/concepts.md: ValidateResult, RefError types
 sources:
   - src/doctrace/commands/info.py: validation implementation
-  - src/doctrace/core/docs.py: metadata extraction
+  - src/doctrace/core/docs.py:     metadata extraction
 ---
 
 Validates that all doc references point to existing files and shows dependency phases.
@@ -62,10 +62,10 @@ Warnings (2):
 
 ## Exit Codes
 
-| Code | Meaning                    |
-|------|----------------------------|
-| 0    | all refs valid             |
-| 1    | one or more refs invalid   |
+| Code | Meaning                  |
+|------|--------------------------|
+| 0    | all refs valid           |
+| 1    | one or more refs invalid |
 
 ## Output Format
 
@@ -92,10 +92,10 @@ Warnings (1):
 
 ## Implementation Details
 
-| Function             | Purpose                            |
-|----------------------|------------------------------------|
-| validate_refs()      | iterate docs, yield ValidateResults|
-| _check_single_doc()  | validate one doc                   |
-| _glob_matches()      | check if pattern has matches       |
-| build_dependency_tree() | build doc dependency tree       |
+| Function                | Purpose                             |
+|-------------------------|-------------------------------------|
+| validate_refs()         | iterate docs, yield ValidateResults |
+| _check_single_doc()     | validate one doc                    |
+| _glob_matches()         | check if pattern has matches        |
+| build_dependency_tree() | build doc dependency tree           |
 

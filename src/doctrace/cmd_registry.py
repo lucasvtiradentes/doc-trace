@@ -20,7 +20,7 @@ COMMANDS: dict[str, CommandInfo] = {
     "affected": {
         "desc": "list docs affected by git diff",
         "args": "<path>",
-        "flags": ["--since-base", "--last", "--base-branch", "--since", "--json", "--ignore"],
+        "flags": ["--last", "--base-branch", "--since", "--json", "--ignore"],
         "subcommands": [],
     },
     "preview": {
@@ -28,12 +28,6 @@ COMMANDS: dict[str, CommandInfo] = {
         "args": "<path>",
         "flags": ["--port"],
         "subcommands": [],
-    },
-    "base": {
-        "desc": "manage base commit state",
-        "args": "<update|show>",
-        "flags": [],
-        "subcommands": ["update", "show"],
     },
     "init": {
         "desc": "create doctrace.json",
@@ -55,4 +49,4 @@ COMMANDS: dict[str, CommandInfo] = {
     },
 }
 
-DIR_COMMANDS = [c for c in COMMANDS if c not in ("base", "init", "completion")]
+DIR_COMMANDS = [c for c in COMMANDS if c not in ("init", "completion")]

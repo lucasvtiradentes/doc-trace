@@ -5,7 +5,7 @@ related_docs:
   - docs/overview.md: CLI commands overview
 sources:
   - src/doctrace/commands/completion.py: completion generators
-  - src/doctrace/cmd_registry.py: command metadata
+  - src/doctrace/cmd_registry.py:        command metadata
 ---
 
 Generates shell completion scripts with full support for commands, subcommands, flags, and directory paths.
@@ -35,15 +35,14 @@ doctrace completion fish | source
 
 ## What Gets Completed
 
-| Context                    | Completions                              |
-|----------------------------|------------------------------------------|
-| `doctrace <TAB>`           | all commands                             |
-| `doctrace info <TAB>`      | directories                              |
-| `doctrace info --<TAB>`    | `--json --ignore`                        |
-| `doctrace affected --<TAB>`| `--since-base --last --json --ignore`   |
-| `doctrace base <TAB>`      | `update show`                            |
-| `doctrace completion <TAB>`| `zsh bash fish`                          |
-| `doctrace index --<TAB>`   | `-o --output`                            |
+| Context                     | Completions                                    |
+|-----------------------------|------------------------------------------------|
+| `doctrace <TAB>`            | all commands                                   |
+| `doctrace info <TAB>`       | directories                                    |
+| `doctrace info --<TAB>`     | `--json --ignore`                              |
+| `doctrace affected --<TAB>` | `--last --base-branch --since --json --ignore` |
+| `doctrace completion <TAB>` | `zsh bash fish`                                |
+| `doctrace index --<TAB>`    | `-o --output`                                  |
 
 ## Implementation
 

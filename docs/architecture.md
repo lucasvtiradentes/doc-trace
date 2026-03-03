@@ -4,13 +4,13 @@ description: System design, data flow, and module structure
 required_docs:
   - docs/concepts.md: key types used in data flow
 related_docs:
-  - docs/features/affected.md: affected algorithm details
+  - docs/features/affected.md:   affected algorithm details
   - docs/features/validation.md: validate command details
-  - docs/features/preview.md: preview command details
+  - docs/features/preview.md:    preview command details
 sources:
-  - src/doctrace/cli.py: entry point and dispatcher
+  - src/doctrace/cli.py:    entry point and dispatcher
   - src/doctrace/commands/: command implementations
-  - src/doctrace/core/: core modules
+  - src/doctrace/core/:     core modules
 ---
 
 ## Entry Point
@@ -23,13 +23,13 @@ sources:
 ├─────────────────────────────────────────────────────────────┤
 │  argparse → subcommand dispatcher                           │
 │                                                             │
-│  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────┐ ┌──────┐    │
-│  │   info   │ │ affected │ │ preview │ │ base │ │ init │    │
-│  └────┬─────┘ └────┬─────┘ └────┬────┘ └──┬───┘ └──┬───┘    │
-│       │            │            │         │        │        │
-│       v            v            v         v        v        │
-│  commands/    commands/    commands/  commands/ commands/   │
-│  info.py     affected.py  preview.py base.py   init.py      │
+│  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────┐             │
+│  │   info   │ │ affected │ │ preview │ │ init │             │
+│  └────┬─────┘ └────┬─────┘ └────┬────┘ └──┬───┘             │
+│       │            │            │         │                 │
+│       v            v            v         v                 │
+│  commands/    commands/    commands/  commands/             │
+│  info.py     affected.py  preview.py init.py                │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -42,11 +42,10 @@ src/doctrace/
 │   ├── info.py         ← info command (phases + validation)
 │   ├── affected.py     ← change detection + output formatting
 │   ├── preview/        ← interactive browser UI module
-│   ├── base.py         ← base commit state management
 │   └── init.py         ← project setup
 ├── core/
 │   ├── docs.py         ← doc parsing + indexing
-│   ├── config.py       ← runtime configuration + base state
+│   ├── config.py       ← runtime configuration
 │   ├── git.py          ← git operations
 │   └── constants.py    ← shared constants
 ```
@@ -136,13 +135,13 @@ while current_level not empty:
 
 ## Observability
 
-| Signal    | Description                                |
-|-----------|--------------------------------------------|
-| Exit 0    | success, no errors                         |
-| Exit 1    | validation errors found                    |
-| Exit 2    | scope error (affected command)             |
-| stdout    | results output                             |
-| Warnings  | circular ref detection (non-blocking)      |
+| Signal   | Description                           |
+|----------|---------------------------------------|
+| Exit 0   | success, no errors                    |
+| Exit 1   | validation errors found               |
+| Exit 2   | scope error (affected command)        |
+| stdout   | results output                        |
+| Warnings | circular ref detection (non-blocking) |
 
 ## Config Loading
 

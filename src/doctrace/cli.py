@@ -4,7 +4,7 @@ from importlib.metadata import version
 from pathlib import Path
 
 from doctrace.cmd_registry import COMMANDS
-from doctrace.commands import affected, base, completion, index, info, init, preview
+from doctrace.commands import affected, completion, index, info, init, preview
 from doctrace.core.constants import DEFAULT_PREVIEW_PORT
 
 VERSION = version("doctrace")
@@ -23,7 +23,6 @@ def main():
     affected_parser = subparsers.add_parser("affected", help=COMMANDS["affected"]["desc"])
     affected_parser.add_argument("path", type=Path, help="docs directory")
     scope_group = affected_parser.add_mutually_exclusive_group(required=True)
-    scope_group.add_argument("--since-base", action="store_true", help="compare from base in doctrace.json")
     scope_group.add_argument("--last", type=int, help="compare against HEAD~N (N must be > 0)")
     scope_group.add_argument("--base-branch", help="compare from merge-base(HEAD, <branch>)")
     scope_group.add_argument("--since", help="compare from git ref (commit/tag/branch)")
@@ -33,11 +32,6 @@ def main():
     preview_parser = subparsers.add_parser("preview", help=COMMANDS["preview"]["desc"])
     preview_parser.add_argument("path", type=Path, help="docs directory")
     preview_parser.add_argument("--port", type=int, default=DEFAULT_PREVIEW_PORT, help="server port")
-
-    base_parser = subparsers.add_parser("base", help=COMMANDS["base"]["desc"])
-    base_subparsers = base_parser.add_subparsers(dest="base_command", required=True)
-    base_subparsers.add_parser("update", help="save current commit to doctrace.json")
-    base_subparsers.add_parser("show", help="show base state")
 
     subparsers.add_parser("init", help=COMMANDS["init"]["desc"])
 
@@ -60,7 +54,6 @@ def main():
         sys.exit(
             affected.run(
                 args.path,
-                args.since_base,
                 args.last,
                 args.base_branch,
                 args.since,
@@ -70,11 +63,6 @@ def main():
         )
     elif args.command == "preview":
         sys.exit(preview.run(args.path, args.port))
-    elif args.command == "base":
-        if args.base_command == "update":
-            sys.exit(base.run_update())
-        elif args.base_command == "show":
-            sys.exit(base.run_show())
     elif args.command == "init":
         sys.exit(init.run())
     elif args.command == "index":

@@ -147,14 +147,11 @@ doctrace preview docs/               # interactive explorer in browser
 ```bash
 doctrace info <path>                           # show phases + validate refs
 doctrace affected <path> --last <N>            # list affected docs by last N commits
-doctrace affected <path> --since <ref>         # list affected docs since ref
-doctrace affected <path> --since-base          # list affected docs since base commit
+doctrace affected <path> --since <ref>         # list affected docs since ref (commit/tag/branch)
 doctrace affected <path> --base-branch <branch># list affected docs from merge-base
 doctrace affected <path> --json                # output as JSON
 doctrace preview <path>                        # interactive explorer in browser
 doctrace preview <path> --port <N>             # preview on custom port (default 8420)
-doctrace base update                           # save current commit as base
-doctrace base show                             # show base state
 doctrace init                                  # create doctrace.json
 doctrace index <path> -o <file>                # generate index.md from frontmatter
 doctrace completion <shell>                    # generate shell completion script
@@ -202,12 +199,6 @@ Phases show dependency order - useful for AI agents processing docs.
     "required_docs_key": "required_docs",
     "related_docs_key": "related_docs",
     "sources_key": "sources"
-  },
-  "base": {
-    "commit_hash": "abc123...",
-    "commit_message": "feat: something",
-    "commit_date": "2026-02-17T10:30:00+00:00",
-    "analyzed_at": "2026-02-17T20:55:32+00:00"
   }
 }
 ```
@@ -217,7 +208,6 @@ Phases show dependency order - useful for AI agents processing docs.
 | `metadata.required_docs_key` | frontmatter key for required docs (default: "required_docs") |
 | `metadata.related_docs_key`  | frontmatter key for related docs (default: "related_docs")   |
 | `metadata.sources_key`       | frontmatter key for source refs (default: "sources")         |
-| `base`                       | set by `doctrace base update`                                |
 
 </div>
 </details>

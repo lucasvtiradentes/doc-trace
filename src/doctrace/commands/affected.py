@@ -32,20 +32,13 @@ class AffectedResult(NamedTuple):
 
 def resolve_commit_ref(
     repo_root: Path,
-    since_base: bool = False,
     last: int | None = None,
     base_branch: str | None = None,
     since: str | None = None,
 ) -> str:
-    options_selected = int(since_base) + int(last is not None) + int(base_branch is not None) + int(since is not None)
+    options_selected = int(last is not None) + int(base_branch is not None) + int(since is not None)
     if options_selected != 1:
-        raise ValueError("choose exactly one scope: --since-base, --last <N>, --base-branch <branch>, or --since <ref>")
-    if since_base:
-        config = load_config(repo_root, validate=False)
-        if not config.base.is_set:
-            raise ValueError("doctrace.json has no base; run 'doctrace base update' first")
-        assert config.base.commit_hash is not None
-        return config.base.commit_hash
+        raise ValueError("choose exactly one scope: --last <N>, --base-branch <branch>, or --since <ref>")
     if last is not None:
         if last <= 0:
             raise ValueError("--last must be greater than 0")
@@ -314,7 +307,6 @@ def _filter_docs(docs: list[Path], repo_root: Path, ignore_patterns: list[str]) 
 
 def run(
     docs_path: Path,
-    since_base: bool = False,
     last: int | None = None,
     base_branch: str | None = None,
     since: str | None = None,
@@ -326,7 +318,7 @@ def run(
     all_ignore = config.ignore_inline_refs + (ignore_patterns or [])
 
     try:
-        commit_ref = resolve_commit_ref(repo_root, since_base, last, base_branch, since)
+        commit_ref = resolve_commit_ref(repo_root, last, base_branch, since)
     except ValueError as e:
         if output_json:
             print(json.dumps({"error": str(e)}))

@@ -5,7 +5,7 @@ related_docs:
   - docs/concepts.md: core types
 sources:
   - src/doctrace/commands/preview/: preview module
-  - src/doctrace/core/git.py: get_file_history, get_file_at_commit
+  - src/doctrace/core/git.py:       get_file_history, get_file_at_commit
 ---
 
 Interactive documentation explorer in the browser.
@@ -49,13 +49,13 @@ Starts a local HTTP server serving an interactive single-page application for ex
 
 ## Server Endpoints
 
-| Endpoint | Method | Description                          |
-|----------|--------|--------------------------------------|
-| /        | GET    | main HTML application                |
-| /doc     | GET    | fetch doc content (supports ?commit=)|
-| /doc     | POST   | save doc content                     |
-| /history | GET    | get git commit history for doc       |
-| /search  | GET    | search docs by content               |
+| Endpoint | Method | Description                           |
+|----------|--------|---------------------------------------|
+| /        | GET    | main HTML application                 |
+| /doc     | GET    | fetch doc content (supports ?commit=) |
+| /doc     | POST   | save doc content                      |
+| /history | GET    | get git commit history for doc        |
+| /search  | GET    | search docs by content                |
 
 ## Configuration
 
@@ -69,14 +69,14 @@ doctrace preview docs/ --port 3000
 
 ## Implementation
 
-| Function            | Purpose                                  |
-|---------------------|------------------------------------------|
-| build_graph_data()  | build nodes/edges from dependency tree   |
-| generate_html()     | inject graph data into template          |
-| PreviewHandler      | HTTP request handler                     |
-| get_file_history()  | git log for file                         |
-| get_file_at_commit()| git show for file at commit              |
-| search_docs()       | content search across docs               |
+| Function             | Purpose                                |
+|----------------------|----------------------------------------|
+| build_graph_data()   | build nodes/edges from dependency tree |
+| generate_html()      | inject graph data into template        |
+| PreviewHandler       | HTTP request handler                   |
+| get_file_history()   | git log for file                       |
+| get_file_at_commit() | git show for file at commit            |
+| search_docs()        | content search across docs             |
 
 ## Output
 

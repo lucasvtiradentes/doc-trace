@@ -3,15 +3,15 @@ title: Testing
 description: Testing strategy and patterns
 related_docs:
   - docs/repo/tooling.md: pytest configuration
-  - docs/repo/cicd.md: CI test jobs
+  - docs/repo/cicd.md:    CI test jobs
 sources:
   - tests/affected/: affected tests
-  - tests/parser/: parser tests
-  - tests/preview/: preview tests
+  - tests/parser/:   parser tests
+  - tests/preview/:  preview tests
   - tests/validate/: validation tests
-  - tests/config/: config tests
-  - tests/cli/: CLI tests
-  - tests/core/: core module tests
+  - tests/config/:   config tests
+  - tests/cli/:      CLI tests
+  - tests/core/:     core module tests
 ---
 
 ## Framework
@@ -33,15 +33,15 @@ make test
 
 Tests are organized by feature area:
 
-| Directory / File   | Coverage                                                         |
-|--------------------|------------------------------------------------------------------|
-| `tests/affected/`  | index building, direct hits, propagation, scope resolution       |
-| `tests/validate/`  | valid refs, missing docs, missing sources                        |
-| `tests/config/`    | config validation (valid + invalid)                              |
-| `tests/parser/`    | frontmatter parsing, code blocks, line numbers                   |
-| `tests/preview/`   | search, graph building                                           |
-| `tests/cli/`       | CLI argument parsing and command dispatch                        |
-| `tests/core/`      | dependency tree building, level computation                      |
+| Directory / File  | Coverage                                                   |
+|-------------------|------------------------------------------------------------|
+| `tests/affected/` | index building, direct hits, propagation, scope resolution |
+| `tests/validate/` | valid refs, missing docs, missing sources                  |
+| `tests/config/`   | config validation (valid + invalid)                        |
+| `tests/parser/`   | frontmatter parsing, code blocks, line numbers             |
+| `tests/preview/`  | search, graph building                                     |
+| `tests/cli/`      | CLI argument parsing and command dispatch                  |
+| `tests/core/`     | dependency tree building, level computation                |
 
 ## Common Patterns
 

@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from doctrace.core.constants import CONFIG_FILENAME, DEFAULT_METADATA, GIT_DIR
-from doctrace.core.git import get_current_commit_info
 
 
 class ConfigError(Exception):
@@ -20,32 +18,9 @@ class MetadataConfig:
         self.sources_key: str = data.get("sources_key", DEFAULT_METADATA["sources_key"])
 
 
-class Base:
-    def __init__(self, data: dict[str, Any] | None):
-        if data is None:
-            data = {}
-        self.commit_hash: str | None = data.get("commit_hash")
-        self.commit_message: str | None = data.get("commit_message")
-        self.commit_date: str | None = data.get("commit_date")
-        self.analyzed_at: str | None = data.get("analyzed_at")
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "commit_hash": self.commit_hash,
-            "commit_message": self.commit_message,
-            "commit_date": self.commit_date,
-            "analyzed_at": self.analyzed_at,
-        }
-
-    @property
-    def is_set(self) -> bool:
-        return self.commit_hash is not None
-
-
 class Config:
     def __init__(self, data: dict[str, Any]):
         self.metadata: MetadataConfig = MetadataConfig(data.get("metadata", {}))
-        self.base: Base = Base(data.get("base"))
         self.ignore_inline_refs: list[str] = data.get("ignore_inline_refs", [])
 
     def to_dict(self) -> dict[str, Any]:
@@ -56,8 +31,6 @@ class Config:
                 "related_docs_key": self.metadata.related_docs_key,
                 "sources_key": self.metadata.sources_key,
             }
-        if self.base.is_set:
-            result["base"] = self.base.to_dict()
         if self.ignore_inline_refs:
             result["ignore_inline_refs"] = self.ignore_inline_refs
         return result
@@ -72,7 +45,7 @@ class Config:
 
 def validate_config(data: dict[str, Any]) -> list[str]:
     errors = []
-    valid_keys = {"metadata", "base", "ignore_inline_refs"}
+    valid_keys = {"metadata", "ignore_inline_refs"}
     for key in data:
         if key not in valid_keys:
             errors.append(f"unknown key: {key}")
@@ -136,30 +109,6 @@ def find_repo_root(start_path: Path) -> Path:
     if git_dir:
         return git_dir.parent
     return start_path.resolve()
-
-
-def save_config(config: Config, repo_root: Path) -> Path:
-    config_path = repo_root / CONFIG_FILENAME
-    with open(config_path, "w", encoding="utf-8") as f:
-        json.dump(config.to_dict(), f, indent=2)
-    return config_path
-
-
-def update_base(repo_root: Path) -> tuple[Path, Base]:
-    config = load_config(repo_root, validate=False)
-    commit_info = get_current_commit_info(repo_root)
-    if commit_info is None:
-        raise ConfigError("Could not get current commit info")
-    config.base = Base(
-        {
-            "commit_hash": commit_info.hash,
-            "commit_message": commit_info.message,
-            "commit_date": commit_info.date,
-            "analyzed_at": datetime.now(timezone.utc).isoformat(),
-        }
-    )
-    config_path = save_config(config, repo_root)
-    return config_path, config.base
 
 
 def init_config(target_dir: Path) -> Path:

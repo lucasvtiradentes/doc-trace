@@ -23,23 +23,23 @@ This creates `.venv/` and installs package with dev dependencies.
 
 ## Dev Dependencies
 
-| Package      | Purpose                    |
-|--------------|----------------------------|
-| pytest       | testing framework          |
-| ruff         | linter and formatter       |
-| towncrier    | changelog generation       |
-| bump2version | version bumping            |
+| Package      | Purpose              |
+|--------------|----------------------|
+| pytest       | testing framework    |
+| ruff         | linter and formatter |
+| towncrier    | changelog generation |
+| bump2version | version bumping      |
 
 ## Available Commands
 
-| Command              | Description                       |
-|----------------------|-----------------------------------|
-| make install         | create venv, install deps         |
-| make check           | ruff lint + format check          |
-| make test            | pytest -v                         |
-| make practical-test  | doctrace info docs/            |
-| make changelog       | build CHANGELOG.md                |
-| make changelog-draft | preview changelog                 |
+| Command              | Description               |
+|----------------------|---------------------------|
+| make install         | create venv, install deps |
+| make check           | ruff lint + format check  |
+| make test            | pytest -v                 |
+| make practical-test  | doctrace info docs/       |
+| make changelog       | build CHANGELOG.md        |
+| make changelog-draft | preview changelog         |
 
 ## Manual Install
 

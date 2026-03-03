@@ -2,11 +2,11 @@
 title: Concepts
 description: Core types and terminology
 sources:
-  - src/doctrace/core/docs.py: RefEntry, ParsedDoc, DocIndex, DependencyTree definitions
+  - src/doctrace/core/docs.py:         RefEntry, ParsedDoc, DocIndex, DependencyTree definitions
   - src/doctrace/commands/affected.py: AffectedResult definition
-  - src/doctrace/commands/info.py: ValidateResult, RefError definitions
-  - src/doctrace/core/config.py: Config, MetadataConfig, Base definitions
-  - src/doctrace/core/git.py: FileChange, CommitInfo, CurrentCommitInfo definitions
+  - src/doctrace/commands/info.py:     ValidateResult, RefError definitions
+  - src/doctrace/core/config.py:       Config, MetadataConfig definitions
+  - src/doctrace/core/git.py:          FileChange, CommitInfo, CurrentCommitInfo definitions
 ---
 
 ## Core Types
@@ -15,11 +15,11 @@ sources:
 
 Reference tuple extracted from doc metadata sections.
 
-| Field       | Type | Description                   |
-|-------------|------|-------------------------------|
-| path        | str  | relative path from repo root  |
-| description | str  | human-readable description    |
-| line_number | int  | line number in source doc     |
+| Field       | Type | Description                  |
+|-------------|------|------------------------------|
+| path        | str  | relative path from repo root |
+| description | str  | human-readable description   |
+| line_number | int  | line number in source doc    |
 
 ### ParsedDoc
 
@@ -35,46 +35,46 @@ Container for extracted references from a markdown file.
 
 Index structure built from scanning docs.
 
-| Field          | Type                    | Description                           |
-|----------------|-------------------------|---------------------------------------|
-| parsed_cache   | dict[Path, ParsedDoc]   | parsed docs by path                   |
-| source_to_docs | dict[str, list[Path]]   | source paths to docs that reference them |
-| forward_deps   | dict[Path, list[Path]]  | doc to docs it requires               |
-| reverse_deps   | dict[Path, list[Path]]  | doc to docs that require it           |
+| Field          | Type                   | Description                              |
+|----------------|------------------------|------------------------------------------|
+| parsed_cache   | dict[Path, ParsedDoc]  | parsed docs by path                      |
+| source_to_docs | dict[str, list[Path]]  | source paths to docs that reference them |
+| forward_deps   | dict[Path, list[Path]] | doc to docs it requires                  |
+| reverse_deps   | dict[Path, list[Path]] | doc to docs that require it              |
 
 ### DependencyTree
 
 Dependency tree with levels and circular detection.
 
-| Field    | Type                      | Description                         |
-|----------|---------------------------|-------------------------------------|
-| levels   | list[list[Path]]          | docs grouped by dependency level    |
-| circular | list[tuple[Path, Path]]   | detected circular dependencies      |
-| doc_deps | dict[Path, list[Path]]    | forward dependencies                |
-| index    | DocIndex                  | underlying doc index                |
+| Field    | Type                    | Description                      |
+|----------|-------------------------|----------------------------------|
+| levels   | list[list[Path]]        | docs grouped by dependency level |
+| circular | list[tuple[Path, Path]] | detected circular dependencies   |
+| doc_deps | dict[Path, list[Path]]  | forward dependencies             |
+| index    | DocIndex                | underlying doc index             |
 
 ### AffectedResult
 
 Output from affected analysis.
 
-| Field            | Type                      | Description                              |
-|------------------|---------------------------|------------------------------------------|
-| affected_docs    | list[Path]                | all docs needing review                  |
-| direct_hits      | list[Path]                | docs with changed source refs            |
-| indirect_hits    | list[Path]                | docs reached via doc-to-doc refs         |
-| circular_refs    | list[tuple[Path, Path]]   | detected circular dependencies           |
-| matches          | dict[str, list[Path]]     | changed source paths to affected docs    |
-| indirect_chains  | dict[Path, Path]          | indirect hit doc to doc it was reached through |
-| parsed_cache     | dict[Path, ParsedDoc]     | parsed docs cache for efficiency               |
+| Field           | Type                    | Description                                    |
+|-----------------|-------------------------|------------------------------------------------|
+| affected_docs   | list[Path]              | all docs needing review                        |
+| direct_hits     | list[Path]              | docs with changed source refs                  |
+| indirect_hits   | list[Path]              | docs reached via doc-to-doc refs               |
+| circular_refs   | list[tuple[Path, Path]] | detected circular dependencies                 |
+| matches         | dict[str, list[Path]]   | changed source paths to affected docs          |
+| indirect_chains | dict[Path, Path]        | indirect hit doc to doc it was reached through |
+| parsed_cache    | dict[Path, ParsedDoc]   | parsed docs cache for efficiency               |
 
 ### Config
 
 Runtime configuration loaded from doctrace.json.
 
-| Field    | Type           | Description               |
-|----------|----------------|---------------------------|
-| metadata | MetadataConfig | metadata parsing settings |
-| base     | Base           | base commit state         |
+| Field              | Type           | Description                |
+|--------------------|----------------|----------------------------|
+| metadata           | MetadataConfig | metadata parsing settings  |
+| ignore_inline_refs | list[str]      | patterns to ignore in refs |
 
 ### MetadataConfig
 
@@ -86,36 +86,25 @@ Settings for how doc metadata is parsed.
 | related_docs_key  | str  | "related_docs"  | header for related doc refs section  |
 | sources_key       | str  | "sources"       | header for source references section |
 
-### Base
-
-State tracking for incremental analysis.
-
-| Field          | Type        | Description                |
-|----------------|-------------|----------------------------|
-| commit_hash    | str or None | commit hash of base        |
-| commit_message | str or None | commit message             |
-| commit_date    | str or None | ISO timestamp of commit    |
-| analyzed_at    | str or None | ISO timestamp of update    |
-
 ### ValidateResult
 
 Validation result for a single doc.
 
-| Field    | Type           | Description                  |
-|----------|----------------|------------------------------|
-| doc_path | Path           | path to the validated doc    |
-| errors   | list[RefError] | list of validation errors    |
-| ok       | property       | True if no errors            |
+| Field    | Type           | Description               |
+|----------|----------------|---------------------------|
+| doc_path | Path           | path to the validated doc |
+| errors   | list[RefError] | list of validation errors |
+| ok       | property       | True if no errors         |
 
 ### RefError
 
 Single validation error.
 
-| Field    | Type     | Description                    |
-|----------|----------|--------------------------------|
-| doc_path | Path     | doc containing the bad ref     |
-| ref      | RefEntry | the problematic reference      |
-| message  | str      | error description              |
+| Field    | Type     | Description                |
+|----------|----------|----------------------------|
+| doc_path | Path     | doc containing the bad ref |
+| ref      | RefEntry | the problematic reference  |
+| message  | str      | error description          |
 
 ## Terminology
 

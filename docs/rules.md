@@ -3,10 +3,10 @@ title: Rules
 description: Coding principles and conventions
 related_docs:
   - docs/architecture.md: system design context
-  - docs/concepts.md: type definitions
+  - docs/concepts.md:     type definitions
 sources:
   - src/doctrace/commands/: command implementations
-  - src/doctrace/core/: core modules
+  - src/doctrace/core/:     core modules
 ---
 
 ## Design Principles
@@ -17,7 +17,6 @@ Each command does one thing:
 - `info`     - shows phases + validates refs
 - `affected` - finds affected docs
 - `preview`  - interactive explorer
-- `base`     - manages base commit state
 - `init`     - creates config
 
 ### Explicit Paths from Repo Root
@@ -76,10 +75,6 @@ Return types are NamedTuples for clear structure:
 ### Exhaustive Dependency Crawling
 
 Do not recursively follow all refs without limits. Use `affected_depth_limit`.
-
-### Base Commit State
-
-Base commit is stored in `doctrace.json` under the `base` key and used for incremental analysis with `--since-base`.
 
 ### Hardcoded Doc Paths
 
