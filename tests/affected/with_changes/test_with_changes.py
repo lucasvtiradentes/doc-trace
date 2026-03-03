@@ -11,7 +11,7 @@ DOCS_DIR = Path(__file__).parent / "docs"
 
 def test_find_affected_docs_with_changes():
     with tempfile.TemporaryDirectory() as tmpdir:
-        tmppath = Path(tmpdir)
+        tmppath = Path(tmpdir).resolve()
         docs_dir = tmppath / "docs"
         shutil.copytree(DOCS_DIR, docs_dir)
         config = Config({})

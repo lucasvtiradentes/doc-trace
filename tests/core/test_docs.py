@@ -22,7 +22,7 @@ def _create_doc(path: Path, required_docs: list[str] = None, sources: list[str] 
 
 def test_build_dependency_tree_independent():
     with tempfile.TemporaryDirectory() as tmpdir:
-        tmppath = Path(tmpdir)
+        tmppath = Path(tmpdir).resolve()
         docs_dir = tmppath / "docs"
         _create_doc(docs_dir / "a.md", sources=["src/a.py"])
         _create_doc(docs_dir / "b.md", sources=["src/b.py"])
@@ -35,7 +35,7 @@ def test_build_dependency_tree_independent():
 
 def test_build_dependency_tree_with_deps():
     with tempfile.TemporaryDirectory() as tmpdir:
-        tmppath = Path(tmpdir)
+        tmppath = Path(tmpdir).resolve()
         docs_dir = tmppath / "docs"
         _create_doc(docs_dir / "base.md", sources=["src/base.py"])
         _create_doc(docs_dir / "child.md", required_docs=["docs/base.md"])
@@ -50,7 +50,7 @@ def test_build_dependency_tree_with_deps():
 
 def test_build_dependency_tree_multi_level():
     with tempfile.TemporaryDirectory() as tmpdir:
-        tmppath = Path(tmpdir)
+        tmppath = Path(tmpdir).resolve()
         docs_dir = tmppath / "docs"
         _create_doc(docs_dir / "l0.md", sources=["src/l0.py"])
         _create_doc(docs_dir / "l1.md", required_docs=["docs/l0.md"])
@@ -62,7 +62,7 @@ def test_build_dependency_tree_multi_level():
 
 def test_build_dependency_tree_circular():
     with tempfile.TemporaryDirectory() as tmpdir:
-        tmppath = Path(tmpdir)
+        tmppath = Path(tmpdir).resolve()
         docs_dir = tmppath / "docs"
         _create_doc(docs_dir / "a.md", required_docs=["docs/b.md"])
         _create_doc(docs_dir / "b.md", required_docs=["docs/a.md"])

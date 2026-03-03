@@ -22,7 +22,7 @@ def _create_doc(path: Path, required_docs: list[str] = None, sources: list[str] 
 
 def test_build_graph_data_structure():
     with tempfile.TemporaryDirectory() as tmpdir:
-        tmppath = Path(tmpdir)
+        tmppath = Path(tmpdir).resolve()
         docs_dir = tmppath / "docs"
         _create_doc(docs_dir / "a.md", sources=["src/a.py"])
         _create_doc(docs_dir / "b.md", required_docs=["docs/a.md"])
@@ -38,7 +38,7 @@ def test_build_graph_data_structure():
 
 def test_build_graph_data_stats():
     with tempfile.TemporaryDirectory() as tmpdir:
-        tmppath = Path(tmpdir)
+        tmppath = Path(tmpdir).resolve()
         docs_dir = tmppath / "docs"
         _create_doc(docs_dir / "a.md", sources=["src/a.py"])
         _create_doc(docs_dir / "b.md", sources=["src/b.py"])
@@ -51,7 +51,7 @@ def test_build_graph_data_stats():
 
 def test_build_graph_data_node_fields():
     with tempfile.TemporaryDirectory() as tmpdir:
-        tmppath = Path(tmpdir)
+        tmppath = Path(tmpdir).resolve()
         docs_dir = tmppath / "docs"
         _create_doc(docs_dir / "test.md", sources=["src/test.py"])
         config = Config({})
@@ -66,7 +66,7 @@ def test_build_graph_data_node_fields():
 
 def test_generate_html_contains_graph_data():
     with tempfile.TemporaryDirectory() as tmpdir:
-        tmppath = Path(tmpdir)
+        tmppath = Path(tmpdir).resolve()
         docs_dir = tmppath / "docs"
         _create_doc(docs_dir / "test.md", sources=["src/test.py"])
         config = Config({})

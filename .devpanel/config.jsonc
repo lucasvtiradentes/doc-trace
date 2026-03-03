@@ -1,0 +1,36 @@
+{
+  "settings": {
+    "exclude": [
+      "**/.devpanel/**"
+    ]
+  },
+  "variables": [],
+  "replacements": [],
+  "tasks": [
+    {
+      "name": "check",
+      "command": "make check",
+      "group": "Lint"
+    },
+    {
+      "name": "format",
+      "command": "make format",
+      "group": "Lint"
+    },
+    {
+      "name": "test",
+      "command": "make test",
+      "group": "Test"
+    },
+    {
+      "name": "practical-test",
+      "command": "make practical-test",
+      "group": "Test"
+    },
+    {
+      "name": "build",
+      "command": "make build",
+      "group": "Release"
+    }
+  ]
+}
