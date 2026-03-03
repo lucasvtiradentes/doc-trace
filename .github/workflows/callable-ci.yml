@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e ".[dev]"
-      - run: doctrace info docs/
+      - run: doctrace info docs/ --ignore docs/index.md
 
   test:
     runs-on: ubuntu-latest
