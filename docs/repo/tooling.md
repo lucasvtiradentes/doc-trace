@@ -4,7 +4,24 @@ description: Dev tools and configurations
 sources:
   - pyproject.toml: tool configurations
   - Makefile: tool commands
+  - .pre-commit-config.yaml: pre-commit hooks
 ---
+
+## Pre-commit
+
+Git hooks for automatic code quality checks on commit.
+
+```yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.1
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+```
+
+Runs ruff linting (with autofix) and formatting before each commit.
 
 ## Linting and Formatting
 
