@@ -15,6 +15,7 @@ doc-trace/
 ├── src/doctrace/           ← main package
 │   ├── __init__.py
 │   ├── cli.py             ← entry point, argparse setup
+│   ├── cmd_registry.py    ← command metadata registry
 │   ├── commands/          ← subcommand implementations
 │   │   ├── __init__.py
 │   │   ├── info.py        ← info command (phases + validation)
@@ -25,12 +26,15 @@ doc-trace/
 │   │   │   ├── graph.py   ← graph data building
 │   │   │   ├── search.py  ← doc content search
 │   │   │   └── template.html ← HTML/JS template
+│   │   ├── completion.py  ← shell completion generation
+│   │   ├── index.py       ← index.md generation from frontmatter
 │   │   └── init.py        ← project initialization
 │   └── core/              ← shared logic
 │       ├── __init__.py
 │       ├── docs.py        ← doc parsing + indexing
 │       ├── config.py      ← config loading/validation + base state
 │       ├── git.py         ← git operations
+│       ├── filtering.py   ← ignore pattern matching
 │       └── constants.py   ← shared constants
 ├── tests/                 ← pytest test suite
 │   ├── __init__.py
@@ -39,13 +43,15 @@ doc-trace/
 │   ├── config/            ← config validation tests
 │   ├── parser/            ← parser tests
 │   ├── preview/           ← preview tests
-│   └── cli/               ← CLI argument tests
+│   ├── cli/               ← CLI argument tests
+│   └── core/              ← core module tests
 ├── docs/                  ← documentation
 ├── .github/workflows/     ← CI/CD pipelines
 │   ├── prs.yml            ← PR checks
 │   ├── push-to-main.yml   ← main branch checks
 │   ├── callable-ci.yml    ← reusable CI workflow
-│   └── release.yml        ← PyPI release workflow
+│   ├── release.yml        ← PyPI release workflow
+│   └── update-docs.yml    ← automated doc updates
 ├── .changelog/            ← towncrier fragments
 ├── pyproject.toml         ← project config, deps
 ├── Makefile               ← dev commands
@@ -67,6 +73,7 @@ Shared modules used across commands:
 - `docs.py`      - doc parsing, indexing, dependency tree
 - `config.py`    - loads and validates doctrace.json
 - `git.py`       - git operations, change detection
+- `filtering.py` - ignore pattern matching
 - `constants.py` - file/dir names, default values
 
 ### tests/
