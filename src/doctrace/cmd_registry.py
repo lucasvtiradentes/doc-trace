@@ -14,13 +14,13 @@ COMMANDS: dict[str, CommandInfo] = {
     "info": {
         "desc": "show docs phases and warnings",
         "args": "<path>",
-        "flags": ["--json"],
+        "flags": ["--json", "--ignore"],
         "subcommands": [],
     },
     "affected": {
         "desc": "list docs affected by git diff",
         "args": "<path>",
-        "flags": ["--since-base", "--last", "--base-branch", "--since", "--verbose", "-V", "--json"],
+        "flags": ["--since-base", "--last", "--base-branch", "--since", "--verbose", "-V", "--json", "--ignore"],
         "subcommands": [],
     },
     "preview": {

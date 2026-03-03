@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import fnmatch
 import json
 import re
 from dataclasses import dataclass, field
@@ -10,6 +9,7 @@ from typing import Any, Iterator
 
 from doctrace.core.config import Config, find_repo_root, load_config
 from doctrace.core.docs import ParsedDoc, RefEntry, build_dependency_tree
+from doctrace.core.filtering import matches_ignore_pattern
 
 
 @dataclass
@@ -92,10 +92,8 @@ def find_undeclared_inline_refs(
     pattern = re.compile(rf"{escaped_prefix}[a-zA-Z0-9/_.-]+\.md")
     undeclared = []
     for doc_path, parsed in parsed_cache.items():
-        if ignore_patterns:
-            rel_path = str(doc_path.relative_to(repo_root))
-            if any(fnmatch.fnmatch(rel_path, pat) for pat in ignore_patterns):
-                continue
+        if matches_ignore_pattern(doc_path, repo_root, ignore_patterns):
+            continue
         declared = {ref.path for ref in parsed.related_docs}
         declared.update(ref.path for ref in parsed.required_docs)
         inline_refs = extract_inline_refs(doc_path, pattern)
@@ -223,12 +221,7 @@ def _filter_parsed_cache(
 ) -> dict[Path, ParsedDoc]:
     if not ignore_patterns:
         return parsed_cache
-    filtered = {}
-    for doc_path, parsed in parsed_cache.items():
-        rel_path = str(doc_path.relative_to(repo_root))
-        if not any(fnmatch.fnmatch(rel_path, pat) for pat in ignore_patterns):
-            filtered[doc_path] = parsed
-    return filtered
+    return {p: d for p, d in parsed_cache.items() if not matches_ignore_pattern(p, repo_root, ignore_patterns)}
 
 
 def run(docs_path: Path, output_json: bool = False, ignore_patterns: list[str] | None = None) -> int:

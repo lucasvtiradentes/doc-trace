@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import fnmatch
 import json
 import sys
 from collections import defaultdict
@@ -9,6 +8,7 @@ from typing import Any, NamedTuple
 
 from doctrace.core.config import Config, find_repo_root, load_config
 from doctrace.core.docs import ParsedDoc, build_doc_index, compute_levels, parse_doc
+from doctrace.core.filtering import matches_ignore_pattern
 from doctrace.core.git import (
     FileChange,
     get_changed_files,
@@ -310,12 +310,7 @@ def _print_from_data(data: dict[str, Any], verbose: bool = False) -> None:
 def _filter_docs(docs: list[Path], repo_root: Path, ignore_patterns: list[str]) -> list[Path]:
     if not ignore_patterns:
         return docs
-    filtered = []
-    for doc in docs:
-        rel_path = str(doc.relative_to(repo_root))
-        if not any(fnmatch.fnmatch(rel_path, pat) for pat in ignore_patterns):
-            filtered.append(doc)
-    return filtered
+    return [d for d in docs if not matches_ignore_pattern(d, repo_root, ignore_patterns)]
 
 
 def run(
