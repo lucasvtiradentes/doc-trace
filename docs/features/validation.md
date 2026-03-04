@@ -64,9 +64,9 @@ ERROR: Referenced docs not found!
 
 ## Exit Codes
 
-| Code | Meaning                  |
-|------|--------------------------|
-| 0    | all refs valid           |
+| Code | Meaning                                                               |
+|------|-----------------------------------------------------------------------|
+| 0    | all refs valid                                                        |
 | 1    | errors found (missing refs, circular deps, or undeclared inline refs) |
 
 ## Output Format
