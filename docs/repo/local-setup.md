@@ -3,7 +3,7 @@ title: Local Setup
 description: Quick reference for local development setup
 related_docs:
   - docs/repo/tooling.md: tool configurations
-  - docs/index.md: referenced in practical-test command
+  - docs/index.md:        referenced in practical-test command
 sources:
   - Makefile: command definitions
   - pyproject.toml: project dependencies
@@ -34,14 +34,14 @@ This creates `.venv/`, installs package with dev dependencies, and sets up pre-c
 
 ## Available Commands
 
-| Command              | Description               |
-|----------------------|---------------------------|
+| Command              | Description                                 |
+|----------------------|---------------------------------------------|
 | make install         | create venv, install deps, setup pre-commit |
-| make check           | ruff lint + format check  |
-| make test            | pytest -v                 |
-| make practical-test  | doctrace info docs/ --ignore docs/index.md |
-| make changelog       | build CHANGELOG.md        |
-| make changelog-draft | preview changelog         |
+| make check           | ruff lint + format check                    |
+| make test            | pytest -v                                   |
+| make practical-test  | doctrace info docs/ --ignore docs/index.md  |
+| make changelog       | build CHANGELOG.md                          |
+| make changelog-draft | preview changelog                           |
 
 ## Manual Install
 
